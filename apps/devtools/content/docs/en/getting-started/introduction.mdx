@@ -1,0 +1,26 @@
+---
+title: "Introduction"
+description: "OldPhone Wallet turns an old Android phone into a BLE hardware wallet compatible with OKX, MetaMask, and other dApps."
+---
+
+## What is OldPhone Wallet?
+
+OldPhone Wallet repurposes an old Android phone as a BLE hardware wallet. From the perspective of a host app like OKX Wallet or MetaMask, it behaves identically to a Ledger Nano X — communicating over Bluetooth using the same GATT profile and APDU protocol.
+
+## Key Capabilities
+
+- Ethereum HD key derivation (BIP-44, `m/44'/60'/0'/0/i`)
+- Solana HD key derivation (SLIP-10 Ed25519, `m/44'/501'/0'/0'`)
+- BLE peripheral mode with exact Ledger GATT UUIDs
+- Transaction signing with on-device confirmation UI
+- Mnemonic backup and PIN protection
+
+## This Site
+
+This DevTools site provides:
+
+1. **Documentation** — Full protocol reference for developers integrating with OldPhone Wallet
+2. **APDU Debugger** — Send commands to the simulator or a real device and inspect responses
+3. **Wallet Simulator** — A live software simulator that responds to APDU commands in real-time
+
+Use the **APDU Debugger** (link in the sidebar) to explore the protocol interactively.

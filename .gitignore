@@ -1,0 +1,12 @@
+node_modules/
+.turbo/
+dist/
+.next/
+*.log
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Android build artifacts (tracked by apps/mobile/android/.gitignore)
+apps/mobile/android/build/
+apps/mobile/android/app/.cxx/

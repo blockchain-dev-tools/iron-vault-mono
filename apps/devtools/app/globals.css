@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Docs prose styles ── */
+.prose {
+  @apply font-body text-on-surface-variant leading-7;
+  max-width: 100%;
+}
+
+.prose h1 { @apply font-headline text-3xl font-bold text-on-surface mb-3 mt-8 leading-tight; }
+.prose h2 {
+  @apply font-headline text-xl font-semibold text-on-surface mb-3 mt-10 pb-2;
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+.prose h3 { @apply font-headline text-base font-semibold text-on-surface mb-2 mt-6; }
+.prose h4 { @apply font-headline text-sm font-semibold text-on-surface mb-2 mt-4; }
+
+.prose p  { @apply mb-4 leading-7; }
+
+.prose code {
+  @apply font-mono text-[0.85em] bg-surface-container px-1.5 py-0.5 rounded text-primary;
+}
+/* Don't double-style code inside CodeBlock pre */
+.prose pre code { @apply bg-transparent p-0 text-inherit; }
+/* Hide the prose pre style — CodeBlock handles it */
+.prose pre {
+  @apply my-0 p-0 bg-transparent border-0 rounded-none overflow-visible;
+}
+
+.prose a   { @apply text-primary underline underline-offset-2 hover:opacity-80 transition-opacity; }
+.prose strong { @apply font-semibold text-on-surface; }
+.prose em { @apply italic; }
+
+.prose ul  { @apply list-disc pl-5 mb-4 space-y-1.5; }
+.prose ol  { @apply list-decimal pl-5 mb-4 space-y-1.5; }
+.prose li  { @apply leading-7; }
+
+.prose blockquote {
+  @apply border-l-2 border-primary pl-4 py-0.5 my-4 text-on-surface-variant italic;
+}
+
+.prose hr { @apply border-outline-variant my-8; }
+
+.prose table { @apply w-full border-collapse mb-6 text-sm; }
+.prose thead { @apply border-b border-outline-variant; }
+.prose th  { @apply text-left font-label font-semibold text-on-surface px-3 py-2 first:pl-0; }
+.prose td  { @apply text-on-surface-variant px-3 py-2.5 border-b border-outline-variant first:pl-0 align-top; }
+.prose tr:last-child td { @apply border-b-0; }

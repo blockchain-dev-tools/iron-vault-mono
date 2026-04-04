@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Import Wallet - OldPhone Wallet</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary": "#6ddd81",
+                        "on-tertiary-fixed-variant": "#005320",
+                        "on-primary-fixed-variant": "#004493",
+                        "on-error-container": "#ffdad6",
+                        "outline-variant": "#414754",
+                        "inverse-primary": "#005bc0",
+                        "on-secondary-fixed": "#290055",
+                        "on-primary-fixed": "#001a41",
+                        "on-primary-container": "#ffffff",
+                        "on-surface-variant": "#c1c6d6",
+                        "on-error": "#690005",
+                        "surface": "#121212",
+                        "primary-fixed-dim": "#adc7ff",
+                        "on-background": "#e5e2e1",
+                        "error-container": "#93000a",
+                        "outline": "#8b909f",
+                        "on-surface": "#e5e2e1",
+                        "secondary-fixed-dim": "#d8b9ff",
+                        "secondary-container": "#7505db",
+                        "on-primary": "#002e68",
+                        "error": "#ffb4ab",
+                        "surface-container-highest": "#353534",
+                        "surface-tint": "#adc7ff",
+                        "on-secondary": "#450086",
+                        "inverse-surface": "#e5e2e1",
+                        "tertiary-fixed": "#89fa9b",
+                        "on-tertiary-container": "#ffffff",
+                        "on-tertiary": "#003914",
+                        "background": "#121212",
+                        "secondary": "#d8b9ff",
+                        "primary": "#adc7ff",
+                        "surface-container": "#201f1f",
+                        "primary-container": "#1a73e8",
+                        "tertiary-container": "#008939",
+                        "on-secondary-container": "#dbbdff",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-bright": "#393939",
+                        "tertiary-fixed-dim": "#6ddd81",
+                        "on-tertiary-fixed": "#002108",
+                        "on-secondary-fixed-variant": "#6300bb",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-dim": "#121212",
+                        "surface-variant": "#353534",
+                        "surface-container-high": "#2a2a2a",
+                        "primary-fixed": "#d8e2ff",
+                        "secondary-fixed": "#eddcff",
+                        "inverse-on-surface": "#313030",
+                        "okx-green": "#8FC322"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .micro-grid {
+            background-image: radial-gradient(circle, #2a2a2a 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .glass-panel {
+            background: rgba(53, 53, 52, 0.6);
+            backdrop-filter: blur(20px);
+        }
+        body {
+            min-height: 100dvh;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-okx-green/30 min-h-screen micro-grid">
+<!-- TopAppBar Section -->
+<header class="bg-[#121212] flex items-center justify-between w-full px-6 h-16 sticky top-0 z-50 border-b border-outline-variant/10">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#e5e2e1] hover:bg-[#8FC322]/10 transition-colors p-2 rounded-full active:scale-95 duration-100">
+                arrow_back
+            </button>
+<h1 class="text-okx-green font-['Space_Grotesk'] font-bold tracking-tight uppercase">IMPORT WALLET</h1>
+</div>
+<div class="w-10"></div>
+</header>
+<main class="max-w-2xl mx-auto px-6 pt-8 pb-32">
+<!-- Hero Section -->
+<div class="mb-8">
+<h2 class="font-headline text-4xl font-bold tracking-tighter text-on-surface mb-2 uppercase leading-none">
+                Restore Wallet
+            </h2>
+<p class="text-on-surface-variant text-sm font-medium tracking-wide">
+                Type or paste your recovery phrase (12, 15, 18, or 24 words).
+            </p>
+</div>
+<!-- Security Warning (Alert Box) -->
+<div class="mb-8 p-4 bg-error-container/10 rounded-lg flex items-start gap-4 border border-error/30">
+<span class="material-symbols-outlined text-error mt-0.5">security</span>
+<p class="text-on-error-container text-[11px] leading-relaxed font-medium uppercase tracking-wider">
+                Ensure no one is watching your screen. Never share these words.
+            </p>
+</div>
+<!-- Phrase Entry Area -->
+<div class="space-y-6">
+<!-- Large Textarea -->
+<div class="relative">
+<textarea class="w-full bg-surface-container-lowest border-2 border-okx-green rounded-xl p-5 text-lg font-headline min-h-[160px] focus:ring-0 focus:border-okx-green transition-all placeholder:text-surface-container-highest resize-none leading-relaxed" placeholder="Enter your phrase here..." spellcheck="false">vivid abandon ability able about above absent absorb abstract absurd abuse access</textarea>
+<div class="absolute bottom-4 right-4 flex items-center gap-2">
+<div class="flex items-center gap-2 bg-okx-green/10 border border-okx-green/30 px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-okx-green text-sm">check_circle</span>
+<span class="text-[10px] font-bold text-okx-green font-mono uppercase tracking-widest">12 / 12 WORDS</span>
+</div>
+</div>
+</div>
+<!-- Redesigned Suggestion Area -->
+<div class="space-y-3">
+<div class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-[0.2em] px-1">Suggestions</div>
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+<button class="flex-shrink-0 px-5 py-2.5 bg-surface-container-high border border-outline-variant/10 rounded-xl text-sm font-semibold hover:bg-surface-container-highest transition-colors text-on-surface">apple</button>
+<button class="flex-shrink-0 px-5 py-2.5 bg-surface-container-high border border-outline-variant/10 rounded-xl text-sm font-semibold hover:bg-surface-container-highest transition-colors text-on-surface">apply</button>
+<button class="flex-shrink-0 px-5 py-2.5 bg-surface-container-high border border-outline-variant/10 rounded-xl text-sm font-semibold hover:bg-surface-container-highest transition-colors text-on-surface">april</button>
+<button class="flex-shrink-0 px-5 py-2.5 bg-surface-container-high border border-outline-variant/10 rounded-xl text-sm font-semibold hover:bg-surface-container-highest transition-colors text-on-surface">apron</button>
+<button class="flex-shrink-0 px-5 py-2.5 bg-surface-container-high border border-outline-variant/10 rounded-xl text-sm font-semibold hover:bg-surface-container-highest transition-colors text-on-surface">arena</button>
+</div>
+</div>
+<!-- Advanced Options Section -->
+<details class="group bg-surface-container-low rounded-xl border border-outline-variant/10 overflow-hidden transition-all duration-300">
+<summary class="flex items-center justify-between p-4 cursor-pointer list-none hover:bg-surface-container-high transition-colors">
+<span class="text-xs font-bold text-on-surface uppercase tracking-widest">Advanced Options</span>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="p-4 pt-0 space-y-4">
+<div class="space-y-2">
+<label class="block text-[10px] font-bold text-okx-green uppercase tracking-[0.15em]" for="passphrase">Passphrase / 13th Word</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg p-3 text-sm font-headline focus:ring-1 focus:ring-okx-green focus:border-okx-green transition-all placeholder:text-surface-container-highest" id="passphrase" placeholder="Optional passphrase..." type="password"/>
+<p class="text-[10px] text-on-surface-variant leading-relaxed">
+                            A passphrase adds an extra layer of security. This is different from your login password.
+                        </p>
+</div>
+</div>
+</details>
+</div>
+<!-- Derived Address Preview (Live State) -->
+<div class="mt-8 p-5 bg-okx-green/5 rounded-xl border border-okx-green/20">
+<div class="flex justify-between items-center mb-3">
+<span class="text-[10px] uppercase tracking-[0.2em] text-okx-green font-bold">Preview Address</span>
+<div class="flex items-center gap-1.5">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-okx-green animate-pulse"></span>
+<span class="text-[10px] text-okx-green font-bold tracking-widest uppercase">Verified &amp; Active</span>
+</div>
+</div>
+<div class="font-mono text-sm break-all text-on-surface bg-surface-container-lowest/80 p-4 rounded-lg border border-okx-green/10 shadow-inner">
+                0x71C7656EC7ab88b098defB751B7401B5f6d8976F
+            </div>
+</div>
+<!-- Primary Action - Active State -->
+<div class="mt-10 mb-20">
+<button class="w-full bg-okx-green text-surface-container-lowest font-headline font-bold py-5 rounded-xl transition-all uppercase tracking-[0.2em] text-lg shadow-[0_8px_32px_rgba(143,195,34,0.3)] hover:scale-[1.02] active:scale-[0.98] duration-200">
+                Verify &amp; Import
+            </button>
+<p class="text-center mt-4 text-[10px] text-on-surface-variant/60 font-medium uppercase tracking-[0.1em]">
+                Seed phrase checksum passed
+            </p>
+</div>
+</main>
+<!-- Visual Polish: Decorative Element -->
+<div class="fixed top-1/4 -right-24 w-64 h-64 bg-okx-green/5 blur-[120px] rounded-full pointer-events-none"></div>
+<div class="fixed bottom-1/4 -left-24 w-64 h-64 bg-okx-green/5 blur-[120px] rounded-full pointer-events-none"></div>
+</body></html>

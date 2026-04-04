@@ -1,0 +1,241 @@
+---
+title: "密钥派生"
+description: "OldPhone Wallet 如何通过 BIP-39 助记词，借助 BIP-32 和 SLIP-10 Ed25519 派生以太坊和 Solana 私钥。"
+---
+
+# 密钥派生
+
+OldPhone Wallet 从单一 BIP-39 助记词派生所有私钥。以太坊账户使用 BIP-32 HD 密钥树；Solana 账户使用 SLIP-10 Ed25519——这是一种与 BIP-32 完全不兼容的独立算法。
+
+所有派生逻辑位于 `packages/crypto/src/`。
+
+---
+
+## 助记词的生成与验证
+
+**源文件：** `packages/crypto/src/mnemonic.ts`
+**依赖库：** `@scure/bip39`，使用英文词表
+
+```ts
+import { generateMnemonic, validateMnemonic, mnemonicToSeed } from '@ble-vault/crypto';
+
+// 12 个单词（128 位熵）
+const phrase12 = generateMnemonic(128);
+
+// 24 个单词（256 位熵）
+const phrase24 = generateMnemonic(256);
+
+// 验证用户输入的助记词
+const isValid = validateMnemonic(phrase); // boolean
+
+// 转换为种子（异步，PBKDF2-SHA512，2048 轮迭代）
+const seed: Uint8Array = await mnemonicToSeed(phrase);           // 64 字节
+const seedWithPassphrase = await mnemonicToSeed(phrase, 'opt'); // 带 BIP-39 密码短语
+```
+
+| 函数 | 输入 | 输出 |
+|---|---|---|
+| `generateMnemonic(128)` | — | 12 词助记词 |
+| `generateMnemonic(256)` | — | 24 词助记词 |
+| `validateMnemonic(phrase)` | string | boolean |
+| `mnemonicToSeed(phrase, passphrase?)` | string, string? | `Uint8Array(64)` |
+
+`mnemonicToSeed` 是异步函数，因为底层 PBKDF2-SHA512 运算经过刻意减速处理以提升安全性。可选的 `passphrase` 参数默认为空字符串。
+
+---
+
+## 以太坊密钥派生（BIP-32）
+
+**源文件：** `packages/crypto/src/hdkey.ts` — `deriveEthPrivateKey`
+**依赖库：** `@scure/bip32`
+
+以太坊使用标准 BIP-32 HD 密钥树，BIP-44 规定的币种类型编号为 `60`。
+
+```ts
+import { HDKey } from '@scure/bip32';
+
+function deriveEthPrivateKey(seed: Uint8Array, pathComponents: number[]): Uint8Array {
+  const root = HDKey.fromMasterSeed(seed);
+  const child = root.derive(bip32PathToString(pathComponents));
+  if (!child.privateKey) throw new Error('No private key derived');
+  return child.privateKey; // 32 字节
+}
+```
+
+### 标准派生路径
+
+```
+m / 44' / 60' / 0' / 0 / index
+```
+
+| 路径段 | 值 | 含义 |
+|---|---|---|
+| `44'` | `0x80000000 \| 44` | BIP-44 目的字段 |
+| `60'` | `0x80000000 \| 60` | 以太坊币种类型 |
+| `0'` | `0x80000000 \| 0` | 账户 0 |
+| `0` | `0` | 外部链（收款地址） |
+| `index` | `0, 1, 2, …` | 地址索引 |
+
+强化路径分量的编码方式是将索引与 `0x80000000` 做按位或。例如，`44'` 存储为 `0x8000002C`。
+
+派生第一个以太坊地址的完整调用：
+
+```ts
+const seed = await mnemonicToSeed(phrase);
+const pathComponents = [0x8000002C, 0x8000003C, 0x80000000, 0, 0];
+const privKey = deriveEthPrivateKey(seed, pathComponents); // 32 字节的 Uint8Array
+```
+
+---
+
+## Solana 密钥派生（SLIP-10 Ed25519）
+
+**源文件：** `packages/crypto/src/hdkey.ts` — `deriveSolanaPrivateKey`
+**依赖库：** `@noble/hashes/hmac`、`@noble/hashes/sha2`
+
+Solana 使用 Ed25519 密钥。由于 BIP-32 未针对 Ed25519 曲线定义，OldPhone Wallet 实现了 **SLIP-10** 规范。其派生算法与 BIP-32 根本不同。
+
+> **关键约束：** SLIP-10 Ed25519 路径的**每个分量都必须是强化分量**。若传入任何非强化分量，函数将抛出 `Error('SLIP-10 Ed25519 requires all-hardened paths')`。
+
+### 主密钥派生
+
+```
+I = HMAC-SHA512(key = "ed25519 seed", data = seed)
+kL = I[0..31]   // 左 32 字节 — 主私钥
+kR = I[32..63]  // 右 32 字节 — 主链码
+```
+
+HMAC 的 key 是 ASCII 字符串 `"ed25519 seed"`（12 字节），而非原始字节值。
+
+### 子密钥派生（每个路径分量执行一次）
+
+对于每个已设置最高位的强化路径分量 `index`：
+
+```
+data = 0x00 || kL || index_BE32
+
+I_child = HMAC-SHA512(key = kR, data = data)
+
+kL_child = I_child[0..31]
+kR_child = I_child[32..63]
+```
+
+其中 `index_BE32` 是包含最高位在内的完整 32 位大端编码值。前缀字节 `0x00` 以及以 `kR` 作为 HMAC key 的用法，是 SLIP-10 与 BIP-32 普通子密钥派生的核心区别。
+
+### 标准派生路径
+
+```
+m / 44' / 501' / account' / 0'
+```
+
+| 路径段 | 值 | 含义 |
+|---|---|---|
+| `44'` | `0x80000000 \| 44` | BIP-44 目的字段 |
+| `501'` | `0x80000000 \| 501` | Solana 币种类型 |
+| `account'` | `0x80000000 \| n` | 账户索引 |
+| `0'` | `0x80000000 \| 0` | 强化的找零层级 |
+
+函数返回最终的 `kL` 值（32 字节），即 Ed25519 私钥标量。
+
+```ts
+const seed = await mnemonicToSeed(phrase);
+const pathComponents = [0x8000002C, 0x800001F5, 0x80000000, 0x80000000];
+const privKey = deriveSolanaPrivateKey(seed, pathComponents); // 32 字节的 Uint8Array
+```
+
+---
+
+## 地址派生
+
+**源文件：** `packages/crypto/src/signer.ts` 和 `packages/crypto/src/address.ts`
+
+### 以太坊地址
+
+```ts
+function ethPubKeyToAddress(privKey: Uint8Array): { pubKey: Uint8Array; address: string }
+```
+
+1. 从私钥派生非压缩 secp256k1 公钥：65 字节（`04 || X || Y`）
+2. 去掉 `04` 前缀，保留 64 字节（`X || Y`）
+3. `hash = keccak256(pubKey[1:])` — 得到 32 字节哈希
+4. `raw = hash[12:]` — 取后 20 字节，以小写十六进制表示
+5. 应用 EIP-55 混合大小写校验和
+
+返回的 `address` 字符串不含 `0x` 前缀，调用方负责拼接：
+
+```ts
+const { address } = ethPubKeyToAddress(privKey);
+const full = '0x' + address; // 例如 "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+```
+
+### Solana 地址
+
+```ts
+function solanaPubKey(privKey: Uint8Array): Uint8Array // 32 字节
+```
+
+1. 计算 Ed25519 公钥：`ed25519.getPublicKey(privKey)` → 32 字节
+2. 对 32 字节公钥进行 Base58 编码
+
+```ts
+import { base58 } from '@scure/base';
+const pubBytes = solanaPubKey(privKey);
+const full = base58.encode(pubBytes); // 例如 "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
+```
+
+---
+
+## 高层辅助函数：`deriveAccountsFromPaths`
+
+**源文件：** `packages/crypto/src/address.ts`
+
+这是同时派生多个账户的主要对外 API。
+
+```ts
+async function deriveAccountsFromPaths(
+  mnemonic: string,
+  ethPaths: string[],
+  solPaths: string[],
+  passphrase?: string,
+): Promise<WalletAccounts>
+```
+
+```ts
+interface Account {
+  full: string;   // 完整地址（ETH 带 0x 前缀）
+  short: string;  // 前 6 字符 + "..." + 后 5 字符
+  path: string;   // 派生路径字符串，例如 "m/44'/60'/0'/0/0"
+}
+
+interface WalletAccounts {
+  eth: Account[];
+  sol: Account[];
+}
+```
+
+使用示例：
+
+```ts
+const accounts = await deriveAccountsFromPaths(
+  mnemonic,
+  ["m/44'/60'/0'/0/0", "m/44'/60'/0'/0/1"],
+  ["m/44'/501'/0'/0'", "m/44'/501'/1'/0'"],
+);
+
+accounts.eth[0].full;   // "0xd8dA6BF26964aF9D7..."
+accounts.eth[0].short;  // "0xd8dA...96045"
+accounts.eth[0].path;   // "m/44'/60'/0'/0/0"
+```
+
+> **已废弃：** `deriveWalletAccounts(mnemonic, ethCount, solCount)` 为向后兼容保留，内部自动生成顺序路径。新代码请统一使用 `deriveAccountsFromPaths`。
+
+---
+
+## 密钥派生总览
+
+| 链 | 算法 | 路径 | 返回值 |
+|---|---|---|---|
+| 以太坊 | BIP-32（`@scure/bip32`） | `m/44'/60'/0'/0/{i}` | 32 字节 secp256k1 私钥 |
+| Solana | SLIP-10 Ed25519（`@noble/hashes`） | `m/44'/501'/{i}'/0'` | 32 字节 Ed25519 私钥标量 |
+
+两套算法共享同一助记词和种子，但在 `mnemonicToSeed` 之后完全分叉。它们绝对不能混用——将 Solana 私钥传入以太坊签名函数（或反之）会静默产生无效签名，且不会报错。

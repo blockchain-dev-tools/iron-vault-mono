@@ -1,0 +1,10 @@
+# Android build artifacts
+build/
+.gradle/
+*.apk
+*.aab
+*.aar
+*.so
+local.properties
+.cxx/
+*.keystore

@@ -1,0 +1,22 @@
+# Android build artifacts
+android/build/
+android/.gradle/
+android/app/build/
+android/app/.cxx/
+
+# React Native
+.metro-health-check*
+
+# iOS build artifacts
+ios/build/
+ios/build-device/
+ios/Pods/
+ios/*.xcodeproj/xcuserdata/
+ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+ios/*.xcworkspace/xcuserdata/
+ios/DerivedData/
+
+# node_modules symlink (replaced by real install later)
+node_modules
+.DS_Store
+ios/.xcode.env.local

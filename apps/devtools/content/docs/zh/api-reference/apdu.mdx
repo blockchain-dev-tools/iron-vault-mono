@@ -1,0 +1,319 @@
+---
+title: "@ble-vault/apdu"
+description: "@ble-vault/apdu 包的 API 参考 — APDU 解析器、处理器配置与签名请求接口。"
+---
+
+## 概述
+
+`@ble-vault/apdu` 是 OldPhone Wallet 的 APDU 处理核心。它对外暴露两类导出：用于编解码原始 APDU 字节的**解析工具函数**，以及将 APDU 分发器与助记词存储和 UI 签名确认流程绑定在一起的**处理器配置函数**。
+
+```bash
+pnpm add @ble-vault/apdu
+```
+
+---
+
+## 解析工具
+
+### `Apdu`
+
+已解码 APDU 命令的结构化表示。
+
+```typescript
+interface Apdu {
+  cla:  number;      // 类字节
+  ins:  number;      // 指令字节
+  p1:   number;      // 参数 1
+  p2:   number;      // 参数 2
+  data: Uint8Array;  // 命令数据（Lc 之后的字节）
+}
+```
+
+---
+
+### `parseApdu`
+
+将十六进制编码的 APDU 字符串解析为 `Apdu` 对象。函数会跳过 `CLA INS P1 P2 Lc` 头部，将数据负载单独返回。
+
+```typescript
+function parseApdu(hexApdu: string): Apdu
+```
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+|---|---|---|
+| `hexApdu` | `string` | 十六进制编码的 APDU 字节，例如 `"e0020000"` |
+
+**返回值** 包含 `cla`、`ins`、`p1`、`p2` 和 `data` 字段的 `Apdu` 对象。
+
+**示例**
+
+```typescript
+import { parseApdu } from '@ble-vault/apdu';
+
+const apdu = parseApdu('e0020000');
+console.log(apdu.cla.toString(16)); // "e0"
+console.log(apdu.ins.toString(16)); // "02"
+```
+
+---
+
+### `parseBip32Path`
+
+从数据缓冲区头部解码 BIP-32 派生路径。第一个字节为路径分量数量，随后每 4 个字节为一个 `uint32` 路径分量。
+
+```typescript
+function parseBip32Path(data: Uint8Array): { path: number[]; rest: Uint8Array }
+```
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+|---|---|---|
+| `data` | `Uint8Array` | 以路径计数字节开头的原始缓冲区 |
+
+**返回值**
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `path` | `number[]` | 原始 `uint32` 路径分量（强化路径：`0x80000000 \| index`） |
+| `rest` | `Uint8Array` | 路径之后的剩余字节 |
+
+**异常** 若缓冲区长度不足以容纳声明的路径长度，抛出 `Error`。
+
+---
+
+### `rlpTotalLength`
+
+根据 RLP 编码值的首字节计算其预期总字节长度。支持 EIP-2718 类型化交易（`0x01` = EIP-2930，`0x02` = EIP-1559），会自动跳过交易类型前缀字节。
+
+```typescript
+function rlpTotalLength(bytes: number[] | Uint8Array): number
+```
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+|---|---|---|
+| `bytes` | `number[] \| Uint8Array` | RLP 编码字节，可以是不完整的缓冲区 |
+
+**返回值** 预期的总字节长度；若缓冲区不足以确定长度，则返回 `-1`。
+
+---
+
+### `hexToBytes`
+
+将十六进制字符串转换为 `Uint8Array`，转换前自动去除空白字符。
+
+```typescript
+function hexToBytes(hex: string): Uint8Array
+```
+
+---
+
+### `bytesToHex`
+
+将 `Uint8Array` 转换为小写十六进制字符串。
+
+```typescript
+function bytesToHex(bytes: Uint8Array): string
+```
+
+---
+
+### `bip32PathToString`
+
+将原始 `uint32` 路径分量数组格式化为人类可读的 BIP-32 路径字符串。
+
+```typescript
+function bip32PathToString(path: number[]): string
+```
+
+**示例**
+
+```typescript
+import { bip32PathToString } from '@ble-vault/apdu';
+
+bip32PathToString([0x80000000 | 44, 0x80000000 | 60, 0x80000000, 0, 0]);
+// → "m/44'/60'/0'/0/0"
+```
+
+---
+
+## 处理器配置
+
+处理器模块维护模块级单例。在组件挂载时调用各 setter 完成配置，在卸载时进行清理。
+
+### `setCurrentApp`
+
+切换当前活跃的应用上下文。APDU 分发器依据此设置将 `CLA 0xE0` 命令路由至正确的处理函数。
+
+```typescript
+function setCurrentApp(app: string): void
+```
+
+**可选值：** `'Ethereum'` | `'Solana'` | `'Bitcoin'` | `'Tron'` | `'Sui'`
+
+注意：`CLA 0xE1`/`0xF8`（Bitcoin New App）、`CLA 0x14`（Tron）和 `CLA 0x07`（Sui）依据类字节直接路由，不依赖此设置。
+
+---
+
+### `setLogFn`
+
+注册日志回调函数。每次 APDU 分发事件都会转发给此函数。
+
+```typescript
+function setLogFn(fn: (msg: string) => void): void
+```
+
+---
+
+### `setMnemonicProvider`
+
+注册一个异步函数，用于在密钥派生时按需返回钱包的 BIP-39 助记词。设置新的提供者会使内部种子缓存失效。
+
+```typescript
+function setMnemonicProvider(fn: () => Promise<string | null>): void
+```
+
+若尚未创建钱包，返回 `null` — APDU 处理器将以错误状态字响应。
+
+---
+
+### `setSignRequestHandler`
+
+注册 UI 签名确认回调。当签名类 APDU 到达时，处理器会暂停并调用此函数。返回的 Promise 必须 resolve 为一个十六进制字符串：空字符串表示用户批准（处理器将签名并构建真实响应），`'6985'` 表示用户拒绝。
+
+```typescript
+function setSignRequestHandler(
+  fn: ((req: SignRequestData) => Promise<string>) | null
+): void
+```
+
+组件卸载时传入 `null` 以注销处理器。
+
+---
+
+### `handleApdu`
+
+主 APDU 分发器。解析传入的十六进制字符串，路由至对应的应用处理器，并返回十六进制编码的响应（始终以 2 字节状态字结尾）。
+
+```typescript
+function handleApdu(hexApdu: string): Promise<string>
+```
+
+**返回值** 十六进制响应字符串，例如：`"9000"` 表示成功，`"6d00"` 表示不支持的指令，`"6f00"` 表示内部意外错误。
+
+---
+
+### `clearSignSessions`
+
+清除所有待处理的多分块签名状态。在组件卸载或 BLE 连接断开时调用，防止过时的会话数据影响下一次连接。
+
+```typescript
+function clearSignSessions(): void
+```
+
+---
+
+### `resetSharedState`
+
+完全重置所有模块级单例，包括当前应用、日志函数、助记词提供者、签名处理器和种子缓存。适用于测试环境或完全销毁 BLE 会话时使用。
+
+```typescript
+function resetSharedState(): void
+```
+
+---
+
+## `SignRequestData`
+
+当签名类 APDU 到达时，传递给已注册签名处理器的对象。
+
+```typescript
+interface SignRequestData {
+  chain:    'eth' | 'sol' | 'btc' | 'tron' | 'sui';
+  raw:      Uint8Array;                   // 待签名的原始字节
+  data?:    string;                       // 人类可读摘要（如已解码）
+  decoded?: Record<string, unknown>;      // 结构化解码字段（如可用）
+}
+```
+
+---
+
+## 附加导出
+
+### `getLastToken`
+
+若上一次 `eth_signTransaction` 请求中的交易数据被解码为 ERC-20 转账，则返回对应的代币元数据。
+
+```typescript
+function getLastToken(): unknown
+```
+
+### `getLastNft`
+
+若上一次 `eth_signTransaction` 请求中的交易被解码为 NFT 转账，则返回对应的 NFT 元数据。
+
+```typescript
+function getLastNft(): unknown
+```
+
+### `getLastDomain`
+
+返回上一次 `eth_signTypedData` 请求中的 EIP-712 domain 对象。
+
+```typescript
+function getLastDomain(): unknown
+```
+
+---
+
+## 完整接线示例
+
+下面的模式展示了 `useBleSession` 如何将所有 setter 与 BLE 传输层和签名确认 UI 连接起来。
+
+```typescript
+import {
+  setMnemonicProvider,
+  setLogFn,
+  setSignRequestHandler,
+  handleApdu,
+  clearSignSessions,
+} from '@ble-vault/apdu';
+
+// ── 挂载：完成全部配置 ───────────────────────────────────────────────────────
+
+// 1. 从安全存储提供助记词
+setMnemonicProvider(async () => {
+  return await getSecureItem('wallet.mnemonic');
+});
+
+// 2. 将 APDU 日志行转发至 UI 状态
+setLogFn(msg => appendLog(msg));
+
+// 3. 注册签名确认处理器
+//    resolve('') → 批准（处理器将签名并响应）
+//    resolve('6985') → 拒绝（处理器返回"条件不满足"）
+setSignRequestHandler(async (req: SignRequestData) => {
+  return new Promise(resolve => {
+    showSignModal(req, {
+      approve: () => resolve(''),
+      reject:  () => resolve('6985'),
+    });
+  });
+});
+
+// ── 每次收到 BLE 写特征通知时 ───────────────────────────────────────────────
+
+const response = await handleApdu(incomingHex);
+sendBleNotification(response);
+
+// ── 卸载：清理资源 ───────────────────────────────────────────────────────────
+
+setSignRequestHandler(null);
+clearSignSessions();
+```
+
+> **重要提示：** 拒绝时始终使用 `resolve('6985')`，切勿直接调用 Promise 的原生 `reject`。未处理的 reject 会导致 `handleApdu` 返回 `'6f00'`（内部错误），而非正确的拒绝状态字。

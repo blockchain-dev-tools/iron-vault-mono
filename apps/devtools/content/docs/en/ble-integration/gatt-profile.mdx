@@ -1,0 +1,101 @@
+---
+title: "GATT Profile"
+description: "The Ledger GATT service profile implemented by OldPhone Wallet — exact UUIDs, characteristic properties, and advertising configuration."
+---
+
+## Overview
+
+OldPhone Wallet emulates a Ledger Nano X at the BLE transport layer. Host applications such as OKX Wallet and MetaMask identify a real Ledger device by scanning for a specific GATT service UUID and connecting to characteristics with precise UUIDs. **Exact UUID replication is mandatory** — any deviation causes the host app to ignore the device entirely, because the host's BLE transport library (`@ledgerhq/hw-transport-web-ble`) hard-codes the UUIDs it looks for during service discovery.
+
+The Android app uses `BluetoothGattServer` (API 21+) to act as a GATT peripheral and `BluetoothLeAdvertiser` to broadcast the service UUID so hosts can find the device.
+
+---
+
+## UUID Reference
+
+All five UUIDs are defined in `LedgerBleConstants.java`. Copy them exactly — a single transposed digit will break host compatibility.
+
+| Name | UUID | Role |
+|------|------|------|
+| **Service** | `13d63400-2c97-0004-0000-4c6564676572` | The root GATT service; hosts scan for this |
+| **Notify** | `13d63400-2c97-0004-0001-4c6564676572` | Device → host; carries response APDU frames |
+| **Write** | `13d63400-2c97-0004-0002-4c6564676572` | Host → device; carries request APDU frames (with response) |
+| **WriteCmd** | `13d63400-2c97-0004-0003-4c6564676572` | Host → device; carries request frames (no response, Write Without Response) |
+| **CCCD** | `00002902-0000-1000-8000-00805f9b34fb` | Standard Bluetooth descriptor; host writes `0x01 0x00` to enable notifications |
+
+The CCCD UUID (`00002902-...`) is a Bluetooth SIG–assigned descriptor UUID and is the same for every BLE device. You still must attach it as a descriptor on the Notify characteristic — without it, Android will reject the `setValue` call and the host will never receive notifications.
+
+---
+
+## Characteristic Properties
+
+Each characteristic is configured with a specific set of `BluetoothGattCharacteristic` property and permission flags:
+
+| Characteristic | Properties | Permissions | Notes |
+|----------------|------------|-------------|-------|
+| **Notify** | `PROPERTY_NOTIFY` | `PERMISSION_READ` | Requires CCCD descriptor attached |
+| **Write** | `PROPERTY_WRITE` | `PERMISSION_WRITE` | Host expects an ATT Write Response |
+| **WriteCmd** | `PROPERTY_WRITE_NO_RESPONSE` | `PERMISSION_WRITE` | No ATT response; used for command frames |
+
+The CCCD descriptor on the Notify characteristic must itself have `PERMISSION_READ | PERMISSION_WRITE` so the host can both read the current notification state and write `0x01 0x00` to enable it.
+
+---
+
+## Advertising Configuration
+
+The device advertises under the name `"Nano X"` — exactly as a real Ledger Nano X would appear in a BLE scan. The advertising data and scan response are split because BLE advertising packets have a 31-byte payload limit:
+
+- **Advertising data** — includes the service UUID (`13d63400-2c97-0004-0000-4c6564676572`), which is what the host scans for
+- **Scan response** — includes the complete local name `"Nano X"`, returned when the host issues an active scan request
+
+Additional advertising settings:
+
+| Setting | Value | Reason |
+|---------|-------|--------|
+| Mode | `ADVERTISE_MODE_LOW_LATENCY` | Fastest discovery; reduces connection setup time |
+| TX Power | `ADVERTISE_TX_POWER_HIGH` | Maximum range for reliable connection |
+| Timeout | 0 (no timeout) | Advertises indefinitely until a host connects |
+| Connectable | `true` | Required — scan-only devices cannot be connected |
+
+The advertiser is started via `BluetoothLeAdvertiser.startAdvertising()` and restarted automatically whenever the GATT connection drops so the device is always discoverable.
+
+---
+
+## CCCD Subscription
+
+Before any APDU data can flow from device to host, the host must **enable notifications** on the Notify characteristic. This is done by writing the value `0x01 0x00` (little-endian `ENABLE_NOTIFICATION_VALUE`) to the CCCD descriptor (`00002902-...`).
+
+The sequence is:
+
+1. Host discovers the Notify characteristic
+2. Host writes `0x01 0x00` to the CCCD descriptor via `BluetoothGatt.writeDescriptor()`
+3. Android fires `BluetoothGattServerCallback.onDescriptorWriteRequest()` on the peripheral side
+4. Peripheral responds with `BluetoothGattServer.sendResponse(GATT_SUCCESS)`
+5. Notifications are now active — device can push frames via `BluetoothGattServer.notifyCharacteristicChanged()`
+
+If the host skips this step (or the CCCD is missing), `notifyCharacteristicChanged()` will return `false` and all device responses are silently dropped.
+
+---
+
+## Android API and Permissions
+
+**Core APIs used:**
+
+```java
+// Open the GATT server
+BluetoothGattServer server = bluetoothManager.openGattServer(context, callback);
+server.addService(ledgerService); // BluetoothGattService with all three characteristics
+
+// Start advertising
+BluetoothLeAdvertiser advertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
+advertiser.startAdvertising(settings, advertiseData, scanResponse, advertiseCallback);
+```
+
+**Required Android permissions** (declare in `AndroidManifest.xml`):
+
+| API Level | Permissions |
+|-----------|-------------|
+| API 21–30 | `BLUETOOTH`, `BLUETOOTH_ADMIN`, `ACCESS_FINE_LOCATION` |
+| API 31+ (Android 12+) | `BLUETOOTH_ADVERTISE`, `BLUETOOTH_CONNECT` |
+
+On API 31+, `BLUETOOTH_ADVERTISE` and `BLUETOOTH_CONNECT` are runtime permissions and must be requested via `ActivityCompat.requestPermissions()` before calling any BLE API. The legacy `BLUETOOTH` and `BLUETOOTH_ADMIN` permissions are no longer sufficient.

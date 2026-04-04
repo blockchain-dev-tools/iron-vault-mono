@@ -1,0 +1,129 @@
+---
+title: "APDU Protocol Overview"
+description: "ISO 7816-4 command structure, CLA routing table, status words, and the deferred signing model used by OldPhone Wallet."
+---
+
+## Command Format
+
+OldPhone Wallet speaks the Ledger APDU dialect, which follows ISO 7816-4:
+
+```
+Request:   CLA  INS  P1  P2  Lc  [Data...]
+Response:  [Data...]  SW1  SW2
+```
+
+| Field | Size | Description |
+|---|---|---|
+| `CLA` | 1 byte | Class byte — identifies the app/layer |
+| `INS` | 1 byte | Instruction — the specific command |
+| `P1` / `P2` | 1 byte each | Parameter bytes (command-specific) |
+| `Lc` | 1 byte | Length of `Data` (0 if no data) |
+| `Data` | 0–255 bytes | Command payload |
+| `SW1 SW2` | 2 bytes | Status word in response (`9000` = success) |
+
+Commands and responses are carried over BLE as Ledger-framed chunks (TAG + chunk index + total length). The APDU layer never sees the BLE framing — the transport layer strips it before dispatch.
+
+## CLA Routing Table
+
+The APDU dispatcher in `@ble-vault/apdu` routes commands by `CLA` byte before any app-specific handler runs:
+
+| CLA | Routes to |
+|---|---|
+| `0xB0` | OS layer — `GET_APP_AND_VERSION` |
+| `0xE0` | OS layer first (`GET_VERSION`, `OPEN_APP`, `QUIT_APP`, `GET_DEVICE_INFO`), then Ethereum or Solana by `currentApp` |
+| `0xE1` / `0xF8` | Bitcoin New App handler |
+| `0x14` | Tron App handler |
+| `0x07` | Sui App handler |
+
+When `CLA = 0xE0` and no OS command matches, dispatch continues to either the Ethereum handler (default) or the Solana handler, depending on the `currentApp` value set by the most recent `OPEN_APP` command.
+
+## App Switching
+
+`OPEN_APP` and `QUIT_APP` control which app-level handler receives `CLA 0xE0` commands:
+
+**OPEN_APP — `E0 D8 00 00 Lc [AppName]`**
+
+Switches `currentApp` to the UTF-8 app name in `Data`. For example, to activate the Solana handler:
+
+```
+E0 D8 00 00 07 536F6C616E61
+                └──────────── "Solana" in ASCII
+```
+
+Common app names: `Ethereum`, `Solana`, `Bitcoin`.
+
+**QUIT_APP — `E0 A7 00 00 00`**
+
+Resets `currentApp` to `'BOLOS'` (the OS dashboard). Subsequent `CLA 0xE0` commands go to the Ethereum handler by default.
+
+Both commands respond with `9000` only.
+
+## OS-Layer Commands
+
+These commands are handled before app routing regardless of `currentApp`:
+
+| Command | APDU | Notes |
+|---|---|---|
+| `GET_VERSION` | `E0 01 00 00 00` | Returns target ID, SE version `2.1.0`, MCU version `1.13` |
+| `GET_APP_AND_VERSION` | `B0 01 00 00 00` | Returns current app name and version |
+| `GET_DEVICE_INFO` | `E0 E2 00 00 00` | Returns hardware revision, language, onboarding state |
+
+`GET_APP_AND_VERSION` response format:
+```
+01 + name_len(1) + name(n) + ver_len(1) + ver(m) + flags_len(1) + flags(1) + 9000
+```
+
+Example when Ethereum app is active:
+```
+format=01  name="Ethereum"  ver="1.10.3"  flags=02
+```
+
+## Status Words
+
+Every APDU response ends with a 2-byte status word:
+
+| SW | Hex | Meaning |
+|---|---|---|
+| Success | `9000` | Command completed successfully |
+| INS not supported | `6D00` | Unknown instruction for this CLA/app |
+| P1/P2 invalid | `6B00` | Parameter bytes out of range |
+| Wrong data length | `6700` | `Lc` or payload length incorrect |
+| Internal error | `6F00` | Unexpected exception in handler |
+| User rejected | `6985` | Sign request denied by user |
+| Continue (BTC) | `61XX` | Multi-frame response, more data follows |
+
+## Deferred Signing Model
+
+Sign commands (`SIGN_ETH_TRANSACTION`, `SIGN_PERSONAL_MESSAGE`, `SIGN_EIP_712`, `SIGN_TRANSACTION` for Solana) do not sign immediately. Instead the handler:
+
+1. Accumulates all data frames until the complete payload is received.
+2. Calls `signRequestHandler` — a callback registered by the UI layer via `setSignRequestHandler`.
+3. Suspends until the callback resolves.
+4. Returns the signature bytes on approval, or `6985` on rejection.
+
+The UI navigates to a confirmation screen, shows decoded transaction details, and resolves the promise when the user taps Approve or Reject.
+
+**Sign session timeout:** 120 seconds. If the user does not respond within this window, the handler resolves with `6985` automatically.
+
+```ts
+// Registering the handler (apps/mobile)
+setSignRequestHandler(async (req: SignRequestData) => {
+  return new Promise(resolve => {
+    showConfirmScreen(req, {
+      onApprove: () => resolve('sign'),
+      onReject:  () => resolve('6985'),
+    });
+  });
+});
+```
+
+The `reject` callback always resolves with the string `'6985'` — it never calls `Promise.reject()` — so the APDU handler always receives a clean status word response.
+
+## Multi-Frame Transactions
+
+When a transaction exceeds the BLE MTU, the host splits it across multiple APDU frames:
+
+- **Frame 1** (`P1 = 0x00` for Ethereum, `P1 = 0x01` for Solana): contains the BIP-32 path plus the start of the payload.
+- **Continuation frames** (`P1 = 0x80` for Ethereum, `P1 = 0x00` for Solana): carry additional payload bytes.
+
+The handler accumulates chunks in memory until the expected total length is reached (derived from the RLP envelope for Ethereum, or from `P2` flags for Solana), then signs in one operation.

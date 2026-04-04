@@ -1,0 +1,33 @@
+---
+title: "快速开始"
+description: "通过 BLE 连接到 OldPhone Wallet 并在 5 分钟内发送第一条 APDU 命令。"
+---
+
+## 前提条件
+
+- Chrome 浏览器，需在 `chrome://flags/#enable-experimental-web-platform-features` 中启用实验性 Web 平台功能
+- 运行 OldPhone Wallet 应用的安卓设备，或使用本站的**模拟器**
+
+## 第一步：打开 APDU 调试器
+
+点击侧边栏的 **APDU 调试器**，右侧面板即显示钱包模拟器。
+
+## 第二步：发送 GET_VERSION
+
+从预设下拉列表中选择 `GET_VERSION`，目标设为 **Simulator**，点击 **发送 ▶**。
+
+响应末尾应显示 `9000`（成功）。响应字节包含 SE 版本 `2.1.0` 和 MCU 版本 `1.13`。
+
+## 第三步：获取以太坊地址
+
+选择 `GET_ETH_ADDRESS (m/44'/60'/0'/0/0)` 并发送到模拟器。响应包含：
+
+- 65 字节：未压缩的 secp256k1 公钥
+- 40 字节：以 ASCII 十六进制表示的以太坊地址
+- 状态码：`9000`
+
+## 第四步：连接真实设备
+
+将目标切换为 **BLE Device**，点击 **扫描**，选择你的 OldPhone Wallet 设备。之后所有命令将通过蓝牙发往真实手机。
+
+> **注意：** BLE 设备模式需要 Chrome 浏览器并启用实验性 Web Bluetooth API 标志。

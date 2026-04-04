@@ -1,0 +1,256 @@
+---
+title: "以太坊命令"
+description: "CLA 0xE0 以太坊 App APDU 命令完整参考——地址派生、交易签名、EIP-712 与个人消息签名。"
+---
+
+## 激活方式
+
+以太坊处理器是 `CLA 0xE0` 的**默认**处理器。连接建立后未发送任何 `OPEN_APP` 时（初始状态），或 `currentApp` 为 `'Ethereum'` 时，均由此处理器处理。也可显式激活：
+
+```
+E0 D8 00 00 08 457468657265756D
+                └─────────────── "Ethereum" 的 ASCII 编码
+```
+
+---
+
+## GET_ETH_ADDRESS — INS 0x02 / 0x28
+
+从 BIP-32 路径派生以太坊公钥和地址。
+
+`INS 0x28`（`GET_PUBLIC_KEY`）是别名，两者处理逻辑完全相同。
+
+**完整 APDU：** `E0 02 00 P2 Lc [BIP32Path]`
+
+**P2 标志位：**
+
+| 位 | 值 | 效果 |
+|---|---|---|
+| bit 0 | `0x01` | 在响应末尾追加 32 字节 chain code |
+| bit 1 | `0x02` | 在设备屏幕显示地址供用户确认（已识别但不强制等待——直接返回响应） |
+
+**请求数据格式：**
+```
+path_count(1)  +  [path_component(4) × path_count]
+```
+
+每个路径分量为大端序 uint32。最高位置 1（`0x80000000`）表示硬化派生。
+
+示例路径 `m/44'/60'/0'/0/0`：
+```
+05  8000002C  8000003C  80000000  00000000  00000000
+│   └─44'──┘  └─60'──┘  └──0'──┘  └──0───┘  └──0───┘
+└─ 5 个分量
+```
+
+**响应格式：**
+```
+pubkey_len(1=0x41)  +  pubkey(65, 非压缩格式 04‖X‖Y)
+addr_len(1=0x28)    +  addr_hex(40, EIP-55 大小写校验，无 "0x" 前缀)
+[chain_code(32)]       ← 仅当 P2 bit 0 置位时附加
+9000
+```
+
+地址为 `keccak256(pubkey[1:])` 后 20 字节的 EIP-55 校验和编码十六进制字符串。
+
+---
+
+## GET_APP_CONFIGURATION — INS 0x06
+
+返回以太坊 App 版本号和功能标志。
+
+**完整 APDU：** `E0 06 00 00 00`
+
+**响应格式：**
+```
+arbitrary_data_enabled(1)  +  erc20_provision_needed(1)  +  major(1)  +  minor(1)  +  patch(1)  +  9000
+```
+
+**固定响应：** `01 00 01 0A 03 9000` = 版本 1.10.3，任意数据已启用。
+
+---
+
+## SIGN_ETH_TRANSACTION — INS 0x04 / 0x18
+
+对原始以太坊交易进行签名。`INS 0x18`（`SIGN_ETH_TX_BATCH`）委托给相同处理器。
+
+**完整 APDU：** `E0 04 P1 00 Lc [Data]`
+
+### 分帧机制
+
+| P1 | 帧类型 | Data 内容 |
+|---|---|---|
+| `0x00` | 第一帧 | BIP-32 路径 + 原始交易字节开头 |
+| `0x80` | 续帧 | 原始交易字节（续） |
+
+**第一帧数据布局：**
+```
+path_count(1)  +  [path_component(4) × n]  +  raw_tx_bytes...
+```
+
+处理器从 `raw_tx_bytes` 的 RLP 信封读取 `rlpTotalLength` 来判断何时累积完毕。对于有类型前缀的交易（EIP-1559、EIP-2930），计算 RLP 长度时跳过首字节（`0x01` 或 `0x02`）。
+
+### 支持的交易类型
+
+| 类型 | 标识 | 原始字节格式 |
+|---|---|---|
+| Legacy / EIP-155 | 首字节 `> 0x7F` | `RLP([nonce, gasPrice, gas, to, value, data, chainId, 0, 0])` |
+| EIP-2930（type 1） | 首字节 `0x01` | `0x01 \|\| RLP([chainId, nonce, gasPrice, gas, to, value, data, accessList])` |
+| EIP-1559（type 2） | 首字节 `0x02` | `0x02 \|\| RLP([chainId, nonce, maxPriorityFee, maxFee, gas, to, value, data, accessList])` |
+
+### 签名逻辑
+
+```
+hash = keccak256(raw_tx_bytes)
+(recovery_bit, r, s) = secp256k1_sign(hash, privKey)
+```
+
+调用 `@noble/curves` 时传入 `{ prehash: false }`——哈希已预先计算，**不会**二次哈希。
+
+### v 值规则
+
+| 交易类型 | 条件 | v 值 |
+|---|---|---|
+| EIP-1559（type 2） | `raw_tx[0] === 0x02` | `recovery_bit`（0 或 1） |
+| EIP-2930（type 1） | `raw_tx[0] === 0x01` | `recovery_bit`（0 或 1） |
+| EIP-155 | `raw_tx[0] > 0x7F` 且包含 chainId | `chainId * 2 + 35 + recovery_bit` |
+| Legacy（无 EIP-155） | `raw_tx[0] > 0x7F` 且无 chainId | `27 + recovery_bit` |
+
+### 响应
+
+**中间帧：** 仅 `9000`（继续发送数据）。
+
+**最后一帧（或单帧）：**
+```
+v(1)  +  r(32)  +  s(32)  +  9000   共 67 字节
+```
+
+钱包 App 将 `(v, r, s)` 拼接到原始交易字节后广播。APDU 处理器只返回签名分量，不对最终签名交易进行 RLP 编码。
+
+---
+
+## SIGN_PERSONAL_MESSAGE — INS 0x08
+
+对 EIP-191 个人消息进行签名（`eth_sign` / `personal_sign`）。
+
+**完整 APDU：** `E0 08 P1 00 Lc [Data]`
+
+### 分帧机制
+
+| P1 | 帧类型 | Data 内容 |
+|---|---|---|
+| `0x00` | 第一帧 | BIP-32 路径 + 4 字节大端消息长度 + 消息起始字节 |
+| `0x80` | 续帧 | 消息字节（续） |
+
+**第一帧数据布局：**
+```
+path_count(1)  +  [path_component(4) × n]  +  msg_len(4, 大端 uint32)  +  msg_bytes...
+```
+
+### 签名逻辑
+
+在哈希前添加 EIP-191 前缀：
+```
+prefixed = "\x19Ethereum Signed Message:\n" + str(len(msg)) + msg
+hash = keccak256(prefixed)
+(recovery_bit, r, s) = secp256k1_sign(hash, privKey)
+v = 27 + recovery_bit
+```
+
+### 响应
+
+**最后一帧：**
+```
+v(1)  +  r(32)  +  s(32)  +  9000   共 67 字节
+```
+
+---
+
+## SIGN_EIP_712 — INS 0x0C / 0x12 / 0x1E / 0x2A
+
+对 EIP-712 结构化数据进行签名。以下四个 INS 值路由至同一处理器：
+
+| INS | 名称 |
+|---|---|
+| `0x0C` | `SIGN_EIP_712_MESSAGE` |
+| `0x12` | `SIGN_ETH_EIP_712_FILTERED` |
+| `0x1E` | `SIGN_EIP_712_FILTERED_CHUNKS` |
+| `0x2A` | `SIGN_TYPED_DATA` |
+
+**完整 APDU：** `E0 0C 00 00 Lc [Data]`
+
+P1 必须为 `0x00`，其他值返回 `6B00`。
+
+**请求数据布局：**
+```
+path_count(1)  +  [path_component(4) × n]  +  domain_hash(32)  +  struct_hash(32)
+```
+
+### 签名逻辑
+
+```
+message = "\x19\x01" + domain_hash + struct_hash
+hash = keccak256(message)
+(recovery_bit, r, s) = secp256k1_sign(hash, privKey)
+v = 27 + recovery_bit
+```
+
+### 响应
+
+```
+v(1)  +  r(32)  +  s(32)  +  9000   共 67 字节
+```
+
+---
+
+## 元数据命令
+
+这些命令为确认页面提供丰富的展示数据。它们立即响应 `9000` 并将数据暂存，供下一次签名请求使用。
+
+### PROVIDE_ERC20_TOKEN_INFO — INS 0x0A
+
+提供 ERC-20 代币的代码、小数位数和合约地址，用于转账展示。
+
+**数据布局：**
+```
+ticker_len(1)  +  ticker(n, ASCII)  +  decimals(1)  +  contract(20)  +  chain_id(4, 大端)
+```
+
+### PROVIDE_NFT_METADATA — INS 0x14
+
+提供 NFT 集合名称和合约地址，用于 NFT 转移展示。
+
+**数据布局：**
+```
+name_len(1)  +  name(n, ASCII)  +  contract(20)  +  chain_id(4, 大端)
+```
+
+### PROVIDE_DOMAIN_NAME — INS 0x22
+
+提供 ENS 域名，在确认页面替代原始 `to` 地址显示。
+
+**数据布局（第一帧）：**
+```
+domain_len(2, 大端)  +  domain_bytes(n, UTF-8)
+```
+
+### GET_CHALLENGE — INS 0x1C
+
+返回 4 字节密码学随机数供客户端使用。响应：`nonce(4) + 9000`。
+
+---
+
+## 存根命令
+
+以下 INS 值直接响应 `9000`，不执行实际操作：
+
+| INS | 名称 |
+|---|---|
+| `0x0E` | `SIGN_ETH_TX_WITH_PLUGIN` |
+| `0x10` | `PROVIDE_TRUSTED_NAME` |
+| `0x16` | `SET_PLUGIN` |
+| `0x1A` | `PROVIDE_TRUSTED_CONTRACT_NAME` |
+| `0x20` | `PROVIDE_DELEGATE_KEY` |
+| `0x24` | `REVOKE_DOMAIN_NAME` |
+
+这些存根的意义在于：宿主应用在签名前序流程中发送这些命令时，不会因收到非 `9000` 状态字而卡住。

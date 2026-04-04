@@ -1,0 +1,45 @@
+---
+title: "架构"
+description: "OldPhone Wallet 系统架构与数据流概述。"
+---
+
+## 系统概览
+
+```
+宿主应用（OKX / MetaMask）
+        ↕ BLE（Ledger GATT profile）
+安卓手机（OldPhone Wallet）
+        ├── BLE 外设（Kotlin GattServer）
+        ├── APDU 处理器（@ble-vault/apdu）
+        ├── HD 密码学（@ble-vault/crypto）
+        └── 钱包存储（@ble-vault/wallet）
+```
+
+## BLE 传输层
+
+安卓应用以 `"Nano X"` 为名广播，并实现 Ledger GATT profile：
+
+| 角色 | UUID 后缀 |
+|---|---|
+| 服务 | `...0004...` |
+| Notify 特征 | `...0001...` |
+| Write 特征 | `...0002...` |
+
+APDU 命令被分片打包进带序号的 BLE 帧中。第一个分片包含总载荷长度，后续分片携带连续数据。
+
+## APDU 层
+
+命令遵循 ISO 7816-4 格式：`CLA INS P1 P2 [Lc Data]`。响应以 2 字节状态字结尾（`9000` 表示成功）。
+
+完整命令参考见 [APDU 协议](/docs/apdu-protocol/overview) 章节。
+
+## 密码学层
+
+所有密钥派生均为无状态纯函数：
+
+- **以太坊：** `@scure/bip32` 实现 BIP-32，`@scure/bip39` 实现 BIP-39，`@noble/curves` 实现 secp256k1
+- **Solana：** SLIP-10 Ed25519，HMAC-SHA512 密钥为 `"ed25519 seed"`——所有路径分量均为硬化派生
+
+## 延迟签名
+
+当 `SIGN_*` 命令到达时，APDU 处理器暂停并调用 `setSignRequestHandler`，令 UI 跳转至确认页面。用户批准或拒绝后，处理器才完成签名并响应。

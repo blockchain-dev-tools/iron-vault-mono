@@ -1,0 +1,319 @@
+---
+title: "@ble-vault/apdu"
+description: "API reference for the @ble-vault/apdu package — APDU parser, handler setup, and sign request interface."
+---
+
+## Overview
+
+`@ble-vault/apdu` is the APDU processing core of OldPhone Wallet. It exposes two categories of exports: **parser utilities** for encoding and decoding raw APDU bytes, and **handler setup functions** that wire the APDU dispatcher to your wallet's mnemonic store and UI sign-confirmation flow.
+
+```bash
+pnpm add @ble-vault/apdu
+```
+
+---
+
+## Parser Utilities
+
+### `Apdu`
+
+The structured representation of a decoded APDU command.
+
+```typescript
+interface Apdu {
+  cla:  number;      // Class byte
+  ins:  number;      // Instruction byte
+  p1:   number;      // Parameter 1
+  p2:   number;      // Parameter 2
+  data: Uint8Array;  // Command data (bytes after Lc)
+}
+```
+
+---
+
+### `parseApdu`
+
+Parse a hex-encoded APDU string into an `Apdu` object. Skips the `CLA INS P1 P2 Lc` header and returns the data payload separately.
+
+```typescript
+function parseApdu(hexApdu: string): Apdu
+```
+
+**Parameters**
+
+| Name | Type | Description |
+|---|---|---|
+| `hexApdu` | `string` | Hex-encoded APDU bytes, e.g. `"e0020000"` |
+
+**Returns** An `Apdu` object with `cla`, `ins`, `p1`, `p2`, and `data`.
+
+**Example**
+
+```typescript
+import { parseApdu } from '@ble-vault/apdu';
+
+const apdu = parseApdu('e0020000');
+console.log(apdu.cla.toString(16)); // "e0"
+console.log(apdu.ins.toString(16)); // "02"
+```
+
+---
+
+### `parseBip32Path`
+
+Decode a BIP-32 derivation path from the beginning of a data buffer. The first byte is the path component count; each subsequent group of 4 bytes is a `uint32` path component.
+
+```typescript
+function parseBip32Path(data: Uint8Array): { path: number[]; rest: Uint8Array }
+```
+
+**Parameters**
+
+| Name | Type | Description |
+|---|---|---|
+| `data` | `Uint8Array` | Raw buffer starting with path count byte |
+
+**Returns**
+
+| Field | Type | Description |
+|---|---|---|
+| `path` | `number[]` | Raw `uint32` path components (hardened: `0x80000000 \| index`) |
+| `rest` | `Uint8Array` | Remaining bytes after the path |
+
+**Throws** `Error` if the buffer is too short for the declared path length.
+
+---
+
+### `rlpTotalLength`
+
+Compute the expected total byte length of an RLP-encoded value from its leading byte(s). Handles EIP-2718 typed transactions (`0x01` = EIP-2930, `0x02` = EIP-1559) by skipping the transaction type prefix byte.
+
+```typescript
+function rlpTotalLength(bytes: number[] | Uint8Array): number
+```
+
+**Parameters**
+
+| Name | Type | Description |
+|---|---|---|
+| `bytes` | `number[] \| Uint8Array` | RLP-encoded bytes, may be a partial buffer |
+
+**Returns** The total expected byte length, or `-1` if the buffer is too short to determine the length.
+
+---
+
+### `hexToBytes`
+
+Convert a hex string to a `Uint8Array`. Strips whitespace before parsing.
+
+```typescript
+function hexToBytes(hex: string): Uint8Array
+```
+
+---
+
+### `bytesToHex`
+
+Convert a `Uint8Array` to a lowercase hex string.
+
+```typescript
+function bytesToHex(bytes: Uint8Array): string
+```
+
+---
+
+### `bip32PathToString`
+
+Format an array of raw `uint32` path components as a human-readable BIP-32 path string.
+
+```typescript
+function bip32PathToString(path: number[]): string
+```
+
+**Example**
+
+```typescript
+import { bip32PathToString } from '@ble-vault/apdu';
+
+bip32PathToString([0x80000000 | 44, 0x80000000 | 60, 0x80000000, 0, 0]);
+// → "m/44'/60'/0'/0/0"
+```
+
+---
+
+## Handler Setup
+
+The handler module maintains module-level singletons. Call the setters once on mount and tear down on unmount.
+
+### `setCurrentApp`
+
+Switch the active app context. The APDU dispatcher uses this to route `CLA 0xE0` commands to the correct handler.
+
+```typescript
+function setCurrentApp(app: string): void
+```
+
+**Accepted values:** `'Ethereum'` | `'Solana'` | `'Bitcoin'` | `'Tron'` | `'Sui'`
+
+Note: `CLA 0xE1`/`0xF8` (Bitcoin New App), `CLA 0x14` (Tron), and `CLA 0x07` (Sui) are routed by their class byte and do not depend on this setting.
+
+---
+
+### `setLogFn`
+
+Register a log callback. Every APDU dispatch event will be forwarded to this function.
+
+```typescript
+function setLogFn(fn: (msg: string) => void): void
+```
+
+---
+
+### `setMnemonicProvider`
+
+Register an async function that returns the wallet's BIP-39 mnemonic. Called on demand during key derivation. Setting a new provider invalidates the internal seed cache.
+
+```typescript
+function setMnemonicProvider(fn: () => Promise<string | null>): void
+```
+
+Return `null` if no wallet is set up — the APDU handler will respond with an error status word.
+
+---
+
+### `setSignRequestHandler`
+
+Register the UI sign-confirmation callback. When a signing APDU arrives, the handler pauses and calls this function. The returned promise must resolve to a hex response string: an empty string signals approval (the handler will sign and build the real response), and `'6985'` signals user rejection.
+
+```typescript
+function setSignRequestHandler(
+  fn: ((req: SignRequestData) => Promise<string>) | null
+): void
+```
+
+Pass `null` to unregister the handler on unmount.
+
+---
+
+### `handleApdu`
+
+The main APDU dispatcher. Parses the incoming hex, routes to the correct app handler, and returns the hex-encoded response (always ending with a 2-byte status word).
+
+```typescript
+function handleApdu(hexApdu: string): Promise<string>
+```
+
+**Returns** A hex string response, e.g. `"9000"` for success, `"6d00"` for unsupported instruction, `"6f00"` for an unexpected internal error.
+
+---
+
+### `clearSignSessions`
+
+Clear any pending multi-chunk sign state. Call this on unmount or when the BLE connection drops to prevent stale session data from affecting the next connection.
+
+```typescript
+function clearSignSessions(): void
+```
+
+---
+
+### `resetSharedState`
+
+Full reset of all module-level singletons — current app, log function, mnemonic provider, sign handler, and seed cache. Useful in tests or when fully tearing down the BLE session.
+
+```typescript
+function resetSharedState(): void
+```
+
+---
+
+## `SignRequestData`
+
+The object passed to the registered sign handler when a signing APDU is received.
+
+```typescript
+interface SignRequestData {
+  chain:    'eth' | 'sol' | 'btc' | 'tron' | 'sui';
+  raw:      Uint8Array;                   // Raw bytes to be signed
+  data?:    string;                       // Human-readable summary (if decoded)
+  decoded?: Record<string, unknown>;      // Structured decoded fields (if available)
+}
+```
+
+---
+
+## Additional Exports
+
+### `getLastToken`
+
+Returns the last ERC-20 token metadata seen in an `eth_signTransaction` request, if the transaction data was decoded as an ERC-20 transfer.
+
+```typescript
+function getLastToken(): unknown
+```
+
+### `getLastNft`
+
+Returns the last NFT metadata seen in an `eth_signTransaction` request, if the transaction was decoded as an NFT transfer.
+
+```typescript
+function getLastNft(): unknown
+```
+
+### `getLastDomain`
+
+Returns the last EIP-712 domain object seen in a `eth_signTypedData` request.
+
+```typescript
+function getLastDomain(): unknown
+```
+
+---
+
+## Full Wiring Example
+
+This pattern shows how `useBleSession` connects all setters to the BLE transport and the sign-confirmation UI.
+
+```typescript
+import {
+  setMnemonicProvider,
+  setLogFn,
+  setSignRequestHandler,
+  handleApdu,
+  clearSignSessions,
+} from '@ble-vault/apdu';
+
+// ── Mount: wire everything up ────────────────────────────────────────────────
+
+// 1. Provide mnemonic from secure storage
+setMnemonicProvider(async () => {
+  return await getSecureItem('wallet.mnemonic');
+});
+
+// 2. Forward APDU log lines to your UI state
+setLogFn(msg => appendLog(msg));
+
+// 3. Register the sign confirmation handler
+//    resolve('') → approve (handler will sign and respond)
+//    resolve('6985') → reject (handler returns "Conditions not satisfied")
+setSignRequestHandler(async (req: SignRequestData) => {
+  return new Promise(resolve => {
+    showSignModal(req, {
+      approve: () => resolve(''),
+      reject:  () => resolve('6985'),
+    });
+  });
+});
+
+// ── On each incoming BLE write characteristic notification ───────────────────
+
+const response = await handleApdu(incomingHex);
+sendBleNotification(response);
+
+// ── Unmount: tear down ───────────────────────────────────────────────────────
+
+setSignRequestHandler(null);
+clearSignSessions();
+```
+
+> **Important:** Always use `resolve('6985')` for rejection — never pass the raw Promise `reject`. An unhandled rejection would cause `handleApdu` to return `'6f00'` (internal error) instead of the correct rejection status word.

@@ -1,0 +1,512 @@
+[
+  {
+    "title": "Ethereum Commands",
+    "sectionTitle": "Activation",
+    "excerpt": "Activation The Ethereum handler is the default for CLA 0xE0. It is active when currentApp is 'Ethereum' or when no OPEN_APP has been sent yet (initial state after connection). Explicitly activate it w",
+    "href": "/docs/apdu-protocol/ethereum"
+  },
+  {
+    "title": "Ethereum Commands",
+    "sectionTitle": "GET_ETH_ADDRESS — INS 0x02 / 0x28",
+    "excerpt": "GET_ETH_ADDRESS — INS 0x02 / 0x28 Derives an Ethereum public key and address from a BIP-32 path. INS 0x28 (GET_PUBLIC_KEY) is an alias — both are handled identically. Full APDU: E0 02 00 P2 Lc [BIP32P",
+    "href": "/docs/apdu-protocol/ethereum"
+  },
+  {
+    "title": "Ethereum Commands",
+    "sectionTitle": "GET_APP_CONFIGURATION — INS 0x06",
+    "excerpt": "GET_APP_CONFIGURATION — INS 0x06 Returns the Ethereum app version and feature flags. Full APDU: E0 06 00 00 00 Response format: `` arbitrary_data_enabled(1) + erc20_provision_needed(1) + major(1) + mi",
+    "href": "/docs/apdu-protocol/ethereum"
+  },
+  {
+    "title": "Ethereum Commands",
+    "sectionTitle": "SIGN_ETH_TRANSACTION — INS 0x04 / 0x18",
+    "excerpt": "SIGN_ETH_TRANSACTION — INS 0x04 / 0x18 Signs a raw Ethereum transaction. INS 0x18 (SIGN_ETH_TX_BATCH) delegates to the same handler. Full APDU: E0 04 P1 00 Lc [Data] Framing | P1 | Frame type | Data c",
+    "href": "/docs/apdu-protocol/ethereum"
+  },
+  {
+    "title": "Ethereum Commands",
+    "sectionTitle": "SIGN_PERSONAL_MESSAGE — INS 0x08",
+    "excerpt": "SIGN_PERSONAL_MESSAGE — INS 0x08 Signs an EIP-191 personal message (eth_sign / personal_sign). Full APDU: E0 08 P1 00 Lc [Data] Framing | P1 | Frame type | Data contents | |---|---|---| | 0x00 | First",
+    "href": "/docs/apdu-protocol/ethereum"
+  },
+  {
+    "title": "Ethereum Commands",
+    "sectionTitle": "SIGN_EIP_712 — INS 0x0C / 0x12 / 0x1E / 0x2A",
+    "excerpt": "SIGN_EIP_712 — INS 0x0C / 0x12 / 0x1E / 0x2A Signs EIP-712 structured data. All four INS values route to the same handler: | INS | Name | |---|---| | 0x0C | SIGN_EIP_712_MESSAGE | | 0x12 | SIGN_ETH_EI",
+    "href": "/docs/apdu-protocol/ethereum"
+  },
+  {
+    "title": "Ethereum Commands",
+    "sectionTitle": "Metadata Commands",
+    "excerpt": "Metadata Commands These commands supply rich display data for the confirmation screen. They respond 9000 immediately and store the data for use in the next sign request. PROVIDE_ERC20_TOKEN_INFO — INS",
+    "href": "/docs/apdu-protocol/ethereum"
+  },
+  {
+    "title": "Ethereum Commands",
+    "sectionTitle": "Stub Commands",
+    "excerpt": "Stub Commands The following INS values are acknowledged with 9000 but perform no action: | INS | Name | |---|---| | 0x0E | SIGN_ETH_TX_WITH_PLUGIN | | 0x10 | PROVIDE_TRUSTED_NAME | | 0x16 | SET_PLUGIN",
+    "href": "/docs/apdu-protocol/ethereum"
+  },
+  {
+    "title": "APDU Protocol Overview",
+    "sectionTitle": "Command Format",
+    "excerpt": "Command Format OldPhone Wallet speaks the Ledger APDU dialect, which follows ISO 7816-4: `` Request: CLA INS P1 P2 Lc [Data...] Response: [Data...] SW1 SW2 ` | Field | Size | Description | |---|---|--",
+    "href": "/docs/apdu-protocol/overview"
+  },
+  {
+    "title": "APDU Protocol Overview",
+    "sectionTitle": "CLA Routing Table",
+    "excerpt": "CLA Routing Table The APDU dispatcher in @iron-vault/apdu routes commands by CLA byte before any app-specific handler runs: | CLA | Routes to | |---|---| | 0xB0 | OS layer — GET_APP_AND_VERSION | | 0xE",
+    "href": "/docs/apdu-protocol/overview"
+  },
+  {
+    "title": "APDU Protocol Overview",
+    "sectionTitle": "App Switching",
+    "excerpt": "App Switching OPEN_APP and QUIT_APP control which app-level handler receives CLA 0xE0 commands: OPEN_APP — E0 D8 00 00 Lc [AppName] Switches currentApp to the UTF-8 app name in Data. For example, to a",
+    "href": "/docs/apdu-protocol/overview"
+  },
+  {
+    "title": "APDU Protocol Overview",
+    "sectionTitle": "OS-Layer Commands",
+    "excerpt": "OS-Layer Commands These commands are handled before app routing regardless of currentApp: | Command | APDU | Notes | |---|---|---| | GET_VERSION | E0 01 00 00 00 | Returns target ID, SE version 2.1.0,",
+    "href": "/docs/apdu-protocol/overview"
+  },
+  {
+    "title": "APDU Protocol Overview",
+    "sectionTitle": "Status Words",
+    "excerpt": "Status Words Every APDU response ends with a 2-byte status word: | SW | Hex | Meaning | |---|---|---| | Success | 9000 | Command completed successfully | | INS not supported | 6D00 | Unknown instructi",
+    "href": "/docs/apdu-protocol/overview"
+  },
+  {
+    "title": "APDU Protocol Overview",
+    "sectionTitle": "Deferred Signing Model",
+    "excerpt": "Deferred Signing Model Sign commands (SIGN_ETH_TRANSACTION, SIGN_PERSONAL_MESSAGE, SIGN_EIP_712, SIGN_TRANSACTION for Solana) do not sign immediately. Instead the handler: 1. Accumulates all data fram",
+    "href": "/docs/apdu-protocol/overview"
+  },
+  {
+    "title": "APDU Protocol Overview",
+    "sectionTitle": "Multi-Frame Transactions",
+    "excerpt": "Multi-Frame Transactions When a transaction exceeds the BLE MTU, the host splits it across multiple APDU frames: - Frame 1 (P1 = 0x00 for Ethereum, P1 = 0x01 for Solana): contains the BIP-32 path plus",
+    "href": "/docs/apdu-protocol/overview"
+  },
+  {
+    "title": "Solana Commands",
+    "sectionTitle": "Activation",
+    "excerpt": "Activation The Solana handler takes over CLA 0xE0 after the host sends OPEN_APP \"Solana\": `` E0 D8 00 00 07 536F6C616E61 └──────────── \"Solana\" in ASCII (7 bytes) ` All subsequent CLA 0xE0 commands ar",
+    "href": "/docs/apdu-protocol/solana"
+  },
+  {
+    "title": "Solana Commands",
+    "sectionTitle": "GET_APP_CONFIGURATION — INS 0x01",
+    "excerpt": "GET_APP_CONFIGURATION — INS 0x01 Returns the Solana app version and feature flags. Full APDU: E0 01 00 00 00 Response format: `` blind_sign_enabled(1) + major(1) + minor(1) + patch(1) + 9000 ` Fixed r",
+    "href": "/docs/apdu-protocol/solana"
+  },
+  {
+    "title": "Solana Commands",
+    "sectionTitle": "GET_PUBKEY — INS 0x05",
+    "excerpt": "GET_PUBKEY — INS 0x05 Derives a 32-byte Ed25519 public key from a SLIP-10 BIP-32 path. Full APDU: E0 05 00 00 Lc [BIP32Path] Request data format: `` path_count(1) + [path_component(4) × path_count] ` ",
+    "href": "/docs/apdu-protocol/solana"
+  },
+  {
+    "title": "Solana Commands",
+    "sectionTitle": "GET_ADDRESS — INS 0x07",
+    "excerpt": "GET_ADDRESS — INS 0x07 Derives the public key and returns it as a base58-encoded Solana address string. Full APDU: E0 07 00 00 Lc [BIP32Path] Request data format: same as GET_PUBKEY. Response format: ",
+    "href": "/docs/apdu-protocol/solana"
+  },
+  {
+    "title": "Solana Commands",
+    "sectionTitle": "SIGN_MESSAGE — INS 0x04",
+    "excerpt": "SIGN_MESSAGE — INS 0x04",
+    "href": "/docs/apdu-protocol/solana"
+  },
+  {
+    "title": "Solana Commands",
+    "sectionTitle": "SIGN_TRANSACTION — INS 0x06",
+    "excerpt": "SIGN_TRANSACTION — INS 0x06",
+    "href": "/docs/apdu-protocol/solana"
+  },
+  {
+    "title": "Solana Commands",
+    "sectionTitle": "SIGN_OFFLINE_MESSAGE — INS 0x03",
+    "excerpt": "SIGN_OFFLINE_MESSAGE — INS 0x03 All three instructions route to the same signing handler. The distinction exists for compatibility with different Solana app versions; OKX Wallet primarily uses INS 0x0",
+    "href": "/docs/apdu-protocol/solana"
+  },
+  {
+    "title": "Solana Commands",
+    "sectionTitle": "Sign Session Lifecycle",
+    "excerpt": "Sign Session Lifecycle 1. Host sends first frame (P1 = 0x01 or first frame with no active session): handler allocates a sign session, stores the private key, and begins accumulating message bytes. 2. ",
+    "href": "/docs/apdu-protocol/solana"
+  },
+  {
+    "title": "Solana Commands",
+    "sectionTitle": "Path Requirements",
+    "excerpt": "Path Requirements All SLIP-10 Ed25519 derivation paths must use fully hardened components. The most common paths: | Use case | Path | |---|---| | Primary account | m/44'/501'/0'/0' | | Second account ",
+    "href": "/docs/apdu-protocol/solana"
+  },
+  {
+    "title": "@iron-vault/apdu",
+    "sectionTitle": "Overview",
+    "excerpt": "Overview @iron-vault/apdu is the APDU processing core of OldPhone Wallet. It exposes two categories of exports: parser utilities for encoding and decoding raw APDU bytes, and handler setup functions th",
+    "href": "/docs/api-reference/apdu"
+  },
+  {
+    "title": "@iron-vault/apdu",
+    "sectionTitle": "Parser Utilities",
+    "excerpt": "Parser Utilities Apdu The structured representation of a decoded APDU command. ``typescript interface Apdu ` --- parseApdu Parse a hex-encoded APDU string into an Apdu object. Skips the CLA INS P1 P2 ",
+    "href": "/docs/api-reference/apdu"
+  },
+  {
+    "title": "@iron-vault/apdu",
+    "sectionTitle": "Handler Setup",
+    "excerpt": "Handler Setup The handler module maintains module-level singletons. Call the setters once on mount and tear down on unmount. setCurrentApp Switch the active app context. The APDU dispatcher uses this ",
+    "href": "/docs/api-reference/apdu"
+  },
+  {
+    "title": "@iron-vault/apdu",
+    "sectionTitle": "`SignRequestData`",
+    "excerpt": "SignRequestData The object passed to the registered sign handler when a signing APDU is received. ``typescript interface SignRequestData `` ---",
+    "href": "/docs/api-reference/apdu"
+  },
+  {
+    "title": "@iron-vault/apdu",
+    "sectionTitle": "Additional Exports",
+    "excerpt": "Additional Exports getLastToken Returns the last ERC-20 token metadata seen in an eth_signTransaction request, if the transaction data was decoded as an ERC-20 transfer. ``typescript function getLastT",
+    "href": "/docs/api-reference/apdu"
+  },
+  {
+    "title": "@iron-vault/apdu",
+    "sectionTitle": "Full Wiring Example",
+    "excerpt": "Full Wiring Example This pattern shows how useBleSession connects all setters to the BLE transport and the sign-confirmation UI. ``typescript setMnemonicProvider, setLogFn, setSignRequestHandler, hand",
+    "href": "/docs/api-reference/apdu"
+  },
+  {
+    "title": "@iron-vault/crypto",
+    "sectionTitle": "Overview",
+    "excerpt": "Overview @iron-vault/crypto is the stateless cryptographic layer of OldPhone Wallet. It covers the full lifecycle from mnemonic generation through HD key derivation, transaction signing, and address en",
+    "href": "/docs/api-reference/crypto"
+  },
+  {
+    "title": "@iron-vault/crypto",
+    "sectionTitle": "Mnemonic",
+    "excerpt": "Mnemonic generateMnemonic Generate a BIP-39 mnemonic phrase using the English wordlist. ``typescript function generateMnemonic(strength?: 128 | 256): string ` Parameters | Name | Type | Default | Desc",
+    "href": "/docs/api-reference/crypto"
+  },
+  {
+    "title": "@iron-vault/crypto",
+    "sectionTitle": "HD Key Derivation",
+    "excerpt": "HD Key Derivation Path components are raw uint32 values. Hardened components have the high bit set: 0x80000000 | index. For example, the standard Ethereum path m/44'/60'/0'/0/0 is represented as: ``ty",
+    "href": "/docs/api-reference/crypto"
+  },
+  {
+    "title": "@iron-vault/crypto",
+    "sectionTitle": "Signing & Address",
+    "excerpt": "Signing & Address ethPubKeyToAddress Derive the Ethereum public key and EIP-55 checksum address from a secp256k1 private key. ``typescript function ethPubKeyToAddress(privKey: Uint8Array): ` Returns |",
+    "href": "/docs/api-reference/crypto"
+  },
+  {
+    "title": "@iron-vault/crypto",
+    "sectionTitle": "Account Derivation",
+    "excerpt": "Account Derivation Account A single derived account entry. ``typescript interface Account ` --- WalletAccounts The result of a multi-account derivation. `typescript interface WalletAccounts ` --- deri",
+    "href": "/docs/api-reference/crypto"
+  },
+  {
+    "title": "@iron-vault/crypto",
+    "sectionTitle": "Bitcoin & Multi-chain Utilities",
+    "excerpt": "Bitcoin & Multi-chain Utilities These low-level primitives support Bitcoin, Tron, and multi-chain signing use cases. sha256Single Single SHA-256 hash. Used for Tron transaction hashing. ``typescript f",
+    "href": "/docs/api-reference/crypto"
+  },
+  {
+    "title": "APDU Framing",
+    "sectionTitle": "Overview",
+    "excerpt": "Overview BLE has a hard per-packet payload ceiling set by the ATT MTU. A raw APDU command can be longer than a single BLE packet, so Ledger's transport layer wraps every APDU in a simple framing proto",
+    "href": "/docs/ble-integration/apdu-framing"
+  },
+  {
+    "title": "APDU Framing",
+    "sectionTitle": "Protocol Tags",
+    "excerpt": "Protocol Tags Two tag values are defined: | Tag | Hex | Purpose | |-----|-----|---------| | TAG_MTU | 0x08 | MTU negotiation frame — 5-byte request/response | | TAG_APDU | 0x05 | APDU data frame — car",
+    "href": "/docs/ble-integration/apdu-framing"
+  },
+  {
+    "title": "APDU Framing",
+    "sectionTitle": "First Chunk Layout",
+    "excerpt": "First Chunk Layout The first chunk of an APDU message carries the total payload length in bytes 3–4. This lets the receiver allocate a reassembly buffer of the exact right size before any subsequent c",
+    "href": "/docs/ble-integration/apdu-framing"
+  },
+  {
+    "title": "APDU Framing",
+    "sectionTitle": "Subsequent Chunk Layout",
+    "excerpt": "Subsequent Chunk Layout Chunks after the first omit the total-length field (it was already communicated in chunk 0). The header shrinks by two bytes, so more APDU data fits per packet. | Byte(s) | Fie",
+    "href": "/docs/ble-integration/apdu-framing"
+  },
+  {
+    "title": "APDU Framing",
+    "sectionTitle": "Reassembly Algorithm",
+    "excerpt": "Reassembly Algorithm The receiver maintains a small state machine per connection: `` state: expectedChunkIdx = 0 totalLength = 0 (set from bytes 3–4 of chunk 0) apduBuffer = [] apduReceived = 0 on fra",
+    "href": "/docs/ble-integration/apdu-framing"
+  },
+  {
+    "title": "APDU Framing",
+    "sectionTitle": "Response Framing",
+    "excerpt": "Response Framing Device responses use the identical frame layout sent in the opposite direction — via notifyCharacteristicChanged() on the Notify characteristic. A response APDU is chunked and indexed",
+    "href": "/docs/ble-integration/apdu-framing"
+  },
+  {
+    "title": "APDU Framing",
+    "sectionTitle": "Inter-Frame Delay",
+    "excerpt": "Inter-Frame Delay The Android implementation inserts a 20 ms sleep between consecutive notifyCharacteristicChanged() calls. Some host BLE stacks drop notifications if they arrive faster than the conne",
+    "href": "/docs/ble-integration/apdu-framing"
+  },
+  {
+    "title": "APDU Framing",
+    "sectionTitle": "MTU Negotiation Frame",
+    "excerpt": "MTU Negotiation Frame The TAG_MTU (0x08) frame is a special-case 5-byte message used only during the MTU handshake (connection step 5). It does not carry an APDU payload. | Direction | Frame bytes | M",
+    "href": "/docs/ble-integration/apdu-framing"
+  },
+  {
+    "title": "APDU Framing",
+    "sectionTitle": "Concrete Example",
+    "excerpt": "Concrete Example Sending E0 01 00 00 00 (GET_VERSION, 5 bytes) at MTU payload = 20: The APDU fits entirely in the first chunk. Total length = 0x0005. APDU data occupies bytes 5–9. `` Byte: 00 01 02 03",
+    "href": "/docs/ble-integration/apdu-framing"
+  },
+  {
+    "title": "Connection Flow",
+    "sectionTitle": "Overview",
+    "excerpt": "Overview Before any APDU command can be exchanged, the host app and OldPhone Wallet must complete a fixed handshake sequence. This sequence is identical to what a real Ledger Nano X performs, because ",
+    "href": "/docs/ble-integration/connection-flow"
+  },
+  {
+    "title": "Connection Flow",
+    "sectionTitle": "Connection Sequence",
+    "excerpt": "Connection Sequence `` Host App OldPhone Wallet (Android) | | | 1. BLE scan (active scan) | |<---- ADV_IND: service UUID ------------- | Advertising data |<---- SCAN_RSP: \"Nano X\" ---------------- | S",
+    "href": "/docs/ble-integration/connection-flow"
+  },
+  {
+    "title": "Connection Flow",
+    "sectionTitle": "Step-by-Step Breakdown",
+    "excerpt": "Step-by-Step Breakdown Step 1 — BLE Scan The host performs an active BLE scan. OldPhone Wallet's advertising data contains the Ledger service UUID (13d63400-2c97-0004-0000-4c6564676572); the scan resp",
+    "href": "/docs/ble-integration/connection-flow"
+  },
+  {
+    "title": "Connection Flow",
+    "sectionTitle": "Connection State Lifecycle",
+    "excerpt": "Connection State Lifecycle `` DISCONNECTED │ │ Host connects ▼ CONNECTED ──► (handshake steps 2–8) │ │ Host disconnects / BLE link drops ▼ DISCONNECTED │ │ Device restarts advertiser automatically ▼ A",
+    "href": "/docs/ble-integration/connection-flow"
+  },
+  {
+    "title": "Connection Flow",
+    "sectionTitle": "How OKX and MetaMask Perform This Handshake",
+    "excerpt": "How OKX and MetaMask Perform This Handshake Both apps use @ledgerhq/hw-transport-web-ble (or its React Native counterpart @ledgerhq/react-native-hw-transport-ble). The library performs steps 1–8 autom",
+    "href": "/docs/ble-integration/connection-flow"
+  },
+  {
+    "title": "GATT Profile",
+    "sectionTitle": "Overview",
+    "excerpt": "Overview OldPhone Wallet emulates a Ledger Nano X at the BLE transport layer. Host applications such as OKX Wallet and MetaMask identify a real Ledger device by scanning for a specific GATT service UU",
+    "href": "/docs/ble-integration/gatt-profile"
+  },
+  {
+    "title": "GATT Profile",
+    "sectionTitle": "UUID Reference",
+    "excerpt": "UUID Reference All five UUIDs are defined in LedgerBleConstants.java. Copy them exactly — a single transposed digit will break host compatibility. | Name | UUID | Role | |------|------|------| | Servi",
+    "href": "/docs/ble-integration/gatt-profile"
+  },
+  {
+    "title": "GATT Profile",
+    "sectionTitle": "Characteristic Properties",
+    "excerpt": "Characteristic Properties Each characteristic is configured with a specific set of BluetoothGattCharacteristic property and permission flags: | Characteristic | Properties | Permissions | Notes | |---",
+    "href": "/docs/ble-integration/gatt-profile"
+  },
+  {
+    "title": "GATT Profile",
+    "sectionTitle": "Advertising Configuration",
+    "excerpt": "Advertising Configuration The device advertises under the name \"Nano X\" — exactly as a real Ledger Nano X would appear in a BLE scan. The advertising data and scan response are split because BLE adver",
+    "href": "/docs/ble-integration/gatt-profile"
+  },
+  {
+    "title": "GATT Profile",
+    "sectionTitle": "CCCD Subscription",
+    "excerpt": "CCCD Subscription Before any APDU data can flow from device to host, the host must enable notifications on the Notify characteristic. This is done by writing the value 0x01 0x00 (little-endian ENABLE_",
+    "href": "/docs/ble-integration/gatt-profile"
+  },
+  {
+    "title": "GATT Profile",
+    "sectionTitle": "Android API and Permissions",
+    "excerpt": "Android API and Permissions Core APIs used: ``java // Open the GATT server BluetoothGattServer server = bluetoothManager.openGattServer(context, callback); server.addService(ledgerService); // Bluetoo",
+    "href": "/docs/ble-integration/gatt-profile"
+  },
+  {
+    "title": "Key Derivation",
+    "sectionTitle": "Key Derivation",
+    "excerpt": "Key Derivation OldPhone Wallet derives private keys from a single BIP-39 mnemonic phrase. Ethereum accounts use BIP-32 HD key derivation; Solana accounts use SLIP-10 with Ed25519 — a distinct algorith",
+    "href": "/docs/crypto-reference/key-derivation"
+  },
+  {
+    "title": "Key Derivation",
+    "sectionTitle": "Mnemonic Generation and Validation",
+    "excerpt": "Mnemonic Generation and Validation Source: packages/crypto/src/mnemonic.ts Library: @scure/bip39 with the English wordlist ``ts // 12 words (128 bits of entropy) const phrase12 = generateMnemonic(128)",
+    "href": "/docs/crypto-reference/key-derivation"
+  },
+  {
+    "title": "Key Derivation",
+    "sectionTitle": "Ethereum Key Derivation (BIP-32)",
+    "excerpt": "Ethereum Key Derivation (BIP-32) Source: packages/crypto/src/hdkey.ts — deriveEthPrivateKey Library: @scure/bip32 Ethereum uses the standard BIP-32 HD key tree with a BIP-44 coin type of 60. ``ts func",
+    "href": "/docs/crypto-reference/key-derivation"
+  },
+  {
+    "title": "Key Derivation",
+    "sectionTitle": "Solana Key Derivation (SLIP-10 Ed25519)",
+    "excerpt": "Solana Key Derivation (SLIP-10 Ed25519) Source: packages/crypto/src/hdkey.ts — deriveSolanaPrivateKey Libraries: @noble/hashes/hmac, @noble/hashes/sha2 Solana uses Ed25519 keys. BIP-32 is not defined ",
+    "href": "/docs/crypto-reference/key-derivation"
+  },
+  {
+    "title": "Key Derivation",
+    "sectionTitle": "Address Derivation",
+    "excerpt": "Address Derivation Source: packages/crypto/src/signer.ts and packages/crypto/src/address.ts Ethereum address ``ts function ethPubKeyToAddress(privKey: Uint8Array): ` 1. Derive uncompressed secp256k1 p",
+    "href": "/docs/crypto-reference/key-derivation"
+  },
+  {
+    "title": "Key Derivation",
+    "sectionTitle": "High-Level Helper: `deriveAccountsFromPaths`",
+    "excerpt": "High-Level Helper: deriveAccountsFromPaths Source: packages/crypto/src/address.ts This is the primary API for deriving multiple accounts at once. ``ts async function deriveAccountsFromPaths( mnemonic:",
+    "href": "/docs/crypto-reference/key-derivation"
+  },
+  {
+    "title": "Key Derivation",
+    "sectionTitle": "Key Derivation Summary",
+    "excerpt": "Key Derivation Summary | Chain | Algorithm | Path | Returns | |---|---|---|---| | Ethereum | BIP-32 (@scure/bip32) | m/44'/60'/0'/0/ | 32-byte secp256k1 private key | | Solana | SLIP-10 Ed25519 (@nobl",
+    "href": "/docs/crypto-reference/key-derivation"
+  },
+  {
+    "title": "Signing Formats",
+    "sectionTitle": "Signing Formats",
+    "excerpt": "Signing Formats OldPhone Wallet implements four signing operations across two chains. All signing logic lives in packages/crypto/src/signer.ts. Every function returns a raw byte array, not a hex strin",
+    "href": "/docs/crypto-reference/signing-formats"
+  },
+  {
+    "title": "Signing Formats",
+    "sectionTitle": "Output Format",
+    "excerpt": "Output Format All Ethereum signing functions return a 65-byte buffer with the layout: `` [ v (1 byte) | r (32 bytes) | s (32 bytes) ] ` The v` value encodes the recovery bit and, for legacy transactio",
+    "href": "/docs/crypto-reference/signing-formats"
+  },
+  {
+    "title": "Signing Formats",
+    "sectionTitle": "ETH: Transaction Signing",
+    "excerpt": "ETH: Transaction Signing Function: signEthTransaction(privKey, rlp) ``ts function signEthTransaction(privKey: Uint8Array, rlp: Uint8Array): Uint8Array // Returns: v(1B) + r(32B) + s(32B) = 65 bytes ` ",
+    "href": "/docs/crypto-reference/signing-formats"
+  },
+  {
+    "title": "Signing Formats",
+    "sectionTitle": "ETH: Personal Message Signing",
+    "excerpt": "ETH: Personal Message Signing Function: signEthPersonalMessage(privKey, message) ``ts function signEthPersonalMessage(privKey: Uint8Array, message: Uint8Array): Uint8Array // Returns: v(1B) + r(32B) +",
+    "href": "/docs/crypto-reference/signing-formats"
+  },
+  {
+    "title": "Signing Formats",
+    "sectionTitle": "ETH: EIP-712 Typed Data Signing",
+    "excerpt": "ETH: EIP-712 Typed Data Signing Function: signEthEip712(privKey, domainHash, structHash) ``ts function signEthEip712( privKey: Uint8Array, domainHash: Uint8Array, // 32 bytes structHash: Uint8Array, /",
+    "href": "/docs/crypto-reference/signing-formats"
+  },
+  {
+    "title": "Signing Formats",
+    "sectionTitle": "SOL: Message Signing",
+    "excerpt": "SOL: Message Signing Function: signSolanaMessage(privKey, message) ``ts function signSolanaMessage(privKey: Uint8Array, message: Uint8Array): Uint8Array // Returns: 64-byte raw Ed25519 signature ` Alg",
+    "href": "/docs/crypto-reference/signing-formats"
+  },
+  {
+    "title": "Signing Formats",
+    "sectionTitle": "Comparison Table",
+    "excerpt": "Comparison Table | Method | Input | Hash construction | v value | Output size | |---|---|---|---|---| | signEthTransaction | RLP bytes | keccak256(rlp) | 0/1 (typed) or 37/38 (legacy) | 65 bytes | | s",
+    "href": "/docs/crypto-reference/signing-formats"
+  },
+  {
+    "title": "Signing Formats",
+    "sectionTitle": "Low-S Normalization",
+    "excerpt": "Low-S Normalization All three Ethereum signing functions pass ` to secp256k1.sign. This instructs the @noble/curves library to negate s if it falls in the upper half of the secp256k1 order (s > n/2), ",
+    "href": "/docs/crypto-reference/signing-formats"
+  },
+  {
+    "title": "Signing Formats",
+    "sectionTitle": "Error Handling",
+    "excerpt": "Error Handling None of the signing functions validate the private key length or format. Passing a key that is not 32 bytes will produce undefined behavior from the underlying @noble/curves primitives.",
+    "href": "/docs/crypto-reference/signing-formats"
+  },
+  {
+    "title": "Architecture",
+    "sectionTitle": "System Overview",
+    "excerpt": "System Overview `` Host App (OKX / MetaMask) ↕ BLE (Ledger GATT profile) Android Phone (OldPhone Wallet) ├── BLE Peripheral (Kotlin GattServer) ├── APDU Handler (@iron-vault/apdu) ├── HD Crypto (@ble-v",
+    "href": "/docs/getting-started/architecture"
+  },
+  {
+    "title": "Architecture",
+    "sectionTitle": "BLE Transport Layer",
+    "excerpt": "BLE Transport Layer The Android app advertises as \"Nano X\" and implements the Ledger GATT profile: | Role | UUID suffix | |---|---| | Service | ...0004... | | Notify characteristic | ...0001... | | Wr",
+    "href": "/docs/getting-started/architecture"
+  },
+  {
+    "title": "Architecture",
+    "sectionTitle": "APDU Layer",
+    "excerpt": "APDU Layer Commands follow the ISO 7816-4 format: CLA INS P1 P2 [Lc Data]. Responses end with a 2-byte status word (9000 = success). See the APDU Protocol section for the full command reference.",
+    "href": "/docs/getting-started/architecture"
+  },
+  {
+    "title": "Architecture",
+    "sectionTitle": "Crypto Layer",
+    "excerpt": "Crypto Layer All key derivation is stateless and pure: - Ethereum: BIP-32 via @scure/bip32, BIP-39 via @scure/bip39, secp256k1 via @noble/curves - Solana: SLIP-10 Ed25519 with HMAC-SHA512 key \"ed25519",
+    "href": "/docs/getting-started/architecture"
+  },
+  {
+    "title": "Architecture",
+    "sectionTitle": "Deferred Signing",
+    "excerpt": "Deferred Signing When a SIGN_* command arrives, the APDU handler pauses and calls setSignRequestHandler, which lets the UI navigate to a confirmation screen. The user approves or rejects; only then do",
+    "href": "/docs/getting-started/architecture"
+  },
+  {
+    "title": "Introduction",
+    "sectionTitle": "What is OldPhone Wallet?",
+    "excerpt": "What is OldPhone Wallet? OldPhone Wallet repurposes an old Android phone as a BLE hardware wallet. From the perspective of a host app like OKX Wallet or MetaMask, it behaves identically to a Ledger Na",
+    "href": "/docs/getting-started/introduction"
+  },
+  {
+    "title": "Introduction",
+    "sectionTitle": "Key Capabilities",
+    "excerpt": "Key Capabilities - Ethereum HD key derivation (BIP-44, m/44'/60'/0'/0/i) - Solana HD key derivation (SLIP-10 Ed25519, m/44'/501'/0'/0') - BLE peripheral mode with exact Ledger GATT UUIDs - Transaction",
+    "href": "/docs/getting-started/introduction"
+  },
+  {
+    "title": "Introduction",
+    "sectionTitle": "This Site",
+    "excerpt": "This Site This DevTools site provides: 1. Documentation — Full protocol reference for developers integrating with OldPhone Wallet 2. APDU Debugger — Send commands to the simulator or a real device and",
+    "href": "/docs/getting-started/introduction"
+  },
+  {
+    "title": "Quick Start",
+    "sectionTitle": "Prerequisites",
+    "excerpt": "Prerequisites - Chrome browser with chrome://flags/#enable-experimental-web-platform-features enabled - OldPhone Wallet app running on an Android device, or use the Simulator on this site",
+    "href": "/docs/getting-started/quick-start"
+  },
+  {
+    "title": "Quick Start",
+    "sectionTitle": "Step 1: Open the APDU Debugger",
+    "excerpt": "Step 1: Open the APDU Debugger Click APDU Debugger in the sidebar. The right panel shows the wallet simulator.",
+    "href": "/docs/getting-started/quick-start"
+  },
+  {
+    "title": "Quick Start",
+    "sectionTitle": "Step 2: Send GET_VERSION",
+    "excerpt": "Step 2: Send GET_VERSION Select GET_VERSION from the preset dropdown and click Send ▶ with target set to Simulator. You should see a response ending in 9000 (success). The response bytes include SE ve",
+    "href": "/docs/getting-started/quick-start"
+  },
+  {
+    "title": "Quick Start",
+    "sectionTitle": "Step 3: Get an Ethereum Address",
+    "excerpt": "Step 3: Get an Ethereum Address Select GET_ETH_ADDRESS (m/44'/60'/0'/0/0) and send to Simulator. The response contains: - 65 bytes: uncompressed secp256k1 public key - 40 bytes: Ethereum address as AS",
+    "href": "/docs/getting-started/quick-start"
+  },
+  {
+    "title": "Quick Start",
+    "sectionTitle": "Step 4: Connecting to a Real Device",
+    "excerpt": "Step 4: Connecting to a Real Device Switch the target to BLE Device, click Scan, and select your OldPhone Wallet device. All subsequent commands go to the real phone over Bluetooth. > Note: BLE Device",
+    "href": "/docs/getting-started/quick-start"
+  }
+]

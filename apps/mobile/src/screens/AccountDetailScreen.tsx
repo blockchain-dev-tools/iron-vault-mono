@@ -1,0 +1,131 @@
+import React, { useMemo } from 'react';
+import { ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import QRCode from 'react-native-qrcode-svg';
+import { useApp, useTheme, useLocale } from '../store/AppContext';
+import { R } from '@iron-vault/theme';
+import type { ColorTokens } from '@iron-vault/theme';
+import TopBar from '../components/ui/TopBar';
+import BleStatus from '../components/ui/BleStatus';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import SectionLabel from '../components/ui/SectionLabel';
+import Icon from '../components/ui/Icon';
+import { useBleSession } from '../hooks/useBleSession';
+
+export default function AccountDetailScreen() {
+  const { goBack, accounts, currentChain, currentAcctIdx, bleState } = useApp();
+  const C = useTheme();
+  const t = useLocale();
+  const s = useMemo(() => makeStyles(C), [C]);
+  const isEth = currentChain === 'eth';
+  const accts = isEth ? accounts.eth : accounts.sol;
+  const acct = accts[currentAcctIdx] ?? { short: '—', full: '—', path: '—' };
+
+  const { logs, startBle, stopBle } = useBleSession(currentChain, acct);
+
+  const toggleBle = async () => {
+    if (bleState === 'broadcasting' || bleState === 'connected') {
+      stopBle();
+    } else {
+      await startBle();
+    }
+  };
+
+  const handleCopyAddress = async () => {
+    await Share.share({ message: acct.full || acct.short });
+  };
+
+  const hasAddress = acct.full !== '—' && acct.full !== '';
+  const btnVariant = bleState === 'idle' || bleState === 'error' ? 'primary' : 'danger';
+  const btnIcon = bleState === 'idle' || bleState === 'error' ? 'input' : 'stop_circle';
+  const btnLabel =
+    bleState === 'error' ? t.accountDetail.retryBle :
+    bleState === 'idle'  ? t.accountDetail.startAccepting :
+                           t.accountDetail.stop;
+
+  return (
+    <View style={s.root}>
+      <TopBar
+        title={`${isEth ? 'Ethereum' : 'Solana'} #${currentAcctIdx + 1}`}
+        onBack={goBack}
+        bleState={bleState}
+      />
+      <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+        <Card accent>
+          <View style={s.addrHeader}>
+            <SectionLabel>{t.accountDetail.publicAddress}</SectionLabel>
+            <TouchableOpacity style={s.copyIconWrap} onPress={handleCopyAddress} activeOpacity={0.7}>
+              <Icon name="content_copy" size={16} color={C.primary} />
+            </TouchableOpacity>
+          </View>
+          <Text style={s.addrNetwork}>
+            {isEth ? t.accountDetail.ethMainnet : t.accountDetail.solMainnet}
+          </Text>
+          <View style={s.addrBox}>
+            <Text style={s.addrText} selectable>{acct.full || acct.short}</Text>
+          </View>
+          {hasAddress && (
+            <View style={s.qrWrap}>
+              <View style={[s.qrInner, { backgroundColor: C.surfaceContainerLow }]}>
+                <QRCode
+                  value={acct.full || acct.short}
+                  size={160}
+                  backgroundColor={C.surfaceContainerLow}
+                  color={C.text}
+                />
+              </View>
+            </View>
+          )}
+          <Text style={s.addrPath}>{acct.path}</Text>
+        </Card>
+
+        <BleStatus state={bleState} />
+
+        {logs.length > 0 && (
+          <View>
+            <SectionLabel>{t.accountDetail.activity}</SectionLabel>
+            <View style={s.logBox}>
+              <ScrollView style={{ maxHeight: 140 }} showsVerticalScrollIndicator={false}>
+                {logs.map((l, i) => (
+                  <Text key={i} style={s.logLine}>
+                    <Text style={s.logTime}>{l.time} </Text>{l.msg}
+                  </Text>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+        )}
+
+        {bleState === 'idle' && (
+          <Text style={s.hint}>{t.accountDetail.hint}</Text>
+        )}
+        <View style={{ height: 100 }} />
+      </ScrollView>
+
+      <View style={s.btnWrap}>
+        <Button variant={btnVariant} icon={btnIcon} onPress={toggleBle}>
+          {btnLabel}
+        </Button>
+      </View>
+    </View>
+  );
+}
+
+const makeStyles = (C: ColorTokens) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: C.bg },
+  scroll: { flex: 1 },
+  content: { paddingHorizontal: 20, paddingTop: 20, gap: 16 },
+  addrHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+  copyIconWrap: { padding: 6, backgroundColor: C.surfaceContainerLow, borderRadius: R.lg },
+  addrNetwork: { color: C.text, fontSize: 16, fontWeight: '700', marginBottom: 12 },
+  addrBox: { backgroundColor: C.surfaceContainerLow, borderRadius: R.lg, padding: 14, borderWidth: 1, borderColor: C.borderVariant },
+  addrText: { color: C.primary, fontSize: 13, fontFamily: 'monospace', lineHeight: 20 },
+  qrWrap: { alignItems: 'center', paddingVertical: 20 },
+  qrInner: { padding: 12, borderRadius: R.lg },
+  addrPath: { color: C.text2, fontSize: 10, fontFamily: 'monospace', marginTop: 4 },
+  logBox: { backgroundColor: C.surfaceContainer, borderRadius: R.lg, padding: 12 },
+  logLine: { color: C.text2, fontSize: 11, fontFamily: 'monospace', lineHeight: 16 },
+  logTime: { color: C.textDisabled },
+  hint: { color: C.text2, fontSize: 13, textAlign: 'center', lineHeight: 18 },
+  btnWrap: { paddingHorizontal: 20, paddingBottom: 8 },
+});

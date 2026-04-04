@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Transaction Signing | Wallet</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-fixed": "#3a0003",
+                        "primary": "#8FC322",
+                        "error-dim": "#d53d18",
+                        "tertiary": "#ff766e",
+                        "secondary-fixed": "#e5e2e1",
+                        "outline": "#777575",
+                        "on-secondary": "#525151",
+                        "inverse-primary": "#006f0e",
+                        "background": "#0e0e0e",
+                        "surface-variant": "#262626",
+                        "on-tertiary": "#4e0005",
+                        "primary-fixed-dim": "#8FC322",
+                        "primary-container": "#8FC322",
+                        "tertiary-dim": "#ff716a",
+                        "tertiary-container": "#ff5a56",
+                        "secondary-fixed-dim": "#d6d4d3",
+                        "on-primary-fixed-variant": "#4d6b12",
+                        "on-surface-variant": "#adaaaa",
+                        "on-primary-container": "#1d2900",
+                        "on-error-container": "#ffd2c8",
+                        "surface-container-lowest": "#000000",
+                        "error-container": "#b92902",
+                        "on-error": "#450900",
+                        "tertiary-fixed-dim": "#ff7b73",
+                        "surface-tint": "#8FC322",
+                        "surface-container-high": "#201f1f",
+                        "secondary-dim": "#d6d4d3",
+                        "on-secondary-fixed": "#403f3f",
+                        "secondary": "#e5e2e1",
+                        "error": "#ff7351",
+                        "outline-variant": "#494847",
+                        "inverse-on-surface": "#565554",
+                        "on-tertiary-fixed-variant": "#79000d",
+                        "secondary-container": "#474746",
+                        "primary-fixed": "#8FC322",
+                        "on-primary-fixed": "#1d2900",
+                        "surface": "#0e0e0e",
+                        "surface-dim": "#0e0e0e",
+                        "inverse-surface": "#fcf8f8",
+                        "on-tertiary-container": "#310002",
+                        "on-primary": "#1d2900",
+                        "surface-bright": "#2c2c2c",
+                        "on-secondary-container": "#d2d0cf",
+                        "on-background": "#ffffff",
+                        "on-surface": "#ffffff",
+                        "tertiary-fixed": "#ff928a",
+                        "primary-dim": "#8FC322",
+                        "on-secondary-fixed-variant": "#5c5b5b",
+                        "surface-container": "#1a1919",
+                        "surface-container-low": "#131313",
+                        "surface-container-highest": "#262626"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Space Grotesk"],
+                        "mono": ["monospace"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #0e0e0e;
+            color: #ffffff;
+            font-family: 'Manrope', sans-serif;
+        }
+        .mono-digits {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+        /* Custom scrollbar for raw data */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #131313;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #262626;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col items-center">
+<!-- Top Navigation Bar -->
+<header class="flex justify-between items-center px-6 h-16 w-full fixed top-0 z-50 bg-[#0A0A0A] shadow-[0_0_20px_rgba(143,195,34,0.04)]">
+<div class="flex items-center gap-4">
+<button class="text-[#8FC322] active:scale-95 transition-transform">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-['Space_Grotesk'] font-bold tracking-tight uppercase text-[#8FC322]">Sign Request</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-gray-500 hover:text-[#8FC322] transition-colors duration-200">settings</span>
+</div>
+</header>
+<main class="mt-20 px-4 w-full max-w-md pb-32">
+<!-- Origin Header -->
+<div class="mb-8 flex flex-col items-center text-center">
+<div class="w-16 h-16 bg-surface-container-highest rounded-lg mb-4 flex items-center justify-center border border-outline-variant/20 shadow-[0_0_30px_rgba(143,195,34,0.08)]">
+<span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">shield_with_heart</span>
+</div>
+<p class="font-headline text-on-surface-variant text-sm tracking-wider uppercase">Origin</p>
+<h2 class="font-headline font-bold text-xl mt-1">From OKX Wallet</h2>
+</div>
+<!-- Hierarchical Data Card -->
+<div class="bg-surface-container rounded-lg p-5 space-y-6 shadow-xl relative overflow-hidden">
+<!-- Subtle accent bar -->
+<div class="absolute left-0 top-0 bottom-0 w-[2px] bg-primary"></div>
+<!-- Network Section -->
+<div class="flex justify-between items-center group">
+<div>
+<p class="font-headline text-[10px] text-on-surface-variant uppercase tracking-widest mb-1">Network</p>
+<div class="flex items-center gap-2">
+<div class="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">Ξ</div>
+<span class="font-headline font-medium">Ethereum</span>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline text-[10px] text-on-surface-variant uppercase tracking-widest mb-1">Action</p>
+<span class="font-headline font-medium text-primary">ERC-20 Transfer</span>
+</div>
+</div>
+<!-- Recipient Section -->
+<div class="bg-surface-container-low p-4 rounded-lg border-l-2 border-outline-variant/10">
+<p class="font-headline text-[10px] text-on-surface-variant uppercase tracking-widest mb-2">Recipient Address</p>
+<div class="flex items-center justify-between gap-3">
+<code class="mono-digits text-xs text-secondary bg-surface-container-highest/50 px-2 py-1.5 rounded break-all">0xb3858485741235b8a00000000000000000000000</code>
+<span class="material-symbols-outlined text-on-surface-variant text-sm flex-shrink-0 cursor-pointer hover:text-primary">content_copy</span>
+</div>
+</div>
+<!-- Amount Section -->
+<div class="bg-surface-container-low p-4 rounded-lg">
+<p class="font-headline text-[10px] text-on-surface-variant uppercase tracking-widest mb-1">Amount</p>
+<p class="mono-digits text-lg font-bold text-white">10.000000 <span class="text-xs font-normal text-on-surface-variant">USDC</span></p>
+</div>
+<!-- Technical Gas Details -->
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-low p-4 rounded-lg">
+<p class="font-headline text-[10px] text-on-surface-variant uppercase tracking-widest mb-1">Gas Price</p>
+<p class="mono-digits text-sm font-medium text-secondary">24.5 <span class="text-[10px] font-normal text-on-surface-variant">GWEI</span></p>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg">
+<p class="font-headline text-[10px] text-on-surface-variant uppercase tracking-widest mb-1">Gas Limit</p>
+<p class="mono-digits text-sm font-medium text-secondary">65,000</p>
+</div>
+</div>
+</div>
+<!-- Warning Banner -->
+<div class="mt-6 flex gap-3 p-4 bg-error-container/10 border border-error/20 rounded-lg">
+<span class="material-symbols-outlined text-error text-xl">warning</span>
+<p class="text-xs text-on-error-container leading-relaxed">
+<span class="font-bold text-error">Double-check recipient address.</span> Signed transactions are permanent and cannot be reversed on-chain.
+            </p>
+</div>
+<!-- Raw Hex Data (Collapsible) -->
+<details class="mt-6 group border-t border-outline-variant/20 pt-4">
+<summary class="flex items-center justify-between cursor-pointer list-none text-on-surface-variant hover:text-white transition-colors">
+<span class="font-headline text-[10px] uppercase tracking-widest font-bold">Raw Hex Data</span>
+<span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="mt-3 bg-surface-container-lowest p-3 rounded-lg border border-outline-variant/10">
+<pre class="mono-digits text-[10px] leading-relaxed text-secondary-dim break-all whitespace-pre-wrap max-h-32 overflow-y-auto custom-scrollbar">0xa9059cbb000000000000000000000000b3858485741235b8a000000000000000000000000000000000000000000000000000000000989680</pre>
+</div>
+</details>
+</main>
+<!-- Bottom Action Shell -->
+<div class="fixed bottom-0 left-0 w-full z-50 bg-[#0E0E0E]/90 backdrop-blur-2xl border-t border-[#1A1919] p-6 flex flex-col gap-4">
+<div class="flex gap-3">
+<button class="flex-1 py-4 bg-surface-container-highest text-secondary font-headline font-bold uppercase tracking-widest text-xs rounded-lg active:scale-[0.98] transition-all border border-outline-variant/20">
+                Reject
+            </button>
+<button class="flex-[2] py-4 bg-[#8FC322] text-[#1d2900] font-headline font-black uppercase tracking-widest text-xs rounded-lg shadow-[0_0_25px_rgba(143,195,34,0.3)] active:scale-[0.98] transition-all">
+                Confirm &amp; Sign
+            </button>
+</div>
+<!-- Safety Tag -->
+<div class="flex items-center justify-center gap-2 opacity-40">
+<span class="material-symbols-outlined text-[10px]">lock</span>
+<p class="text-[9px] font-headline uppercase tracking-[0.2em]">Encrypted Session Secure</p>
+</div>
+</div>
+<!-- Background Decoration -->
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
+<div class="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px]"></div>
+<div class="absolute bottom-[-5%] left-[-5%] w-[30%] h-[30%] rounded-full bg-primary/5 blur-[100px]"></div>
+</div>
+</body></html>

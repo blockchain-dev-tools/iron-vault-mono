@@ -1,0 +1,26 @@
+---
+title: "简介"
+description: "OldPhone Wallet 将旧安卓手机改造为兼容 OKX、MetaMask 等 dApp 的 BLE 硬件钱包。"
+---
+
+## 什么是 OldPhone Wallet？
+
+OldPhone Wallet 将旧安卓手机改造为 BLE 硬件钱包。从 OKX Wallet、MetaMask 等宿主应用的角度看，它与 Ledger Nano X 完全一致——通过蓝牙使用相同的 GATT profile 和 APDU 协议进行通信。
+
+## 核心功能
+
+- 以太坊 HD 密钥派生（BIP-44，`m/44'/60'/0'/0/i`）
+- Solana HD 密钥派生（SLIP-10 Ed25519，`m/44'/501'/0'/0'`）
+- BLE 外设模式，完整复刻 Ledger GATT UUID
+- 交易签名时需在设备上手动确认
+- 助记词备份与 PIN 保护
+
+## 本站功能
+
+本开发者工具站提供：
+
+1. **文档** — 供开发者集成 OldPhone Wallet 的完整协议参考
+2. **APDU 调试器** — 向模拟器或真实设备发送命令并查看响应
+3. **钱包模拟器** — 实时响应 APDU 命令的软件模拟器
+
+点击侧边栏的 **APDU 调试器** 开始交互式探索。

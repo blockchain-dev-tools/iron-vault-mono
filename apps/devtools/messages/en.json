@@ -1,0 +1,39 @@
+{
+  "nav": {
+    "debugger": "APDU Debugger",
+    "sections": {
+      "gettingStarted": "Getting Started",
+      "bleIntegration": "BLE Integration",
+      "apduProtocol": "APDU Protocol",
+      "cryptoReference": "Crypto Reference",
+      "apiReference": "API Reference"
+    }
+  },
+  "toc": {
+    "onThisPage": "On this page"
+  },
+  "prevNext": {
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "breadcrumbs": {
+    "docs": "Docs"
+  },
+  "codeBlock": {
+    "copy": "Copy",
+    "copied": "Copied"
+  },
+  "topBar": {
+    "github": "GitHub"
+  },
+  "theme": {
+    "toggle": "Toggle theme"
+  },
+  "lang": {
+    "toggle": "中文"
+  },
+  "search": {
+    "placeholder": "Search docs...",
+    "noResults": "No results"
+  }
+}

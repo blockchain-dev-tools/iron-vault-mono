@@ -1,0 +1,182 @@
+---
+title: "Solana Commands"
+description: "Full reference for CLA 0xE0 Solana App APDU commands — public key derivation, transaction and message signing, and the OKX num_signers quirk."
+---
+
+## Activation
+
+The Solana handler takes over `CLA 0xE0` after the host sends `OPEN_APP "Solana"`:
+
+```
+E0 D8 00 00 07 536F6C616E61
+                └──────────── "Solana" in ASCII (7 bytes)
+```
+
+All subsequent `CLA 0xE0` commands are routed to the Solana handler until `QUIT_APP` (`E0 A7`) or another `OPEN_APP` is sent.
+
+**Key derivation scheme:** SLIP-10 Ed25519 with HMAC-SHA512 master key string `"ed25519 seed"`. Every path component **must** be hardened (MSB set). Non-hardened components are not valid for Ed25519 derivation and will produce incorrect keys.
+
+---
+
+## GET_APP_CONFIGURATION — INS 0x01
+
+Returns the Solana app version and feature flags.
+
+**Full APDU:** `E0 01 00 00 00`
+
+**Response format:**
+```
+blind_sign_enabled(1)  +  major(1)  +  minor(1)  +  patch(1)  +  9000
+```
+
+**Fixed response:** `01 01 03 00 9000` = blind signing enabled, version 1.3.0.
+
+---
+
+## GET_PUBKEY — INS 0x05
+
+Derives a 32-byte Ed25519 public key from a SLIP-10 BIP-32 path.
+
+**Full APDU:** `E0 05 00 00 Lc [BIP32Path]`
+
+**Request data format:**
+```
+path_count(1)  +  [path_component(4) × path_count]
+```
+
+All path components must have the hardened bit set (`| 0x80000000`). The standard Solana derivation path is `m/44'/501'/0'/0'`.
+
+**Response format:**
+```
+pubkey(32)  +  9000   = 34 bytes total
+```
+
+---
+
+## GET_ADDRESS — INS 0x07
+
+Derives the public key and returns it as a base58-encoded Solana address string.
+
+**Full APDU:** `E0 07 00 00 Lc [BIP32Path]`
+
+**Request data format:** same as `GET_PUBKEY`.
+
+**Response format:**
+```
+addr_len(1)  +  addr_bytes(n, base58 string)  +  9000
+```
+
+The address is the base58 encoding of the raw 32-byte Ed25519 public key — the standard Solana on-chain address format.
+
+---
+
+## SIGN_MESSAGE — INS 0x04
+
+## SIGN_TRANSACTION — INS 0x06
+
+## SIGN_OFFLINE_MESSAGE — INS 0x03
+
+All three instructions route to the same signing handler. The distinction exists for compatibility with different Solana app versions; OKX Wallet primarily uses `INS 0x06`.
+
+**Full APDU:** `E0 06 P1 P2 Lc [Data]`
+
+### Framing
+
+**P1 — frame position:**
+
+| P1 | Meaning |
+|---|---|
+| `0x01` | First frame (starts a new sign session) |
+| `0x00` | Continuation frame (no active session starts a new one automatically) |
+
+**P2 — continuation flag:**
+
+| P2 bit 0 | Meaning |
+|---|---|
+| `0x01` | More frames follow — respond `9000` and wait |
+| `0x00` | This is the last frame — sign and respond with signature |
+
+### First frame data layout (standard)
+
+```
+path_count(1)  +  [path_component(4) × path_count]  +  message_bytes...
+```
+
+### OKX num_signers quirk
+
+OKX Wallet prepends a `num_signers` byte (`0x01`) before the BIP-32 path in the first frame. A standard Ledger client does not send this prefix.
+
+**What OKX sends (first frame data):**
+```
+01  02  8000002C  800001F5  ...message_bytes...
+│   │   └─ path component 1 ─┘
+│   └─ path_count = 2
+└─ num_signers = 0x01  (OKX-specific prefix)
+```
+
+**What a standard client sends (first frame data):**
+```
+02  8000002C  800001F5  ...message_bytes...
+│   └─ path component 1 ─┘
+└─ path_count = 2
+```
+
+**Detection heuristic:** The handler detects the OKX prefix and strips it automatically:
+
+```ts
+const hasNumSignersPrefix =
+  data[0] === 0x01 &&
+  data.length > 1 &&
+  data[1] >= 2 &&
+  data[1] <= 5;
+
+const { path, rest } = parseBip32Path(
+  hasNumSignersPrefix ? data.slice(1) : data
+);
+```
+
+The condition `data[1] in [2..5]` identifies a valid `path_count` value. Since a real `num_signers=0x01` prefix always precedes a `path_count`, this heuristic reliably distinguishes the two formats.
+
+### Signing
+
+Ed25519 raw signing — no pre-hashing:
+
+```
+signature(64) = ed25519_sign(message_bytes, privKey)
+```
+
+### Response
+
+**Intermediate frames (P2 bit 0 = `0x01`):** `9000` only.
+
+**Final frame (P2 bit 0 = `0x00`):**
+```
+signature(64)  +  9000   = 66 bytes total
+```
+
+The 64-byte signature is a raw Ed25519 signature (R‖S). The wallet app embeds it into the Solana transaction wire format before broadcasting.
+
+---
+
+## Sign Session Lifecycle
+
+1. Host sends first frame (`P1 = 0x01` or first frame with no active session): handler allocates a sign session, stores the private key, and begins accumulating message bytes.
+2. Host sends continuation frames (`P1 = 0x00`, `P2 = 0x01`): handler appends bytes to the session buffer. Responds `9000`.
+3. Host sends the final frame (`P2 = 0x00`): handler calls `signRequestHandler` for user confirmation, then returns the signature on approval or `6985` on rejection.
+4. Session is cleared regardless of outcome.
+
+**Sign session timeout:** 120 seconds from the first frame. If the user does not respond before the timeout, the handler resolves with `6985`.
+
+---
+
+## Path Requirements
+
+All SLIP-10 Ed25519 derivation paths must use fully hardened components. The most common paths:
+
+| Use case | Path |
+|---|---|
+| Primary account | `m/44'/501'/0'/0'` |
+| Second account | `m/44'/501'/1'/0'` |
+| OKX default | `m/44'/501'/0'` |
+
+Non-hardened path components are incompatible with Ed25519 private key derivation and will produce incorrect keys silently.

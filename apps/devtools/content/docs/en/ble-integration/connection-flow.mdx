@@ -1,0 +1,157 @@
+---
+title: "Connection Flow"
+description: "Step-by-step BLE connection sequence from host scan to APDU-ready state."
+---
+
+## Overview
+
+Before any APDU command can be exchanged, the host app and OldPhone Wallet must complete a fixed handshake sequence. This sequence is identical to what a real Ledger Nano X performs, because OKX Wallet and MetaMask both use `@ledgerhq/hw-transport-web-ble` under the hood — a library that expects this exact flow.
+
+The entire handshake from scan to APDU-ready typically completes in under two seconds on a modern Android device.
+
+---
+
+## Connection Sequence
+
+```
+Host App                             OldPhone Wallet (Android)
+   |                                          |
+   |  1. BLE scan (active scan)               |
+   |<---- ADV_IND: service UUID ------------- |  Advertising data
+   |<---- SCAN_RSP: "Nano X" ---------------- |  Scan response
+   |                                          |
+   |  2. GATT connect                         |
+   |---- CONNECT_REQ --------------------->   |
+   |<--- onConnectionStateChange(CONNECTED) - |
+   |                                          |
+   |  3. Service & characteristic discovery   |
+   |---- ATT_READ_BY_GROUP_TYPE ----------->  |
+   |<--- Service: 13d63400-2c97-0004-0000-... |
+   |---- ATT_READ_BY_TYPE ----------------->  |
+   |<--- Notify / Write / WriteCmd chars ---- |
+   |                                          |
+   |  4. Enable CCCD notifications            |
+   |---- Write 0x01 0x00 to CCCD (00002902) > |
+   |<--- GATT_SUCCESS ----------------------- |  onDescriptorWriteRequest
+   |                                          |
+   |  5. MTU negotiation                      |
+   |---- Host sends: 08 00 00 00 00 ------->  |  TAG_MTU frame
+   |<--- Device replies: 08 00 00 00 00 14 -- |  14 hex = 20 decimal (MTU payload)
+   |     onMtuChanged fires; ATT_MTU agreed   |
+   |     Effective frame size = ATT_MTU - 3   |
+   |                                          |
+   |  6. GET_VERSION                          |
+   |---- E0 01 00 00 00 ------------------>   |
+   |<--- target_id + SE ver + MCU ver + 9000  |
+   |                                          |
+   |  7. GET_APP_AND_VERSION                  |
+   |---- B0 01 00 00 00 ------------------>   |
+   |<--- format + app name + version + 9000 - |
+   |                                          |
+   |  8. OPEN_APP                             |
+   |---- E0 D8 00 00 08 "Ethereum" ------->   |  or "Solana", "Bitcoin"
+   |<--- 9000 ------------------------------ |
+   |                                          |
+   |  9. APDU-ready                           |
+   |---- GET_ADDRESS / SIGN ... ----------->  |
+```
+
+---
+
+## Step-by-Step Breakdown
+
+### Step 1 — BLE Scan
+
+The host performs an active BLE scan. OldPhone Wallet's advertising data contains the Ledger service UUID (`13d63400-2c97-0004-0000-4c6564676572`); the scan response contains the device name `"Nano X"`. The host library filters by service UUID, so the device is identified immediately.
+
+### Step 2 — GATT Connect
+
+The host calls `BluetoothGatt.connect()`. On the Android peripheral side, `BluetoothGattServerCallback.onConnectionStateChange()` fires with `newState = STATE_CONNECTED`. The device records the connected `BluetoothDevice` reference for subsequent `sendResponse()` and `notifyCharacteristicChanged()` calls.
+
+### Step 3 — Service and Characteristic Discovery
+
+The host calls `BluetoothGatt.discoverServices()`. Android returns the registered `BluetoothGattService` with its three characteristics (Notify, Write, WriteCmd) and the CCCD descriptor on the Notify characteristic.
+
+### Step 4 — Enable CCCD Notifications
+
+The host writes `0x01 0x00` to the CCCD descriptor (`00002902-0000-1000-8000-00805f9b34fb`) on the Notify characteristic. The peripheral's `onDescriptorWriteRequest()` callback receives this, sends `GATT_SUCCESS`, and marks the connection as notification-ready. Without this step, all `notifyCharacteristicChanged()` calls are no-ops.
+
+### Step 5 — MTU Negotiation
+
+MTU negotiation uses the `TAG_MTU` protocol tag (`0x08`) rather than the raw ATT `MTU Exchange` request. The host sends the 5-byte frame `08 00 00 00 00` over the Write or WriteCmd characteristic. The device responds via the Notify characteristic with `08 00 00 00 00 14`, where `0x14` = 20 — the default MTU payload size (`ATT_MTU 23 - 3 bytes ATT header`).
+
+`onMtuChanged()` may fire before or after this exchange depending on the host OS; the device uses the negotiated value to determine how many bytes fit in each APDU chunk.
+
+Effective payload per frame:
+- First APDU chunk: `ATT_MTU - 3 - 5 header bytes` = 15 bytes at MTU 23
+- Subsequent chunks: `ATT_MTU - 3 - 3 header bytes` = 17 bytes at MTU 23
+
+### Step 6 — GET_VERSION
+
+The host sends `E0 01 00 00 00`. The device responds with a fixed firmware version structure:
+
+```
+target_id (4 bytes) + SE_version_length (1) + SE_version + flags_length (1) + flags (4) + MCU_version_length (1) + MCU_version + 9000
+```
+
+Example decoded response:
+```
+target_id  = 33000004
+SE version = "2.1.0"
+flags      = 00000000
+MCU version= "1.13\0"
+```
+
+### Step 7 — GET_APP_AND_VERSION
+
+The host sends `B0 01 00 00 00` to determine which Ledger app is currently active. The device responds with the currently active chain's app name and version:
+
+```
+01 + name_length (1) + name + version_length (1) + version + flags_length (1) + flags (1) + 9000
+```
+
+For example, when the Ethereum app is active: `format=01 name="Ethereum" ver="1.10.3" flags=02`.
+
+### Step 8 — OPEN_APP
+
+The host sends `E0 D8 00 00 <Lc> <AppName>` to switch to the desired chain's app. `Lc` is the byte length of the ASCII app name. Common app names: `"Ethereum"`, `"Solana"`, `"Bitcoin"`. The device responds `9000` and sets its internal active-app state accordingly.
+
+### Step 9 — APDU-Ready
+
+The connection is fully initialized. The host now sends chain-specific APDU commands: `GET_ADDRESS` (`E0 02` for ETH, `E0 05` for SOL), `SIGN` (`E0 04` for ETH, `E0 06` for SOL), etc.
+
+---
+
+## Connection State Lifecycle
+
+```
+DISCONNECTED
+    │
+    │  Host connects
+    ▼
+CONNECTED ──► (handshake steps 2–8)
+    │
+    │  Host disconnects / BLE link drops
+    ▼
+DISCONNECTED
+    │
+    │  Device restarts advertiser automatically
+    ▼
+ADVERTISING (waiting for next host)
+```
+
+`onConnectionStateChange()` is the single callback for both connect and disconnect events. On disconnect the device must:
+
+1. Clear the stored `BluetoothDevice` reference
+2. Cancel any in-progress APDU reassembly buffer
+3. Call `BluetoothLeAdvertiser.startAdvertising()` to resume advertising
+
+Failing to restart advertising after disconnect is the most common integration bug — the device becomes invisible to the host after the first session.
+
+---
+
+## How OKX and MetaMask Perform This Handshake
+
+Both apps use `@ledgerhq/hw-transport-web-ble` (or its React Native counterpart `@ledgerhq/react-native-hw-transport-ble`). The library performs steps 1–8 automatically when `TransportBLE.open(device)` is called. From the app developer's perspective the sequence is opaque — the library surfaces a `Transport` object only after the full handshake succeeds.
+
+MetaMask performs the OPEN_APP step for `"Ethereum"` unconditionally on connect. OKX first reads GET_APP_AND_VERSION and only sends OPEN_APP if the active app name does not match the desired chain — this means OldPhone Wallet must track and respond to GET_APP_AND_VERSION accurately, not just return a fixed value.

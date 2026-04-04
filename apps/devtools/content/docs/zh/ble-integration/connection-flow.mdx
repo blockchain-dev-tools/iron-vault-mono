@@ -1,0 +1,162 @@
+---
+title: "连接流程"
+description: "从宿主扫描到 APDU 就绪状态的完整 BLE 连接步骤。"
+---
+
+## 概述
+
+在交换任何 APDU 命令之前，宿主应用与 OldPhone Wallet 必须完成一套固定的握手流程。这套流程与真实 Ledger Nano X 的行为完全相同，因为 OKX Wallet 和 MetaMask 底层都使用了 `@ledgerhq/hw-transport-web-ble`（或其 React Native 版本），该库对握手序列有硬性要求。
+
+在现代 Android 设备上，从扫描到 APDU 就绪整个握手通常在两秒内完成。
+
+---
+
+## 连接时序图
+
+```
+宿主应用                              OldPhone Wallet（Android）
+   |                                          |
+   |  1. BLE 主动扫描                          |
+   |<---- ADV_IND：服务 UUID ---------------- |  广播数据
+   |<---- SCAN_RSP："Nano X" --------------- |  扫描响应
+   |                                          |
+   |  2. GATT 连接                             |
+   |---- CONNECT_REQ ---------------------->  |
+   |<--- onConnectionStateChange(CONNECTED) - |
+   |                                          |
+   |  3. 服务与特征发现                         |
+   |---- ATT_READ_BY_GROUP_TYPE ----------->  |
+   |<--- Service: 13d63400-2c97-0004-0000-... |
+   |---- ATT_READ_BY_TYPE ----------------->  |
+   |<--- Notify / Write / WriteCmd 特征 ----- |
+   |                                          |
+   |  4. 启用 CCCD 通知                        |
+   |---- 向 CCCD (00002902) 写入 0x01 0x00 -> |
+   |<--- GATT_SUCCESS ----------------------- |  onDescriptorWriteRequest
+   |                                          |
+   |  5. MTU 协商                              |
+   |---- 宿主发送：08 00 00 00 00 ---------->  |  TAG_MTU 帧
+   |<--- 设备回复：08 00 00 00 00 14 --------- |  0x14 = 20（MTU 有效载荷字节数）
+   |     onMtuChanged 触发；ATT_MTU 协商完毕   |
+   |     有效帧载荷 = ATT_MTU - 3             |
+   |                                          |
+   |  6. GET_VERSION                          |
+   |---- E0 01 00 00 00 ------------------>   |
+   |<--- target_id + SE 版本 + MCU 版本 + 9000|
+   |                                          |
+   |  7. GET_APP_AND_VERSION                  |
+   |---- B0 01 00 00 00 ------------------>   |
+   |<--- format + app 名称 + 版本 + 9000 ---- |
+   |                                          |
+   |  8. OPEN_APP                             |
+   |---- E0 D8 00 00 08 "Ethereum" ------->   |  或 "Solana"、"Bitcoin"
+   |<--- 9000 ------------------------------ |
+   |                                          |
+   |  9. APDU 就绪                             |
+   |---- GET_ADDRESS / SIGN ... ----------->  |
+```
+
+---
+
+## 各步骤详解
+
+### 第 1 步 — BLE 主动扫描
+
+宿主发起主动扫描。OldPhone Wallet 的广播数据中包含 Ledger 服务 UUID（`13d63400-2c97-0004-0000-4c6564676572`），扫描响应中包含设备名称 `"Nano X"`。宿主库按服务 UUID 过滤，因此可以立即识别到设备。
+
+### 第 2 步 — GATT 连接
+
+宿主调用 `BluetoothGatt.connect()`。在 Android 外设侧，`BluetoothGattServerCallback.onConnectionStateChange()` 以 `newState = STATE_CONNECTED` 触发。设备记录已连接的 `BluetoothDevice` 引用，用于后续的 `sendResponse()` 和 `notifyCharacteristicChanged()` 调用。
+
+### 第 3 步 — 服务与特征发现
+
+宿主调用 `BluetoothGatt.discoverServices()`。Android 返回已注册的 `BluetoothGattService`，包含三个特征（Notify、Write、WriteCmd）以及 Notify 特征上的 CCCD 描述符。
+
+### 第 4 步 — 启用 CCCD 通知
+
+宿主向 Notify 特征的 CCCD 描述符（`00002902-0000-1000-8000-00805f9b34fb`）写入 `0x01 0x00`。外设的 `onDescriptorWriteRequest()` 回调收到请求后，回复 `GATT_SUCCESS` 并将连接标记为通知就绪。若跳过此步骤，所有 `notifyCharacteristicChanged()` 调用均为空操作，设备响应将被静默丢弃。
+
+### 第 5 步 — MTU 协商
+
+MTU 协商使用协议标签 `TAG_MTU`（`0x08`），而非原生 ATT `MTU Exchange` 请求。宿主通过 Write 或 WriteCmd 特征发送 5 字节帧 `08 00 00 00 00`，设备通过 Notify 特征回复 `08 00 00 00 00 14`，其中 `0x14` = 20，即默认 MTU 有效载荷大小（`ATT_MTU 23 - 3 字节 ATT 头 = 20`）。
+
+`onMtuChanged()` 的触发时机因宿主操作系统而异，可能早于或晚于此交换。设备根据协商值决定每个 APDU 分片的字节数。
+
+各帧有效载荷计算：
+- 第一个 APDU 分片：`ATT_MTU - 3 - 5 字节帧头` = MTU 23 时为 15 字节
+- 后续分片：`ATT_MTU - 3 - 3 字节帧头` = MTU 23 时为 17 字节
+
+### 第 6 步 — GET_VERSION
+
+宿主发送 `E0 01 00 00 00`，设备返回固定的固件版本结构：
+
+```
+target_id（4 字节）+ SE 版本长度（1）+ SE 版本 + flags 长度（1）+ flags（4）+ MCU 版本长度（1）+ MCU 版本 + 9000
+```
+
+示例解码响应：
+```
+target_id  = 33000004
+SE version = "2.1.0"
+flags      = 00000000
+MCU version= "1.13\0"
+```
+
+### 第 7 步 — GET_APP_AND_VERSION
+
+宿主发送 `B0 01 00 00 00`，确认当前激活的 Ledger App 名称。设备返回当前链的 App 名称与版本：
+
+```
+01 + 名称长度（1）+ 名称 + 版本长度（1）+ 版本 + flags 长度（1）+ flags（1）+ 9000
+```
+
+当 Ethereum App 激活时，示例响应：`format=01 name="Ethereum" ver="1.10.3" flags=02`。
+
+### 第 8 步 — OPEN_APP
+
+宿主发送 `E0 D8 00 00 <Lc> <AppName>` 切换到目标链的 App。`Lc` 为 App 名称 ASCII 字节数。常见 App 名称：`"Ethereum"`、`"Solana"`、`"Bitcoin"`。设备响应 `9000` 并更新内部激活 App 状态。
+
+### 第 9 步 — APDU 就绪
+
+连接完全初始化。宿主开始发送链专属 APDU 命令：ETH 的 `GET_ADDRESS`（`E0 02`）、SOL 的 `GET_ADDRESS`（`E0 05`）、ETH 签名（`E0 04`）、SOL 签名（`E0 06`）等。
+
+---
+
+## 连接状态生命周期
+
+```
+未连接（DISCONNECTED）
+    │
+    │  宿主发起连接
+    ▼
+已连接（CONNECTED）──► （握手步骤 2–8）
+    │
+    │  宿主断开 / BLE 链路中断
+    ▼
+未连接（DISCONNECTED）
+    │
+    │  设备自动重启广播
+    ▼
+广播中（ADVERTISING）── 等待下一个宿主连接
+```
+
+`onConnectionStateChange()` 是连接与断开事件的统一回调。断开时设备必须：
+
+1. 清除已存储的 `BluetoothDevice` 引用
+2. 取消正在进行中的 APDU 重组缓冲区
+3. 调用 `BluetoothLeAdvertiser.startAdvertising()` 恢复广播
+
+**断开后忘记重启广播**是最常见的集成缺陷 — 设备在第一次会话结束后对宿主不可见。
+
+---
+
+## OKX 与 MetaMask 的握手行为差异
+
+两款应用底层都依赖 `@ledgerhq/hw-transport-web-ble`（或 React Native 版本）。调用 `TransportBLE.open(device)` 时，该库自动完成步骤 1–8，对上层应用透明，只有握手全部成功后才暴露 `Transport` 对象。
+
+两者的关键行为差异：
+
+- **MetaMask** 在每次连接时无条件发送 `OPEN_APP "Ethereum"`，不管当前激活的是什么 App。
+- **OKX** 先读取 GET_APP_AND_VERSION，仅当 App 名称与目标链不符时才发送 OPEN_APP。
+
+这意味着 OldPhone Wallet 必须准确追踪并响应 GET_APP_AND_VERSION，不能始终返回固定值，否则 OKX 会因为 App 名称已匹配而跳过 OPEN_APP，导致链状态不同步。

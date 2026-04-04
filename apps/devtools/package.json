@@ -1,0 +1,39 @@
+{
+  "name": "@iron-vault/devtools",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3003",
+    "build": "npx tsx scripts/build-search-index.ts && next build",
+    "start": "next start -p 3003"
+  },
+  "dependencies": {
+    "@iron-vault/apdu": "workspace:*",
+    "@iron-vault/simulator": "workspace:*",
+    "@iron-vault/wallet": "workspace:*",
+    "@mdx-js/loader": "^3.0.0",
+    "@mdx-js/react": "^3.0.0",
+    "@next/mdx": "^14.2.0",
+    "fuse.js": "^7.0.0",
+    "gray-matter": "^4.0.3",
+    "next": "^14.2.0",
+    "next-intl": "^4.9.0",
+    "next-mdx-remote": "^5.0.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "rehype-slug": "^6.0.0",
+    "remark-gfm": "^4.0.0",
+    "shiki": "^1.0.0",
+    "zustand": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.4.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0"
+  }
+}

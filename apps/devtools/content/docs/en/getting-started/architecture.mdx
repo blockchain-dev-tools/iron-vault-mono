@@ -1,0 +1,45 @@
+---
+title: "Architecture"
+description: "Overview of the OldPhone Wallet system architecture and data flow."
+---
+
+## System Overview
+
+```
+Host App (OKX / MetaMask)
+        ↕ BLE (Ledger GATT profile)
+Android Phone (OldPhone Wallet)
+        ├── BLE Peripheral (Kotlin GattServer)
+        ├── APDU Handler (@ble-vault/apdu)
+        ├── HD Crypto (@ble-vault/crypto)
+        └── Wallet Storage (@ble-vault/wallet)
+```
+
+## BLE Transport Layer
+
+The Android app advertises as `"Nano X"` and implements the Ledger GATT profile:
+
+| Role | UUID suffix |
+|---|---|
+| Service | `...0004...` |
+| Notify characteristic | `...0001...` |
+| Write characteristic | `...0002...` |
+
+APDU commands are chunked into BLE frames with sequence numbers. The first chunk includes the total payload length; subsequent chunks carry continuation data.
+
+## APDU Layer
+
+Commands follow the ISO 7816-4 format: `CLA INS P1 P2 [Lc Data]`. Responses end with a 2-byte status word (`9000` = success).
+
+See the [APDU Protocol](/docs/apdu-protocol/overview) section for the full command reference.
+
+## Crypto Layer
+
+All key derivation is stateless and pure:
+
+- **Ethereum:** BIP-32 via `@scure/bip32`, BIP-39 via `@scure/bip39`, secp256k1 via `@noble/curves`
+- **Solana:** SLIP-10 Ed25519 with HMAC-SHA512 key `"ed25519 seed"` — all path components hardened
+
+## Deferred Signing
+
+When a `SIGN_*` command arrives, the APDU handler pauses and calls `setSignRequestHandler`, which lets the UI navigate to a confirmation screen. The user approves or rejects; only then does the handler sign and respond.

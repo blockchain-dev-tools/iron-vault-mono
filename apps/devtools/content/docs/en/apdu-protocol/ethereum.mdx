@@ -1,0 +1,256 @@
+---
+title: "Ethereum Commands"
+description: "Full reference for CLA 0xE0 Ethereum App APDU commands — address derivation, transaction signing, EIP-712, and personal messages."
+---
+
+## Activation
+
+The Ethereum handler is the **default** for `CLA 0xE0`. It is active when `currentApp` is `'Ethereum'` or when no `OPEN_APP` has been sent yet (initial state after connection). Explicitly activate it with:
+
+```
+E0 D8 00 00 08 457468657265756D
+                └─────────────── "Ethereum" in ASCII
+```
+
+---
+
+## GET_ETH_ADDRESS — INS 0x02 / 0x28
+
+Derives an Ethereum public key and address from a BIP-32 path.
+
+`INS 0x28` (`GET_PUBLIC_KEY`) is an alias — both are handled identically.
+
+**Full APDU:** `E0 02 00 P2 Lc [BIP32Path]`
+
+**P2 flags:**
+
+| Bit | Value | Effect |
+|---|---|---|
+| bit 0 | `0x01` | Append 32-byte chain code to response |
+| bit 1 | `0x02` | Display address on device screen (acknowledged but not enforced — response is returned immediately) |
+
+**Request data format:**
+```
+path_count(1)  +  [path_component(4) × path_count]
+```
+
+Each path component is a big-endian uint32. Set the MSB (`0x80000000`) for hardened derivation.
+
+Example path `m/44'/60'/0'/0/0`:
+```
+05  8000002C  8000003C  80000000  00000000  00000000
+│   └─44'──┘  └─60'──┘  └──0'──┘  └──0───┘  └──0───┘
+└─ 5 components
+```
+
+**Response format:**
+```
+pubkey_len(1=0x41)  +  pubkey(65, uncompressed 04‖X‖Y)
+addr_len(1=0x28)    +  addr_hex(40, EIP-55 mixed-case, no "0x" prefix)
+[chain_code(32)]       ← only when P2 bit 0 is set
+9000
+```
+
+The address is the uppercase EIP-55 checksum-encoded hex string of the last 20 bytes of `keccak256(pubkey[1:])`.
+
+---
+
+## GET_APP_CONFIGURATION — INS 0x06
+
+Returns the Ethereum app version and feature flags.
+
+**Full APDU:** `E0 06 00 00 00`
+
+**Response format:**
+```
+arbitrary_data_enabled(1)  +  erc20_provision_needed(1)  +  major(1)  +  minor(1)  +  patch(1)  +  9000
+```
+
+**Fixed response:** `01 00 01 0A 03 9000` = version 1.10.3, arbitrary data enabled.
+
+---
+
+## SIGN_ETH_TRANSACTION — INS 0x04 / 0x18
+
+Signs a raw Ethereum transaction. `INS 0x18` (`SIGN_ETH_TX_BATCH`) delegates to the same handler.
+
+**Full APDU:** `E0 04 P1 00 Lc [Data]`
+
+### Framing
+
+| P1 | Frame type | Data contents |
+|---|---|---|
+| `0x00` | First frame | BIP-32 path + start of raw transaction bytes |
+| `0x80` | Continuation | Raw transaction bytes (continued) |
+
+**First frame data layout:**
+```
+path_count(1)  +  [path_component(4) × n]  +  raw_tx_bytes...
+```
+
+The handler reads `rlpTotalLength` from the RLP envelope of `raw_tx_bytes` to know when accumulation is complete. For typed transactions (EIP-1559, EIP-2930), the type prefix byte (`0x01` or `0x02`) is skipped when computing the RLP length.
+
+### Supported transaction types
+
+| Type | Identifier | Raw bytes format |
+|---|---|---|
+| Legacy / EIP-155 | first byte `> 0x7F` | `RLP([nonce, gasPrice, gas, to, value, data, chainId, 0, 0])` |
+| EIP-2930 (type 1) | first byte `0x01` | `0x01 \|\| RLP([chainId, nonce, gasPrice, gas, to, value, data, accessList])` |
+| EIP-1559 (type 2) | first byte `0x02` | `0x02 \|\| RLP([chainId, nonce, maxPriorityFee, maxFee, gas, to, value, data, accessList])` |
+
+### Signing
+
+```
+hash = keccak256(raw_tx_bytes)
+(recovery_bit, r, s) = secp256k1_sign(hash, privKey)
+```
+
+`@noble/curves` is called with `{ prehash: false }` — the hash is pre-computed, **not** double-hashed.
+
+### v value
+
+| TX type | Condition | v |
+|---|---|---|
+| EIP-1559 (type 2) | `raw_tx[0] === 0x02` | `recovery_bit` (0 or 1) |
+| EIP-2930 (type 1) | `raw_tx[0] === 0x01` | `recovery_bit` (0 or 1) |
+| EIP-155 | `raw_tx[0] > 0x7F` and chainId present | `chainId * 2 + 35 + recovery_bit` |
+| Legacy (no EIP-155) | `raw_tx[0] > 0x7F` and no chainId | `27 + recovery_bit` |
+
+### Response
+
+**Intermediate frames:** `9000` only (continue sending).
+
+**Final frame (or single-frame):**
+```
+v(1)  +  r(32)  +  s(32)  +  9000   = 67 bytes total
+```
+
+The wallet app assembles the final signed transaction by appending `(v, r, s)` to the raw transaction bytes. The APDU handler returns the signature components only — it does not RLP-encode the final signed transaction.
+
+---
+
+## SIGN_PERSONAL_MESSAGE — INS 0x08
+
+Signs an EIP-191 personal message (`eth_sign` / `personal_sign`).
+
+**Full APDU:** `E0 08 P1 00 Lc [Data]`
+
+### Framing
+
+| P1 | Frame type | Data contents |
+|---|---|---|
+| `0x00` | First frame | BIP-32 path + 4-byte big-endian message length + first message bytes |
+| `0x80` | Continuation | Message bytes (continued) |
+
+**First frame data layout:**
+```
+path_count(1)  +  [path_component(4) × n]  +  msg_len(4, BE uint32)  +  msg_bytes...
+```
+
+### Signing
+
+Applies EIP-191 prefix before hashing:
+```
+prefixed = "\x19Ethereum Signed Message:\n" + str(len(msg)) + msg
+hash = keccak256(prefixed)
+(recovery_bit, r, s) = secp256k1_sign(hash, privKey)
+v = 27 + recovery_bit
+```
+
+### Response
+
+**Final frame:**
+```
+v(1)  +  r(32)  +  s(32)  +  9000   = 67 bytes total
+```
+
+---
+
+## SIGN_EIP_712 — INS 0x0C / 0x12 / 0x1E / 0x2A
+
+Signs EIP-712 structured data. All four INS values route to the same handler:
+
+| INS | Name |
+|---|---|
+| `0x0C` | `SIGN_EIP_712_MESSAGE` |
+| `0x12` | `SIGN_ETH_EIP_712_FILTERED` |
+| `0x1E` | `SIGN_EIP_712_FILTERED_CHUNKS` |
+| `0x2A` | `SIGN_TYPED_DATA` |
+
+**Full APDU:** `E0 0C 00 00 Lc [Data]`
+
+P1 must be `0x00`. Any other P1 value returns `6B00`.
+
+**Request data layout:**
+```
+path_count(1)  +  [path_component(4) × n]  +  domain_hash(32)  +  struct_hash(32)
+```
+
+### Signing
+
+```
+message = "\x19\x01" + domain_hash + struct_hash
+hash = keccak256(message)
+(recovery_bit, r, s) = secp256k1_sign(hash, privKey)
+v = 27 + recovery_bit
+```
+
+### Response
+
+```
+v(1)  +  r(32)  +  s(32)  +  9000   = 67 bytes total
+```
+
+---
+
+## Metadata Commands
+
+These commands supply rich display data for the confirmation screen. They respond `9000` immediately and store the data for use in the next sign request.
+
+### PROVIDE_ERC20_TOKEN_INFO — INS 0x0A
+
+Supplies token ticker, decimals, and contract address for ERC-20 transfer display.
+
+**Data layout:**
+```
+ticker_len(1)  +  ticker(n, ASCII)  +  decimals(1)  +  contract(20)  +  chain_id(4, BE)
+```
+
+### PROVIDE_NFT_METADATA — INS 0x14
+
+Supplies collection name and contract address for NFT transfer display.
+
+**Data layout:**
+```
+name_len(1)  +  name(n, ASCII)  +  contract(20)  +  chain_id(4, BE)
+```
+
+### PROVIDE_DOMAIN_NAME — INS 0x22
+
+Supplies an ENS domain name to display in place of the raw `to` address.
+
+**Data layout (first frame):**
+```
+domain_len(2, BE)  +  domain_bytes(n, UTF-8)
+```
+
+### GET_CHALLENGE — INS 0x1C
+
+Returns a 4-byte cryptographic nonce for client-side use. Response: `nonce(4) + 9000`.
+
+---
+
+## Stub Commands
+
+The following INS values are acknowledged with `9000` but perform no action:
+
+| INS | Name |
+|---|---|
+| `0x0E` | `SIGN_ETH_TX_WITH_PLUGIN` |
+| `0x10` | `PROVIDE_TRUSTED_NAME` |
+| `0x16` | `SET_PLUGIN` |
+| `0x1A` | `PROVIDE_TRUSTED_CONTRACT_NAME` |
+| `0x20` | `PROVIDE_DELEGATE_KEY` |
+| `0x24` | `REVOKE_DOMAIN_NAME` |
+
+These exist so that host apps which send them as part of a pre-sign sequence do not stall waiting for a non-`9000` status word.

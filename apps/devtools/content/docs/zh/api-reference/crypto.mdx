@@ -1,0 +1,502 @@
+---
+title: "@ble-vault/crypto"
+description: "@ble-vault/crypto 包的 API 参考 — 助记词生成、HD 密钥派生、签名与地址工具。"
+---
+
+## 概述
+
+`@ble-vault/crypto` 是 OldPhone Wallet 的无状态密码学层。它涵盖从助记词生成、HD 密钥派生、交易签名到地址编码的完整流程，支持 Ethereum、Solana、Bitcoin、Tron 和 Sui。所有函数均为纯函数，无任何平台依赖。
+
+```bash
+pnpm add @ble-vault/crypto
+```
+
+**底层库：** `@scure/bip32`、`@scure/bip39`、`@noble/curves`（secp256k1、ed25519）、`@noble/hashes`（SHA-256、RIPEMD-160、Keccak-256、HMAC-SHA-512）、`@scure/base`（Base58、Bech32）。
+
+---
+
+## 助记词
+
+### `generateMnemonic`
+
+使用英文词库生成 BIP-39 助记词短语。
+
+```typescript
+function generateMnemonic(strength?: 128 | 256): string
+```
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+|---|---|---|---|
+| `strength` | `128 \| 256` | `128` | 熵位数：`128` → 12 个单词，`256` → 24 个单词 |
+
+**返回值** 以空格分隔的 BIP-39 助记词字符串。
+
+**示例**
+
+```typescript
+import { generateMnemonic } from '@ble-vault/crypto';
+
+const mnemonic12 = generateMnemonic();       // 12 个单词
+const mnemonic24 = generateMnemonic(256);    // 24 个单词
+```
+
+---
+
+### `validateMnemonic`
+
+检验助记词字符串是否为有效的 BIP-39 格式（单词数正确、单词有效、校验和正确）。校验前自动去除首尾空白字符。
+
+```typescript
+function validateMnemonic(mnemonic: string): boolean
+```
+
+---
+
+### `mnemonicToSeed`
+
+从助记词派生 64 字节的 BIP-39 种子，可选传入密码（BIP-39"第 25 个单词"）。该种子是所有 HD 密钥派生函数的根输入。
+
+```typescript
+function mnemonicToSeed(mnemonic: string, passphrase?: string): Promise<Uint8Array>
+```
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+|---|---|---|---|
+| `mnemonic` | `string` | — | BIP-39 助记词短语 |
+| `passphrase` | `string` | `''` | 可选的 BIP-39 密码 |
+
+**返回值** 64 字节的 `Uint8Array` 种子。
+
+---
+
+## HD 密钥派生
+
+路径分量为原始 `uint32` 值，强化分量需设置高位：`0x80000000 | index`。例如，标准以太坊路径 `m/44'/60'/0'/0/0` 表示为：
+
+```typescript
+[0x80000000 | 44, 0x80000000 | 60, 0x80000000 | 0, 0, 0]
+```
+
+---
+
+### `deriveEthPrivateKey`
+
+使用 BIP-32（`@scure/bip32`，secp256k1 曲线）派生以太坊私钥。
+
+```typescript
+function deriveEthPrivateKey(seed: Uint8Array, pathComponents: number[]): Uint8Array
+```
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+|---|---|---|
+| `seed` | `Uint8Array` | 64 字节 BIP-39 种子 |
+| `pathComponents` | `number[]` | 原始 `uint32` 路径分量 |
+
+**返回值** 32 字节的 secp256k1 私钥。
+
+**异常** 若在指定路径无法派生私钥，抛出 `Error`。
+
+---
+
+### `deriveSolanaPrivateKey`
+
+使用 SLIP-10 Ed25519（HMAC-SHA-512，密钥为 `"ed25519 seed"`）派生 Solana 私钥。**所有路径分量必须为强化路径** — SLIP-10 Ed25519 不支持非强化派生。
+
+```typescript
+function deriveSolanaPrivateKey(seed: Uint8Array, pathComponents: number[]): Uint8Array
+```
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+|---|---|---|
+| `seed` | `Uint8Array` | 64 字节 BIP-39 种子 |
+| `pathComponents` | `number[]` | 原始 `uint32` 路径分量（全部必须为强化路径） |
+
+**返回值** 32 字节的 Ed25519 私钥（SLIP-10 链的左 32 字节）。
+
+**异常** 若任意路径分量不是强化路径，抛出 `Error`。
+
+**示例**
+
+```typescript
+import { mnemonicToSeed, deriveSolanaPrivateKey } from '@ble-vault/crypto';
+
+const seed = await mnemonicToSeed(mnemonic);
+// m/44'/501'/0'/0'
+const privKey = deriveSolanaPrivateKey(seed, [
+  0x80000000 | 44,
+  0x80000000 | 501,
+  0x80000000 | 0,
+  0x80000000 | 0,
+]);
+```
+
+---
+
+## 签名与地址
+
+### `ethPubKeyToAddress`
+
+从 secp256k1 私钥派生以太坊公钥和 EIP-55 校验和地址。
+
+```typescript
+function ethPubKeyToAddress(privKey: Uint8Array): { pubKey: Uint8Array; address: string }
+```
+
+**返回值**
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `pubKey` | `Uint8Array` | 未压缩 secp256k1 公钥（65 字节，`0x04` 前缀） |
+| `address` | `string` | EIP-55 混合大小写校验和地址（40 个十六进制字符，不含 `0x` 前缀） |
+
+---
+
+### `signEthTransaction`
+
+对 RLP 编码的以太坊交易进行签名。同时支持传统 EIP-155 交易和 EIP-2718 类型化交易（`0x01` EIP-2930、`0x02` EIP-1559）。
+
+```typescript
+function signEthTransaction(privKey: Uint8Array, rlp: Uint8Array): Uint8Array
+```
+
+**返回值** `v(1) + r(32) + s(32)` — 共 65 字节。
+
+- **类型化交易**（`rlp[0] <= 0x7f`）：`v` 为原始恢复位（0 或 1）
+- **传统 EIP-155（chainId=1）**：`v` = `37 + recovery`
+
+---
+
+### `signEthPersonalMessage`
+
+按照 EIP-191 标准对以太坊个人消息签名。在使用 Keccak-256 哈希之前，自动添加 `"\x19Ethereum Signed Message:\n{len}"` 前缀。
+
+```typescript
+function signEthPersonalMessage(privKey: Uint8Array, message: Uint8Array): Uint8Array
+```
+
+**返回值** `v(1) + r(32) + s(32)` — 共 65 字节。`v` 为 `27` 或 `28`（personal_sign 惯例）。
+
+---
+
+### `signEthEip712`
+
+使用仅哈希模式对 EIP-712 类型化数据签名。计算 `keccak256("\x19\x01" + domainHash + structHash)` 并对结果签名。
+
+```typescript
+function signEthEip712(
+  privKey:    Uint8Array,
+  domainHash: Uint8Array,
+  structHash: Uint8Array
+): Uint8Array
+```
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+|---|---|---|
+| `privKey` | `Uint8Array` | secp256k1 私钥 |
+| `domainHash` | `Uint8Array` | 32 字节 `hashStruct(eip712Domain)` |
+| `structHash` | `Uint8Array` | 32 字节 `hashStruct(message)` |
+
+**返回值** `v(1) + r(32) + s(32)` — 共 65 字节。`v` 为 `27` 或 `28`。
+
+---
+
+### `solanaPubKey`
+
+从 Solana 私钥派生 32 字节的 Ed25519 公钥。
+
+```typescript
+function solanaPubKey(privKey: Uint8Array): Uint8Array
+```
+
+**返回值** 32 字节的 Ed25519 公钥。使用 `base58Encode` 对其进行 Base58 编码，即可得到标准 Solana 地址字符串。
+
+---
+
+### `signSolanaMessage`
+
+使用 Ed25519 对 Solana 交易消息签名。
+
+```typescript
+function signSolanaMessage(privKey: Uint8Array, message: Uint8Array): Uint8Array
+```
+
+**返回值** 原始 64 字节的 Ed25519 签名。
+
+---
+
+## 账户派生
+
+### `Account`
+
+单个派生账户条目。
+
+```typescript
+interface Account {
+  full:  string;  // 完整地址字符串
+  short: string;  // 截断显示形式，例如 "0x1234...abcde"
+  path:  string;  // 派生路径，例如 "m/44'/60'/0'/0/0"
+}
+```
+
+---
+
+### `WalletAccounts`
+
+多账户派生的结果。
+
+```typescript
+interface WalletAccounts {
+  eth: Account[];
+  sol: Account[];
+}
+```
+
+---
+
+### `deriveAccountsFromPaths`
+
+从显式路径列表派生以太坊和 Solana 账户。每个账户均在其指定的精确路径下派生。这是推荐使用的派生 API。
+
+```typescript
+function deriveAccountsFromPaths(
+  mnemonic:    string,
+  ethPaths:    string[],
+  solPaths:    string[],
+  passphrase?: string
+): Promise<WalletAccounts>
+```
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+|---|---|---|---|
+| `mnemonic` | `string` | — | BIP-39 助记词短语 |
+| `ethPaths` | `string[]` | — | 以太坊账户的 BIP-32 路径字符串列表 |
+| `solPaths` | `string[]` | — | Solana 账户的 BIP-32 路径字符串列表 |
+| `passphrase` | `string` | `''` | 可选的 BIP-39 密码 |
+
+**示例**
+
+```typescript
+import { deriveAccountsFromPaths } from '@ble-vault/crypto';
+
+const accounts = await deriveAccountsFromPaths(
+  mnemonic,
+  ["m/44'/60'/0'/0/0", "m/44'/60'/0'/0/1"],  // 2 个 ETH 账户
+  ["m/44'/501'/0'/0'", "m/44'/501'/1'/0'"],   // 2 个 SOL 账户
+);
+
+console.log(accounts.eth[0].full);   // "0x71C7656EC7ab88b098defB751B7401B5f6d8976F"
+console.log(accounts.sol[0].short);  // "HN7cA...z4rMJ"
+```
+
+---
+
+### `deriveWalletAccounts`（已废弃）
+
+```typescript
+/** @deprecated 新代码请使用 deriveAccountsFromPaths。此函数仅为向后兼容而保留。 */
+function deriveWalletAccounts(
+  mnemonic:    string,
+  ethCount?:   number,
+  solCount?:   number,
+  passphrase?: string
+): Promise<WalletAccounts>
+```
+
+派生 `ethCount` 个路径为 `m/44'/60'/0'/0/{i}` 的以太坊账户，以及 `solCount` 个路径为 `m/44'/501'/{i}'/0'` 的 Solana 账户。**新代码中请勿使用** — 请改用 `deriveAccountsFromPaths`，以获得对派生路径的完整控制权。
+
+---
+
+## Bitcoin 与多链工具
+
+以下底层原语支持 Bitcoin、Tron 和多链签名场景。
+
+### `sha256Single`
+
+单次 SHA-256 哈希，用于 Tron 交易哈希。
+
+```typescript
+function sha256Single(data: Uint8Array): Uint8Array
+```
+
+---
+
+### `sha256d`
+
+双重 SHA-256（连续应用两次 SHA-256），用于 Bitcoin 脚本和地址哈希。
+
+```typescript
+function sha256d(data: Uint8Array): Uint8Array
+```
+
+---
+
+### `hash160`
+
+SHA-256 后接 RIPEMD-160，即 Bitcoin 标准 `HASH160`，用于 P2PKH 和 P2WPKH 地址派生。
+
+```typescript
+function hash160(data: Uint8Array): Uint8Array
+```
+
+---
+
+### `keccak256`
+
+Keccak-256 哈希，用于 Tron 个人消息签名和 EVM 地址派生。
+
+```typescript
+function keccak256(data: Uint8Array): Uint8Array
+```
+
+---
+
+### `btcMasterFingerprint`
+
+计算 4 字节 BIP-32 主指纹：`hash160(masterPublicKey)` 的前 4 字节。部分 Bitcoin 签名流程（如 PSBT）需要此值。
+
+```typescript
+function btcMasterFingerprint(seed: Uint8Array): Uint8Array
+```
+
+**返回值** 4 字节的 `Uint8Array`。
+
+---
+
+### `serializeXpub`
+
+在给定路径处派生并序列化 BIP-32 扩展公钥（`xpub`）。
+
+```typescript
+function serializeXpub(seed: Uint8Array, pathComponents: number[]): string
+```
+
+**返回值** Base58Check 编码的 xpub 字符串，例如 `"xpub6C..."`。
+
+**示例**
+
+```typescript
+import { mnemonicToSeed, serializeXpub } from '@ble-vault/crypto';
+
+const seed = await mnemonicToSeed(mnemonic);
+// m/84'/0'/0' 处的账户 xpub
+const xpub = serializeXpub(seed, [
+  0x80000000 | 84,
+  0x80000000 | 0,
+  0x80000000 | 0,
+]);
+```
+
+---
+
+### `secp256k1PublicKey`
+
+从私钥派生 secp256k1 公钥。
+
+```typescript
+function secp256k1PublicKey(privKey: Uint8Array, compressed: boolean): Uint8Array
+```
+
+**返回值**
+- `compressed = true`：33 字节压缩公钥（`0x02` 或 `0x03` 前缀）
+- `compressed = false`：65 字节未压缩公钥（`0x04` 前缀）
+
+---
+
+### `signSecp256k1DER`
+
+使用 secp256k1 对预哈希消息签名，返回 DER 编码签名，用于 Bitcoin 交易签名。
+
+```typescript
+function signSecp256k1DER(hash: Uint8Array, privKey: Uint8Array): Uint8Array
+```
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+|---|---|---|
+| `hash` | `Uint8Array` | 32 字节预哈希消息摘要 |
+| `privKey` | `Uint8Array` | secp256k1 私钥 |
+
+**返回值** 可变长度的 DER 编码签名（通常为 70–72 字节）。
+
+---
+
+### `signSecp256k1Compact`
+
+使用 secp256k1 对预哈希消息签名，返回紧凑格式 `r(32)+s(32)` 签名和恢复位，用于 Tron 交易签名。
+
+```typescript
+function signSecp256k1Compact(
+  hash:    Uint8Array,
+  privKey: Uint8Array
+): { sig: Uint8Array; recovery: number }
+```
+
+**返回值**
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `sig` | `Uint8Array` | 64 字节紧凑签名（`r` + `s`） |
+| `recovery` | `number` | 恢复位：`0` 或 `1` |
+
+---
+
+### `base58Encode`
+
+对字节数组进行 Base58 编码（不含校验和），用于将 Solana 公钥编码为地址字符串。
+
+```typescript
+function base58Encode(data: Uint8Array): string
+```
+
+---
+
+### `p2wpkhAddress`
+
+从压缩 secp256k1 公钥计算原生 SegWit P2WPKH bech32 地址（`bc1q...`）。
+
+```typescript
+function p2wpkhAddress(pubKey: Uint8Array): string
+```
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+|---|---|---|
+| `pubKey` | `Uint8Array` | 33 字节压缩 secp256k1 公钥 |
+
+**返回值** Bech32 编码的主网地址，例如 `"bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq"`。
+
+---
+
+### `tronAddressFromPrivKey`
+
+从 secp256k1 私钥派生 Tron 地址。Tron 地址采用以太坊派生方式（未压缩公钥的 Keccak-256 哈希），添加 `0x41` 前缀后进行 Base58Check 编码。
+
+```typescript
+function tronAddressFromPrivKey(privKey: Uint8Array): {
+  pubKey:             Uint8Array;
+  uncompressedPubKey: Uint8Array;
+  address:            string;
+}
+```
+
+**返回值**
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `pubKey` | `Uint8Array` | 压缩 secp256k1 公钥（33 字节） |
+| `uncompressedPubKey` | `Uint8Array` | 未压缩 secp256k1 公钥（65 字节） |
+| `address` | `string` | Base58Check 编码的 Tron 地址（`T...`） |

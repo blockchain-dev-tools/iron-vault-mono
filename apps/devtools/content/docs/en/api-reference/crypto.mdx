@@ -1,0 +1,502 @@
+---
+title: "@ble-vault/crypto"
+description: "API reference for the @ble-vault/crypto package — mnemonic generation, HD key derivation, signing, and address utilities."
+---
+
+## Overview
+
+`@ble-vault/crypto` is the stateless cryptographic layer of OldPhone Wallet. It covers the full lifecycle from mnemonic generation through HD key derivation, transaction signing, and address encoding — for Ethereum, Solana, Bitcoin, Tron, and Sui. All functions are pure and have no platform dependencies.
+
+```bash
+pnpm add @ble-vault/crypto
+```
+
+**Underlying libraries:** `@scure/bip32`, `@scure/bip39`, `@noble/curves` (secp256k1, ed25519), `@noble/hashes` (SHA-256, RIPEMD-160, Keccak-256, HMAC-SHA-512), `@scure/base` (Base58, Bech32).
+
+---
+
+## Mnemonic
+
+### `generateMnemonic`
+
+Generate a BIP-39 mnemonic phrase using the English wordlist.
+
+```typescript
+function generateMnemonic(strength?: 128 | 256): string
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `strength` | `128 \| 256` | `128` | Entropy bits: `128` → 12 words, `256` → 24 words |
+
+**Returns** A space-separated BIP-39 mnemonic string.
+
+**Example**
+
+```typescript
+import { generateMnemonic } from '@ble-vault/crypto';
+
+const mnemonic12 = generateMnemonic();       // 12 words
+const mnemonic24 = generateMnemonic(256);    // 24 words
+```
+
+---
+
+### `validateMnemonic`
+
+Check whether a mnemonic string is valid BIP-39 (correct word count, valid words, correct checksum). Trims leading/trailing whitespace before validation.
+
+```typescript
+function validateMnemonic(mnemonic: string): boolean
+```
+
+---
+
+### `mnemonicToSeed`
+
+Derive a 64-byte BIP-39 seed from a mnemonic, with an optional passphrase (BIP-39 "25th word"). The seed is the root input for all HD key derivation functions.
+
+```typescript
+function mnemonicToSeed(mnemonic: string, passphrase?: string): Promise<Uint8Array>
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `mnemonic` | `string` | — | BIP-39 mnemonic phrase |
+| `passphrase` | `string` | `''` | Optional BIP-39 passphrase |
+
+**Returns** A 64-byte `Uint8Array` seed.
+
+---
+
+## HD Key Derivation
+
+Path components are raw `uint32` values. Hardened components have the high bit set: `0x80000000 | index`. For example, the standard Ethereum path `m/44'/60'/0'/0/0` is represented as:
+
+```typescript
+[0x80000000 | 44, 0x80000000 | 60, 0x80000000 | 0, 0, 0]
+```
+
+---
+
+### `deriveEthPrivateKey`
+
+Derive an Ethereum private key using BIP-32 (`@scure/bip32`, secp256k1 curve).
+
+```typescript
+function deriveEthPrivateKey(seed: Uint8Array, pathComponents: number[]): Uint8Array
+```
+
+**Parameters**
+
+| Name | Type | Description |
+|---|---|---|
+| `seed` | `Uint8Array` | 64-byte BIP-39 seed |
+| `pathComponents` | `number[]` | Raw `uint32` path components |
+
+**Returns** A 32-byte secp256k1 private key.
+
+**Throws** `Error` if no private key can be derived at the given path.
+
+---
+
+### `deriveSolanaPrivateKey`
+
+Derive a Solana private key using SLIP-10 Ed25519 (HMAC-SHA512 with key `"ed25519 seed"`). **All path components must be hardened** — SLIP-10 Ed25519 does not support non-hardened derivation.
+
+```typescript
+function deriveSolanaPrivateKey(seed: Uint8Array, pathComponents: number[]): Uint8Array
+```
+
+**Parameters**
+
+| Name | Type | Description |
+|---|---|---|
+| `seed` | `Uint8Array` | 64-byte BIP-39 seed |
+| `pathComponents` | `number[]` | Raw `uint32` path components (all must be hardened) |
+
+**Returns** A 32-byte Ed25519 private key (the left 32 bytes of the SLIP-10 chain).
+
+**Throws** `Error` if any path component is not hardened.
+
+**Example**
+
+```typescript
+import { mnemonicToSeed, deriveSolanaPrivateKey } from '@ble-vault/crypto';
+
+const seed = await mnemonicToSeed(mnemonic);
+// m/44'/501'/0'/0'
+const privKey = deriveSolanaPrivateKey(seed, [
+  0x80000000 | 44,
+  0x80000000 | 501,
+  0x80000000 | 0,
+  0x80000000 | 0,
+]);
+```
+
+---
+
+## Signing & Address
+
+### `ethPubKeyToAddress`
+
+Derive the Ethereum public key and EIP-55 checksum address from a secp256k1 private key.
+
+```typescript
+function ethPubKeyToAddress(privKey: Uint8Array): { pubKey: Uint8Array; address: string }
+```
+
+**Returns**
+
+| Field | Type | Description |
+|---|---|---|
+| `pubKey` | `Uint8Array` | Uncompressed secp256k1 public key (65 bytes, `0x04` prefix) |
+| `address` | `string` | EIP-55 mixed-case checksum address (40 hex chars, no `0x` prefix) |
+
+---
+
+### `signEthTransaction`
+
+Sign an RLP-encoded Ethereum transaction. Handles both legacy EIP-155 transactions and EIP-2718 typed transactions (`0x01` EIP-2930, `0x02` EIP-1559).
+
+```typescript
+function signEthTransaction(privKey: Uint8Array, rlp: Uint8Array): Uint8Array
+```
+
+**Returns** `v(1) + r(32) + s(32)` — 65 bytes total.
+
+- **Typed transactions** (`rlp[0] <= 0x7f`): `v` = raw recovery bit (0 or 1)
+- **Legacy EIP-155 (chainId=1)**: `v` = `37 + recovery`
+
+---
+
+### `signEthPersonalMessage`
+
+Sign an Ethereum personal message following the EIP-191 standard. Prepends `"\x19Ethereum Signed Message:\n{len}"` before hashing with Keccak-256.
+
+```typescript
+function signEthPersonalMessage(privKey: Uint8Array, message: Uint8Array): Uint8Array
+```
+
+**Returns** `v(1) + r(32) + s(32)` — 65 bytes total. `v` is `27` or `28` (personal sign convention).
+
+---
+
+### `signEthEip712`
+
+Sign EIP-712 typed data using the hash-only mode. Computes `keccak256("\x19\x01" + domainHash + structHash)` and signs the result.
+
+```typescript
+function signEthEip712(
+  privKey: Uint8Array,
+  domainHash: Uint8Array,
+  structHash: Uint8Array
+): Uint8Array
+```
+
+**Parameters**
+
+| Name | Type | Description |
+|---|---|---|
+| `privKey` | `Uint8Array` | secp256k1 private key |
+| `domainHash` | `Uint8Array` | 32-byte `hashStruct(eip712Domain)` |
+| `structHash` | `Uint8Array` | 32-byte `hashStruct(message)` |
+
+**Returns** `v(1) + r(32) + s(32)` — 65 bytes total. `v` is `27` or `28`.
+
+---
+
+### `solanaPubKey`
+
+Derive the 32-byte Ed25519 public key from a Solana private key.
+
+```typescript
+function solanaPubKey(privKey: Uint8Array): Uint8Array
+```
+
+**Returns** A 32-byte Ed25519 public key. Base58-encode this with `base58Encode` to obtain the standard Solana address string.
+
+---
+
+### `signSolanaMessage`
+
+Sign a Solana transaction message with Ed25519.
+
+```typescript
+function signSolanaMessage(privKey: Uint8Array, message: Uint8Array): Uint8Array
+```
+
+**Returns** A raw 64-byte Ed25519 signature.
+
+---
+
+## Account Derivation
+
+### `Account`
+
+A single derived account entry.
+
+```typescript
+interface Account {
+  full:  string;  // Full address string
+  short: string;  // Truncated display form, e.g. "0x1234...abcde"
+  path:  string;  // Derivation path, e.g. "m/44'/60'/0'/0/0"
+}
+```
+
+---
+
+### `WalletAccounts`
+
+The result of a multi-account derivation.
+
+```typescript
+interface WalletAccounts {
+  eth: Account[];
+  sol: Account[];
+}
+```
+
+---
+
+### `deriveAccountsFromPaths`
+
+Derive Ethereum and Solana accounts from explicit path lists. Each account is derived at its exact specified path. This is the preferred derivation API.
+
+```typescript
+function deriveAccountsFromPaths(
+  mnemonic:   string,
+  ethPaths:   string[],
+  solPaths:   string[],
+  passphrase?: string
+): Promise<WalletAccounts>
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `mnemonic` | `string` | — | BIP-39 mnemonic phrase |
+| `ethPaths` | `string[]` | — | BIP-32 path strings for Ethereum accounts |
+| `solPaths` | `string[]` | — | BIP-32 path strings for Solana accounts |
+| `passphrase` | `string` | `''` | Optional BIP-39 passphrase |
+
+**Example**
+
+```typescript
+import { deriveAccountsFromPaths } from '@ble-vault/crypto';
+
+const accounts = await deriveAccountsFromPaths(
+  mnemonic,
+  ["m/44'/60'/0'/0/0", "m/44'/60'/0'/0/1"],  // 2 ETH accounts
+  ["m/44'/501'/0'/0'", "m/44'/501'/1'/0'"],   // 2 SOL accounts
+);
+
+console.log(accounts.eth[0].full);   // "0x71C7656EC7ab88b098defB751B7401B5f6d8976F"
+console.log(accounts.sol[0].short);  // "HN7cA...z4rMJ"
+```
+
+---
+
+### `deriveWalletAccounts` (deprecated)
+
+```typescript
+/** @deprecated Use deriveAccountsFromPaths for new code. Kept for backward compatibility. */
+function deriveWalletAccounts(
+  mnemonic:    string,
+  ethCount?:   number,
+  solCount?:   number,
+  passphrase?: string
+): Promise<WalletAccounts>
+```
+
+Derives `ethCount` Ethereum accounts at `m/44'/60'/0'/0/{i}` and `solCount` Solana accounts at `m/44'/501'/{i}'/0'`. **Do not use in new code** — prefer `deriveAccountsFromPaths` which gives full control over derivation paths.
+
+---
+
+## Bitcoin & Multi-chain Utilities
+
+These low-level primitives support Bitcoin, Tron, and multi-chain signing use cases.
+
+### `sha256Single`
+
+Single SHA-256 hash. Used for Tron transaction hashing.
+
+```typescript
+function sha256Single(data: Uint8Array): Uint8Array
+```
+
+---
+
+### `sha256d`
+
+Double SHA-256 (SHA-256 applied twice). Used in Bitcoin script and address hashing.
+
+```typescript
+function sha256d(data: Uint8Array): Uint8Array
+```
+
+---
+
+### `hash160`
+
+SHA-256 followed by RIPEMD-160. This is the standard Bitcoin `HASH160` used in P2PKH and P2WPKH address derivation.
+
+```typescript
+function hash160(data: Uint8Array): Uint8Array
+```
+
+---
+
+### `keccak256`
+
+Keccak-256 hash. Used for Tron personal message signing and EVM address derivation.
+
+```typescript
+function keccak256(data: Uint8Array): Uint8Array
+```
+
+---
+
+### `btcMasterFingerprint`
+
+Compute the 4-byte BIP-32 master fingerprint: the first 4 bytes of `hash160(masterPublicKey)`. Required by some Bitcoin signing flows (e.g. PSBT).
+
+```typescript
+function btcMasterFingerprint(seed: Uint8Array): Uint8Array
+```
+
+**Returns** A 4-byte `Uint8Array`.
+
+---
+
+### `serializeXpub`
+
+Derive and serialize the BIP-32 extended public key (`xpub`) at a given path.
+
+```typescript
+function serializeXpub(seed: Uint8Array, pathComponents: number[]): string
+```
+
+**Returns** A Base58Check-encoded xpub string, e.g. `"xpub6C..."`.
+
+**Example**
+
+```typescript
+import { mnemonicToSeed, serializeXpub } from '@ble-vault/crypto';
+
+const seed = await mnemonicToSeed(mnemonic);
+// Account xpub at m/84'/0'/0'
+const xpub = serializeXpub(seed, [
+  0x80000000 | 84,
+  0x80000000 | 0,
+  0x80000000 | 0,
+]);
+```
+
+---
+
+### `secp256k1PublicKey`
+
+Derive a secp256k1 public key from a private key.
+
+```typescript
+function secp256k1PublicKey(privKey: Uint8Array, compressed: boolean): Uint8Array
+```
+
+**Returns**
+- `compressed = true`: 33-byte compressed public key (`0x02` or `0x03` prefix)
+- `compressed = false`: 65-byte uncompressed public key (`0x04` prefix)
+
+---
+
+### `signSecp256k1DER`
+
+Sign a pre-hashed message with secp256k1 and return a DER-encoded signature. Used for Bitcoin transaction signing.
+
+```typescript
+function signSecp256k1DER(hash: Uint8Array, privKey: Uint8Array): Uint8Array
+```
+
+**Parameters**
+
+| Name | Type | Description |
+|---|---|---|
+| `hash` | `Uint8Array` | 32-byte pre-hashed message digest |
+| `privKey` | `Uint8Array` | secp256k1 private key |
+
+**Returns** A variable-length DER-encoded signature (typically 70–72 bytes).
+
+---
+
+### `signSecp256k1Compact`
+
+Sign a pre-hashed message with secp256k1 and return a compact `r(32)+s(32)` signature with recovery bit. Used for Tron transaction signing.
+
+```typescript
+function signSecp256k1Compact(
+  hash:    Uint8Array,
+  privKey: Uint8Array
+): { sig: Uint8Array; recovery: number }
+```
+
+**Returns**
+
+| Field | Type | Description |
+|---|---|---|
+| `sig` | `Uint8Array` | 64-byte compact signature (`r` + `s`) |
+| `recovery` | `number` | Recovery bit: `0` or `1` |
+
+---
+
+### `base58Encode`
+
+Base58-encode a byte array (no checksum). Used to encode Solana public keys as address strings.
+
+```typescript
+function base58Encode(data: Uint8Array): string
+```
+
+---
+
+### `p2wpkhAddress`
+
+Compute a native SegWit P2WPKH bech32 address (`bc1q...`) from a compressed secp256k1 public key.
+
+```typescript
+function p2wpkhAddress(pubKey: Uint8Array): string
+```
+
+**Parameters**
+
+| Name | Type | Description |
+|---|---|---|
+| `pubKey` | `Uint8Array` | 33-byte compressed secp256k1 public key |
+
+**Returns** A Bech32-encoded mainnet address, e.g. `"bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq"`.
+
+---
+
+### `tronAddressFromPrivKey`
+
+Derive a Tron address from a secp256k1 private key. Tron addresses use the Ethereum derivation (Keccak-256 of uncompressed public key) with a `0x41` prefix and Base58Check encoding.
+
+```typescript
+function tronAddressFromPrivKey(privKey: Uint8Array): {
+  pubKey:            Uint8Array;
+  uncompressedPubKey: Uint8Array;
+  address:           string;
+}
+```
+
+**Returns**
+
+| Field | Type | Description |
+|---|---|---|
+| `pubKey` | `Uint8Array` | Compressed secp256k1 public key (33 bytes) |
+| `uncompressedPubKey` | `Uint8Array` | Uncompressed secp256k1 public key (65 bytes) |
+| `address` | `string` | Base58Check-encoded Tron address (`T...`) |
