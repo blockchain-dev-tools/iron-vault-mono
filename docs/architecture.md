@@ -30,7 +30,7 @@ BLE Vault simulates a Ledger hardware wallet on an old Android phone. The Androi
 ## Monorepo Structure
 
 ```
-ble-vault-mono/
+iron-vault-mono/
 ├── apps/
 │   ├── prototype/       # Next.js 14 design canvas + logic test harness (port 3002)
 │   ├── mobile/          # React Native production wallet app

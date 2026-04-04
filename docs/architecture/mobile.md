@@ -71,7 +71,7 @@
 apps/mobile/
 ├── android/                        # 已完成（BleModule.java + LedgerBleConstants）
 ├── ios/                            # M4: Swift CBPeripheralManager
-│   └── BleWalletRN/
+│   └── IronVault/
 │       ├── BleModule.swift
 │       ├── BleModuleBridge.m
 │       └── LedgerBleConstants.swift
