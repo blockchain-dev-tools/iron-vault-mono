@@ -7,15 +7,6 @@
 - For mobile: Android Studio + JDK 17
 - For web debugger / prototype: Chrome or Edge (Web Bluetooth API required)
 
-## Remote Development Server
-
-The monorepo runs on `robot@192.168.1.170`. Always source the shell profile first:
-
-```bash
-ssh robot@192.168.1.170
-source ~/.zshrc   # loads nvm → node/pnpm available
-```
-
 ## Running Apps
 
 ```bash
@@ -26,11 +17,11 @@ pnpm install
 pnpm dev
 
 # Run specific apps
-pnpm --filter prototype dev     # http://192.168.1.170:3002
-pnpm --filter debugger dev      # http://192.168.1.170:3001
+pnpm --filter prototype dev     # http://localhost:3002
+pnpm --filter debugger dev      # http://localhost:3001
 
 # If pnpm --filter fails with "Cannot find module next", use root .bin directly:
-cd apps/prototype && /home/robot/workspace/ble-vault-mono/node_modules/.bin/next dev -p 3002
+cd apps/prototype && node_modules/.bin/next dev -p 3002
 ```
 
 ## Type Checking
@@ -89,20 +80,6 @@ import { sha256 } from '@noble/hashes/sha256';
 3. Add handler branch in `packages/apdu/src/handler.ts`
 4. Add preset button in `apps/debugger/app/page.tsx`
 5. Add decode branch in `apps/debugger/lib/apdu-commands.ts`
-
-## File Editing Over SSH
-
-Heredocs with backticks break over SSH. Preferred pattern:
-
-```bash
-# 1. Write file locally
-cat > /tmp/MyFile.ts << 'EOF'
-...content...
-EOF
-
-# 2. SCP to remote
-scp /tmp/MyFile.ts robot@192.168.1.170:/home/robot/workspace/ble-vault-mono/path/to/file.ts
-```
 
 ## Project Conventions
 

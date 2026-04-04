@@ -473,8 +473,8 @@ pnpm android         # 安装到 Android 设备
 # packages/apdu 和 packages/crypto 通过 pnpm workspace 软链接
 
 # 查看 prototype 参考
-# http://192.168.1.170:3002  （prototype）
-# http://192.168.1.170:3001  （BLE debugger）
+# http://localhost:3002  （prototype）
+# http://localhost:3001  （BLE debugger）
 ```
 
 ---
