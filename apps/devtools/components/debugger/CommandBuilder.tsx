@@ -1,17 +1,12 @@
 'use client'
 import { useState } from 'react'
 import TargetToggle, { type DebugTarget } from './TargetToggle'
+import ScanModal from './ScanModal'
 import { useApduBus } from '@/lib/apdu-bus'
-
-// ── Preset APDU commands ──────────────────────────────────────────────────────
-// All paths use m/44'/60'/0'/0/0 for ETH and m/44'/501'/0'/0' for SOL unless noted.
-// ETH tx: EIP-1559, chainId=1, 0.001 ETH → vitalik.eth (0xd8dA...6045), gasLimit=21000
-// Personal msg: "Hello, OldPhone Wallet!" (23 bytes)
-// EIP-712: sample domain + struct hash (zeros for demo)
-// Solana msg: "Hello Solana" (12 bytes)
+import { useBleDevice, type BleLogFn } from '@/hooks/useBleDevice'
 
 const PRESETS = [
-  // ── System ──────────────────────────────────────────────────────────────────
+  // ── System ───────────────────────────────────────────────────────────────────
   { label: 'GET_VERSION',
     hex: 'e001000000',
     group: 'System' },
@@ -25,7 +20,6 @@ const PRESETS = [
     hex: 'e0d800000653 6f6c616e61',
     group: 'System' },
   { label: 'PROVIDE_ERC20_TOKEN_INFO (USDC, mainnet)',
-    // ticker_len=4 + "USDC" + decimals=6 + USDC contract(20) + chainId=1 + sig=00
     hex: 'e00a00001f04555344430 6a0b86991c6218b36c1d19d4a2e9eb0ce3606eb480000000100',
     group: 'System' },
 
@@ -40,16 +34,12 @@ const PRESETS = [
     hex: 'e002000015058000002c8000003c800000000000000000000002',
     group: 'Ethereum' },
   { label: "SIGN_ETH_TX (0.001 ETH → vitalik.eth, EIP-1559)",
-    // path(21) + type02 + RLP[chainId=1, nonce=0, maxPriorityFee=1gwei, maxFee=10gwei,
-    //   gasLimit=21000, to=vitalik.eth, value=0.001ETH, data=empty, accessList=empty]
     hex: 'e004000046058000002c8000003c80000000000000000000000002ef0180843b9aca008502540be40082520894d8da6bf26964af9d7eed9e03e53415d37aa9604587038d7ea4c6800080c0',
     group: 'Ethereum' },
   { label: 'SIGN_PERSONAL_MESSAGE ("Hello, OldPhone Wallet!")',
-    // path(21) + msg_len_be(4)=0x00000017 + msg(23 bytes)
     hex: 'e008000030058000002c8000003c8000000000000000000000000000001748656c6c6f2c204f6c6450686f6e652057616c6c657421',
     group: 'Ethereum' },
   { label: 'SIGN_EIP_712_MESSAGE (sample typed data)',
-    // path(21) + domain_hash(32, deadbeef…) + struct_hash(32, cafebabe…)
     hex: 'e00c000055058000002c8000003c800000000000000000000000deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefcafebabecafebabecafebabecafebabecafebabecafebabecafebabecafebabe',
     group: 'Ethereum' },
 
@@ -61,7 +51,6 @@ const PRESETS = [
     hex: 'e005000011048000002c800001f58000000080000001',
     group: 'Solana' },
   { label: 'SIGN_SOLANA_MESSAGE ("Hello Solana")',
-    // P1=0x01(first+last), P2=0x00(no more) + path(17) + msg(12 bytes)
     hex: 'e00601001d048000002c800001f5800000008000000048656c6c6f20536f6c616e61',
     group: 'Solana' },
 ]
@@ -81,12 +70,14 @@ interface CommandBuilderProps {
 let _entryId = 0
 
 export default function CommandBuilder({ onLog }: CommandBuilderProps) {
-  const [mode, setMode] = useState<'preset' | 'manual'>('preset')
+  const [mode, setMode]     = useState<'preset' | 'manual'>('preset')
   const [preset, setPreset] = useState(PRESETS[0])
   const [manual, setManual] = useState('')
   const [target, setTarget] = useState<DebugTarget>('simulator')
   const [loading, setLoading] = useState(false)
-  const dispatch = useApduBus(s => s.dispatch)
+  const [connectingDeviceId, setConnectingDeviceId] = useState<string | null>(null)
+  const dispatch  = useApduBus(s => s.dispatch)
+  const bleDevice = useBleDevice()
 
   const hexToSend = mode === 'preset'
     ? preset.hex.replace(/\s/g, '')
@@ -94,19 +85,31 @@ export default function CommandBuilder({ onLog }: CommandBuilderProps) {
 
   const groups = Array.from(new Set(PRESETS.map(p => p.group)))
 
+  // Bridge BLE transport log events → CommandBuilder LogEntry format
+  const bleLog: BleLogFn = (dir, hex, label) => {
+    if (dir === 'info') {
+      onLog({ id: ++_entryId, dir: 'rx', hex: '', label: `ℹ ${label ?? hex}` })
+    } else {
+      onLog({ id: ++_entryId, dir, hex, label })
+    }
+  }
+
   async function send() {
     if (!hexToSend || loading) return
     setLoading(true)
-    const txEntry: LogEntry = { id: ++_entryId, dir: 'tx', hex: hexToSend, label: mode === 'preset' ? preset.label : undefined }
-    onLog(txEntry)
+    onLog({ id: ++_entryId, dir: 'tx', hex: hexToSend, label: mode === 'preset' ? preset.label : undefined })
 
     try {
       if (target === 'simulator') {
         const response = await dispatch(hexToSend)
-        const status = response.slice(-4).toUpperCase()
-        onLog({ id: ++_entryId, dir: 'rx', hex: response, status })
+        onLog({ id: ++_entryId, dir: 'rx', hex: response, status: response.slice(-4).toUpperCase() })
       } else {
-        onLog({ id: ++_entryId, dir: 'error', hex: '', label: 'BLE Device mode not yet implemented' })
+        if (bleDevice.status !== 'connected') {
+          onLog({ id: ++_entryId, dir: 'error', hex: '', label: '未连接设备，请先扫描并连接' })
+          return
+        }
+        const response = await bleDevice.send(hexToSend)
+        onLog({ id: ++_entryId, dir: 'rx', hex: response, status: response.slice(-4).toUpperCase() })
       }
     } catch (e) {
       onLog({ id: ++_entryId, dir: 'error', hex: '', label: String(e) })
@@ -117,6 +120,7 @@ export default function CommandBuilder({ onLog }: CommandBuilderProps) {
 
   return (
     <div className="p-4 space-y-3 border-b border-outline-variant">
+      {/* Mode tabs + TargetToggle */}
       <div className="flex items-center justify-between">
         <div className="flex gap-2">
           {(['preset', 'manual'] as const).map(m => (
@@ -134,6 +138,39 @@ export default function CommandBuilder({ onLog }: CommandBuilderProps) {
         <TargetToggle value={target} onChange={setTarget} />
       </div>
 
+      {/* BLE connection status bar — only shown in BLE mode */}
+      {target === 'ble' && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-container text-sm">
+          <span className={`w-2 h-2 rounded-full shrink-0 transition-colors ${
+            bleDevice.status === 'connected' ? 'bg-green-500 animate-pulse' : 'bg-gray-500'
+          }`} />
+          <span className={`flex-1 text-xs ${
+            bleDevice.status === 'connected' ? 'text-on-surface' : 'text-on-surface-variant'
+          }`}>
+            {bleDevice.status === 'connected'
+              ? bleDevice.deviceName
+              : bleDevice.status === 'connecting'
+              ? '连接中...'
+              : '未连接'}
+          </span>
+          {bleDevice.status === 'connected' ? (
+            <button
+              onClick={bleDevice.disconnect}
+              className="text-xs px-2 py-0.5 rounded bg-red-500/15 text-red-500 hover:bg-red-500/25 transition">
+              断开
+            </button>
+          ) : (
+            <button
+              onClick={() => bleDevice.openScanModal(bleLog)}
+              disabled={bleDevice.status === 'connecting' || bleDevice.scanning}
+              className="text-xs px-2 py-0.5 rounded bg-primary/15 text-primary hover:bg-primary/25 disabled:opacity-50 transition">
+              {bleDevice.scanning ? '扫描中...' : '扫描设备'}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Preset selector or manual input */}
       {mode === 'preset' ? (
         <select
           value={preset.hex}
@@ -158,18 +195,37 @@ export default function CommandBuilder({ onLog }: CommandBuilderProps) {
         />
       )}
 
+      {/* Hex preview + Send button */}
       <div className="flex items-center gap-3">
         <div className="flex-1 font-mono text-xs text-on-surface-variant bg-surface-container px-3 py-1.5 rounded truncate">
           {hexToSend || '—'}
         </div>
         <button
           onClick={send}
-          disabled={!hexToSend || loading}
+          disabled={!hexToSend || loading || (target === 'ble' && bleDevice.status !== 'connected')}
           className="px-4 py-1.5 bg-primary text-on-primary rounded-lg text-sm font-label font-semibold disabled:opacity-40 hover:opacity-90 transition-opacity"
         >
           {loading ? '...' : 'Send ▶'}
         </button>
       </div>
+
+      {/* Scan modal */}
+      {bleDevice.showScanModal && (
+        <ScanModal
+          status={bleDevice.status}
+          scanning={bleDevice.scanning}
+          scannedDevices={bleDevice.scannedDevices}
+          connectingDeviceId={connectingDeviceId}
+          onStop={bleDevice.stopScan}
+          onRescan={() => bleDevice.openScanModal(bleLog)}
+          onConnect={async (d) => {
+            setConnectingDeviceId(d.device.id)
+            await bleDevice.connectDevice(d)
+            setConnectingDeviceId(null)
+          }}
+          onClose={() => { bleDevice.stopScan(); bleDevice.setShowScanModal(false) }}
+        />
+      )}
     </div>
   )
 }

@@ -13,7 +13,7 @@ const withMDX = createMDX({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
-  transpilePackages: ['@ble-vault/simulator'],
+  transpilePackages: ['@iron-vault/simulator'],
 }
 
 export default withNextIntl(withMDX(nextConfig))

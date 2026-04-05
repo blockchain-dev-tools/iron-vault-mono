@@ -5,18 +5,17 @@ export const WRITE_UUID   = '13d63400-2c97-0004-0002-4c6564676572';
 
 const CHANNEL = [0x01, 0x01];
 const TAG     = 0x05;
-const MTU     = 20; // safe BLE packet size
+const MTU     = 20;
 
 // ── Framing ───────────────────────────────────────────────────────────────────
 
-/** Wrap a raw APDU into Ledger BLE frames */
 export function frameAPDU(apdu: Uint8Array): Uint8Array[] {
   const packets: Uint8Array[] = [];
   let offset = 0;
   let seq = 0;
 
   while (offset < apdu.length || seq === 0) {
-    const headerLen = seq === 0 ? 7 : 5; // +2 for totalLen in first packet
+    const headerLen = seq === 0 ? 7 : 5;
     const chunkLen  = Math.min(MTU - headerLen, apdu.length - offset);
     const pkt       = new Uint8Array(headerLen + chunkLen);
     let i = 0;
@@ -36,7 +35,6 @@ export function frameAPDU(apdu: Uint8Array): Uint8Array[] {
   return packets;
 }
 
-/** Reassemble Ledger BLE frames into raw APDU response */
 export function unframeResponse(chunks: Uint8Array[]): Uint8Array {
   if (chunks.length === 0) throw new Error('No chunks');
   const first = chunks[0];
@@ -54,7 +52,7 @@ export function unframeResponse(chunks: Uint8Array[]): Uint8Array {
   return result;
 }
 
-// ── Connection ────────────────────────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface BleTransport {
   device: BluetoothDevice;
@@ -64,8 +62,6 @@ export interface BleTransport {
   disconnect: () => void;
 }
 
-// ── Scanning ──────────────────────────────────────────────────────────────────
-
 export interface ScannedDevice {
   device: BluetoothDevice;
   name: string;
@@ -74,20 +70,21 @@ export interface ScannedDevice {
   uuids: string[];
 }
 
+export type BleLogFn = (dir: 'tx' | 'rx' | 'info', hex: string, label?: string) => void;
+
+// ── Scanning ──────────────────────────────────────────────────────────────────
+
 export async function scanDevices(
   onFound: (d: ScannedDevice) => void,
   durationMs = 6000,
 ): Promise<() => void> {
-  // Check if experimental scanning API is available
   const bt = navigator.bluetooth as any;
-  if (!bt.requestLEScan) {
-    throw new Error('NO_SCAN_API');
-  }
+  if (!bt.requestLEScan) throw new Error('NO_SCAN_API');
 
   const seen = new Map<string, ScannedDevice>();
 
   const handler = (e: Event) => {
-    const ev = e as any; // BluetoothAdvertisingEvent
+    const ev = e as any;
     const device: BluetoothDevice = ev.device;
     const uuids: string[] = ev.uuids ?? [];
     const isLedger = uuids.some(
@@ -105,7 +102,6 @@ export async function scanDevices(
   };
 
   bt.addEventListener('advertisementreceived', handler);
-
   const scan = await bt.requestLEScan({ acceptAllAdvertisements: true });
 
   const stop = () => {
@@ -113,14 +109,14 @@ export async function scanDevices(
     bt.removeEventListener('advertisementreceived', handler);
   };
 
-  // Auto-stop after duration
   setTimeout(stop, durationMs);
-
   return stop;
 }
 
+// ── Connection ────────────────────────────────────────────────────────────────
+
 export async function connectLedgerBle(
-  onLog: (dir: 'tx' | 'rx' | 'info', hex: string, label?: string) => void,
+  onLog: BleLogFn,
   existingDevice?: BluetoothDevice,
 ): Promise<BleTransport> {
   const device = existingDevice ?? await navigator.bluetooth.requestDevice({
@@ -138,7 +134,6 @@ export async function connectLedgerBle(
 
   onLog('info', '', `已连接 ✓  设备: ${device.name ?? device.id}`);
 
-  // Promise-based response collector
   let resolveResponse: ((v: Uint8Array) => void) | null = null;
   let rejectResponse:  ((e: Error) => void) | null = null;
   const pending: Uint8Array[] = [];
@@ -150,12 +145,10 @@ export async function connectLedgerBle(
     onLog('rx', toHex(chunk));
 
     if (pending.length === 0) {
-      // First chunk — read total length
       expectedLen = (chunk[5] << 8) | chunk[6];
     }
     pending.push(chunk);
 
-    // Check if we have all data
     let received = 0;
     for (let i = 0; i < pending.length; i++) {
       received += pending[i].length - (i === 0 ? 7 : 5);
@@ -187,7 +180,6 @@ export async function connectLedgerBle(
         rejectResponse  = null;
       });
 
-      // 10s timeout
       setTimeout(() => {
         if (rejectResponse) {
           rejectResponse(new Error('Response timeout'));
