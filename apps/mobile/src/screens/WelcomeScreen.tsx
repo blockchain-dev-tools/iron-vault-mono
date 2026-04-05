@@ -3,7 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { generateMnemonic } from '@iron-vault/wallet';
 import { useApp, useTheme, useLocale } from '../store/AppContext';
-import type { LocaleMode } from '../store/AppContext';
+import type { LocaleMode, ThemeMode } from '../store/AppContext';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import Button from '../components/ui/Button';
@@ -16,8 +16,15 @@ const LOCALE_LABEL: Record<LocaleMode, string> = {
   system: 'Auto',
 };
 
+const THEME_CYCLE: ThemeMode[] = ['system', 'light', 'dark'];
+const THEME_ICON: Record<ThemeMode, string> = {
+  light: 'light-mode',
+  dark: 'dark-mode',
+  system: 'brightness-auto',
+};
+
 export default function WelcomeScreen() {
-  const { go, setGeneratedWords, localeMode, setLocaleMode } = useApp();
+  const { go, setGeneratedWords, localeMode, setLocaleMode, themeMode, setThemeMode } = useApp();
   const C = useTheme();
   const t = useLocale();
   const s = useMemo(() => makeStyles(C), [C]);
@@ -34,12 +41,22 @@ export default function WelcomeScreen() {
     setLocaleMode(LOCALE_CYCLE[(idx + 1) % LOCALE_CYCLE.length]);
   };
 
+  const cycleTheme = () => {
+    const idx = THEME_CYCLE.indexOf(themeMode);
+    setThemeMode(THEME_CYCLE[(idx + 1) % THEME_CYCLE.length]);
+  };
+
   return (
     <View style={[s.root, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 16 }]}>
-      {/* Language toggle */}
-      <TouchableOpacity style={s.langBtn} onPress={cycleLocale} activeOpacity={0.7}>
-        <Text style={s.langBtnText}>{LOCALE_LABEL[localeMode]}</Text>
-      </TouchableOpacity>
+      {/* Top controls: theme + language */}
+      <View style={s.topRow}>
+        <TouchableOpacity style={s.themeBtn} onPress={cycleTheme} activeOpacity={0.7}>
+          <Icon name={THEME_ICON[themeMode]} size={18} color={C.text2} />
+        </TouchableOpacity>
+        <TouchableOpacity style={s.langBtn} onPress={cycleLocale} activeOpacity={0.7}>
+          <Text style={s.langBtnText}>{LOCALE_LABEL[localeMode]}</Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={{ flex: 1 }} />
 
@@ -78,8 +95,15 @@ export default function WelcomeScreen() {
 
 const makeStyles = (C: ColorTokens) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg, paddingHorizontal: 24 },
+  topRow: {
+    flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: 8,
+  },
+  themeBtn: {
+    width: 32, height: 32, borderRadius: R.lg,
+    backgroundColor: C.surfaceContainer, borderWidth: 1, borderColor: C.borderVariant,
+    alignItems: 'center', justifyContent: 'center',
+  },
   langBtn: {
-    alignSelf: 'flex-end',
     paddingHorizontal: 12, paddingVertical: 6,
     borderRadius: R.lg, backgroundColor: C.surfaceContainer,
     borderWidth: 1, borderColor: C.borderVariant,
