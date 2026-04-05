@@ -71,7 +71,7 @@ export default function LocalePage({ params: { locale } }: Props) {
             {isZh ? 'EN' : '中文'}
           </a>
           <a
-            href="https://github.com/your-org/iron-vault"
+            href="https://github.com/blockchain-dev-tools/iron-vault-mono"
             target="_blank"
             rel="noopener noreferrer"
             className="text-on-surface-variant hover:text-on-surface transition-colors"
@@ -89,12 +89,12 @@ export default function LocalePage({ params: { locale } }: Props) {
         </h1>
         <p className="text-xl text-on-surface-variant leading-relaxed">
           {isZh
-            ? '用闲置 Android 手机模拟 Ledger Nano X 硬件钱包，通过 BLE 与 OKX、MetaMask 等宿主应用无缝通信。'
-            : 'Turn your old Android phone into a Ledger-compatible hardware wallet. Connect over BLE to OKX, MetaMask, and more — no new hardware needed.'}
+            ? '让旧 Android / iOS 手机变身冷钱包。与 Ledger Nano X 协议完全兼容 — OKX、MetaMask 等任意支持 Ledger 的应用无需改动，直接通过 BLE 连接使用。'
+            : 'Turn your old Android or iOS phone into a cold wallet. Plug-compatible with Ledger Nano X — OKX, MetaMask, and any Ledger-supported app connect over BLE without modification.'}
         </p>
         <div className="flex gap-3 flex-wrap justify-center mt-2">
           <a
-            href="https://github.com/your-org/iron-vault"
+            href="https://github.com/blockchain-dev-tools/iron-vault-mono"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-on-primary rounded-xl font-label font-semibold hover:opacity-90 transition-opacity"
