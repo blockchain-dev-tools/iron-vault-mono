@@ -17,6 +17,7 @@ export interface SignRequestData {
   raw: Uint8Array;
   data?: string;
   decoded?: Record<string, unknown>;
+  sign: () => string;
 }
 
 // ── Mutable state container ────────────────────────────────────────────────────
@@ -106,7 +107,7 @@ export async function maybeDeferred(
 ): Promise<string> {
   if (!S._signHandler) return sign() + '9000';
   try {
-    const result = await S._signHandler({ chain, raw, ...extra } as SignRequestData);
+    const result = await S._signHandler({ chain, raw, sign, ...extra } as SignRequestData);
     return result === '6985' ? '6985' : result + '9000';
   } catch { return sign() + '9000'; }
 }

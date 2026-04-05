@@ -6,9 +6,9 @@ import { handleBtc } from './handlers/btc';
 import { handleTron } from './handlers/tron';
 import { handleSui } from './handlers/sui';
 import {
-  currentApp, ulog, resetSharedState,
-  _mnemonicProvider, _signHandler, _lastToken,
+  ulog, resetSharedState,
   clearSignSessions,
+  type SignRequestData,
 } from './handlers/shared';
 import * as shared from './handlers/shared';
 

@@ -1,7 +1,7 @@
 import { deriveSolanaPrivateKey, solanaPubKey, signSolanaMessage } from '@iron-vault/crypto';
 import { base58Encode } from '@iron-vault/crypto';
 import { parseBip32Path, bytesToHex } from '../parser';
-import { requireSeed, maybeDeferred, ulog, solSign, clearSolSign, startSolSignTimer } from './shared';
+import { requireSeed, maybeDeferred, ulog, clearSolSign, startSolSignTimer } from './shared';
 import * as shared from './shared';
 
 // ── Solana App handler (CLA E0, when currentApp === 'Solana') ─────────────────

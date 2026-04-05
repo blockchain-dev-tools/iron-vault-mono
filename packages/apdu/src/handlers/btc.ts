@@ -3,7 +3,7 @@ import {
   p2wpkhAddress, secp256k1PublicKey, signSecp256k1DER,
 } from '@iron-vault/crypto';
 import { parseBip32Path, bytesToHex } from '../parser';
-import { requireSeed, maybeDeferred, ulog, btcSession, clearBtcSession, startBtcSessionTimer } from './shared';
+import { requireSeed, maybeDeferred, ulog, clearBtcSession, startBtcSessionTimer } from './shared';
 import * as shared from './shared';
 
 // ── BTC New App handler (CLA E1 + F8) ────────────────────────────────────────

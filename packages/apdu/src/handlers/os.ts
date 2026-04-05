@@ -1,5 +1,5 @@
 import { bytesToHex } from '../parser';
-import { currentApp, ulog } from './shared';
+import { S, ulog } from './shared';
 
 // ── OS command handler ────────────────────────────────────────────────────────
 // Returns null if the command is not an OS command (router falls through).
@@ -47,12 +47,12 @@ function buildGetVersion(): string {
 }
 
 export function buildGetAppAndVersion(): string {
-  const verStr = currentApp === 'Solana' ? '1.3.0' :
-                 currentApp === 'Bitcoin' ? '2.1.0' :
-                 currentApp === 'Tron' ? '0.5.0' :
-                 currentApp === 'Sui' ? '0.1.0' :
+  const verStr = S.currentApp === 'Solana' ? '1.3.0' :
+                 S.currentApp === 'Bitcoin' ? '2.1.0' :
+                 S.currentApp === 'Tron' ? '0.5.0' :
+                 S.currentApp === 'Sui' ? '0.1.0' :
                  '1.10.3'; // Ethereum default
-  const name = strToBytes(currentApp);
+  const name = strToBytes(S.currentApp);
   const ver = strToBytes(verStr);
   const flags = new Uint8Array([0x02]);
   const resp = new Uint8Array(1 + 1 + name.length + 1 + ver.length + 1 + 1 + 2);

@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { getLocale } from 'next-intl/server'
 import dynamic from 'next/dynamic'
 import './globals.css'
 import '@iron-vault/simulator/styles.css'
@@ -7,22 +6,21 @@ import '@iron-vault/simulator/styles.css'
 const SearchModal = dynamic(() => import('@/components/search/SearchModal'), { ssr: false })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://devtools.oldphonewallet.dev'),
+  metadataBase: new URL('https://ironvault.dev'),
   title: {
-    default: 'OldPhone Wallet DevTools',
-    template: '%s | OldPhone Wallet DevTools',
+    default: 'Iron Vault',
+    template: '%s | Iron Vault',
   },
-  description: 'Developer documentation, APDU debugger, and wallet simulator for OldPhone Wallet — a BLE hardware wallet emulator.',
+  description: 'BLE hardware wallet emulator for old Android phones — developer docs, APDU debugger, and wallet simulator.',
   openGraph: {
-    siteName: 'OldPhone Wallet DevTools',
+    siteName: 'Iron Vault',
     type: 'website',
   },
 }
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const locale = await getLocale()
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link
           href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap"

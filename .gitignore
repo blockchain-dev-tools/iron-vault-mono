@@ -10,3 +10,6 @@ dist/
 # Android build artifacts (tracked by apps/mobile/android/.gitignore)
 apps/mobile/android/build/
 apps/mobile/android/app/.cxx/
+
+# SSG build output
+apps/website/out/
