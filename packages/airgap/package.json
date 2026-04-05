@@ -1,0 +1,23 @@
+{
+  "name": "@iron-vault/airgap",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "cbor-x": "^1.5.0",
+    "pako": "^2.1.0",
+    "@scure/base": "^1.1.7"
+  },
+  "devDependencies": {
+    "@noble/hashes": "^2.0.1",
+    "@types/pako": "^2.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}
