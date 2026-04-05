@@ -8,12 +8,12 @@ const SearchModal = dynamic(() => import('@/components/search/SearchModal'), { s
 export const metadata: Metadata = {
   metadataBase: new URL('https://ironvault.dev'),
   title: {
-    default: 'Iron Vault',
-    template: '%s | Iron Vault',
+    default: 'IRON Vault',
+    template: '%s | IRON Vault',
   },
   description: 'BLE hardware wallet emulator for old Android phones — developer docs, APDU debugger, and wallet simulator.',
   openGraph: {
-    siteName: 'Iron Vault',
+    siteName: 'IRON Vault',
     type: 'website',
   },
 }

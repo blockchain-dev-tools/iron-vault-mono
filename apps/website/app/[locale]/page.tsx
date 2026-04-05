@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Props {
   params: { locale: string }
@@ -59,7 +60,10 @@ export default function LocalePage({ params: { locale } }: Props) {
     <main className="min-h-screen bg-background">
       {/* Nav bar */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-outline-variant max-w-5xl mx-auto">
-        <span className="font-headline font-bold text-on-surface">🛡️ Iron Vault</span>
+        <span className="flex items-center gap-2 font-headline font-bold text-on-surface">
+          <Image src="/logo.png" alt="IRON Vault" width={28} height={28} unoptimized />
+          IRON Vault
+        </span>
         <div className="flex items-center gap-4 text-sm">
           <Link href={`/${locale}/docs/getting-started/introduction`} className="text-on-surface-variant hover:text-on-surface transition-colors">
             {isZh ? '文档' : 'Docs'}
@@ -83,14 +87,14 @@ export default function LocalePage({ params: { locale } }: Props) {
 
       {/* Hero */}
       <section className="flex flex-col items-center justify-center text-center px-6 pt-20 pb-16 gap-6 max-w-3xl mx-auto">
-        <div className="text-6xl">🛡️</div>
+        <Image src="/logo.png" alt="IRON Vault" width={96} height={96} unoptimized />
         <h1 className="text-5xl font-headline font-bold text-on-surface">
-          Iron Vault
+          IRON Vault
         </h1>
         <p className="text-xl text-on-surface-variant leading-relaxed">
           {isZh
-            ? '让旧 Android / iOS 手机变身冷钱包。与 Ledger Nano X 协议完全兼容 — OKX、MetaMask 等任意支持 Ledger 的应用无需改动，直接通过 BLE 连接使用。'
-            : 'Turn your old Android or iOS phone into a cold wallet. Plug-compatible with Ledger Nano X — OKX, MetaMask, and any Ledger-supported app connect over BLE without modification.'}
+            ? '让旧 Android / iOS 手机变身冷钱包。与 Ledger Nano X 协议完全兼容 — OKX、MetaMask 等任意支持 Ledger 的应用无需改动，直接通过 BLE 连接使用。'
+            : 'Turn your old Android or iOS phone into a cold wallet. Plug-compatible with Ledger Nano X — OKX, MetaMask, and any Ledger-supported app connect over BLE without modification.'}
         </p>
         <div className="flex gap-3 flex-wrap justify-center mt-2">
           <a
@@ -132,7 +136,7 @@ export default function LocalePage({ params: { locale } }: Props) {
       {/* Footer */}
       <footer className="border-t border-outline-variant py-6 text-center text-xs text-on-surface-variant">
         <div className="flex items-center justify-center gap-6 flex-wrap">
-          <span>Iron Vault — MIT License</span>
+          <span>IRON Vault — MIT License</span>
           <Link href={`/${locale}/docs/getting-started/introduction`} className="hover:text-on-surface transition-colors">
             {isZh ? '文档' : 'Docs'}
           </Link>
