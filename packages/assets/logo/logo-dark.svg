@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+
+  <!-- Square frame -->
+  <rect x="60" y="60" width="280" height="280"
+    fill="none" stroke="#CCFF44" stroke-width="12"/>
+
+  <!-- Outer circle ring -->
+  <circle cx="200" cy="200" r="100"
+    fill="none" stroke="#CCFF44" stroke-width="12"/>
+
+  <!-- 4 main radiating lines (N / S / E / W) -->
+  <line x1="200" y1="178" x2="200" y2="102" stroke="#CCFF44" stroke-width="10"/>
+  <line x1="200" y1="222" x2="200" y2="298" stroke="#CCFF44" stroke-width="10"/>
+  <line x1="178" y1="200" x2="102" y2="200" stroke="#CCFF44" stroke-width="10"/>
+  <line x1="222" y1="200" x2="298" y2="200" stroke="#CCFF44" stroke-width="10"/>
+
+  <!-- 4 secondary radiating lines (diagonal, slightly shorter) -->
+  <line x1="215.6" y1="184.4" x2="258" y2="142" stroke="#CCFF44" stroke-width="7"/>
+  <line x1="184.4" y1="184.4" x2="142" y2="142" stroke="#CCFF44" stroke-width="7"/>
+  <line x1="184.4" y1="215.6" x2="142" y2="258" stroke="#CCFF44" stroke-width="7"/>
+  <line x1="215.6" y1="215.6" x2="258" y2="258" stroke="#CCFF44" stroke-width="7"/>
+
+  <!-- Center solid circle (dial hub) -->
+  <circle cx="200" cy="200" r="22" fill="#CCFF44"/>
+
+</svg>
