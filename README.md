@@ -10,6 +10,30 @@ Iron Vault emulates a Ledger Nano X: the device exposes the same BLE GATT profil
 
 ---
 
+## Why Iron Vault?
+
+| | Iron Vault | AirGap Vault | Ledger Hardware |
+|--|-----------|--------------|-----------------|
+| Compatible wallets | All Ledger-compatible | AirGap only | All Ledger-compatible |
+| Solana support | ✅ | ❌ | ✅ ($79+) |
+| Cost | Free (use your old phone) | Free | $79–$149 |
+| Connection | BLE (no cables) | QR code | USB / BLE |
+| Open source | ✅ | ✅ | ❌ |
+
+## Supported Wallets
+
+Works with any wallet that supports Ledger hardware:
+
+**MetaMask** · **OKX Wallet** · **Phantom** · **Rabby** · **Backpack** · **Ledger Live** · and any other Ledger-compatible wallet
+
+## Quick Install
+
+Download the latest APK from [GitHub Releases](../../releases) and install directly on your Android device (no build required).
+
+> iOS requires building from source — see [Mobile App](#mobile-app-appsmobile) below.
+
+---
+
 ## How It Works
 
 ```
@@ -74,7 +98,7 @@ apps/mobile              ← @iron-vault/wallet, @iron-vault/apdu, @iron-vault/t
 
 ---
 
-## Getting Started
+## Development Setup
 
 ### Prerequisites
 
@@ -127,7 +151,6 @@ npx react-native run-ios --device
 ```
 
 Or open `apps/mobile/ios/IronVault.xcworkspace` in Xcode and run on a connected device.
-```
 
 ### Start Metro bundler
 

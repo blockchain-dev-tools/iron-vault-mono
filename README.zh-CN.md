@@ -10,6 +10,30 @@ Iron Vault 模拟一台 Ledger Nano X：设备暴露与真实硬件完全相同�
 
 ---
 
+## 为什么选择 Iron Vault？
+
+| | Iron Vault | AirGap Vault | Ledger 硬件 |
+|--|-----------|--------------|------------|
+| 兼容的钱包 | 所有 Ledger 兼容钱包 | 仅 AirGap | 所有 Ledger 兼容钱包 |
+| Solana 支持 | ✅ | ❌ | ✅（$79+） |
+| 成本 | 免费（用闲置手机） | 免费 | $79–$149 |
+| 连接方式 | 蓝牙（无需线缆） | 二维码 | USB / 蓝牙 |
+| 开源 | ✅ | ✅ | ❌ |
+
+## 支持的钱包
+
+兼容所有支持 Ledger 硬件钱包的 App：
+
+**MetaMask** · **OKX Wallet** · **Phantom** · **Rabby** · **Backpack** · **Ledger Live** · 以及其他所有 Ledger 兼容钱包
+
+## 快速安装
+
+从 [GitHub Releases](../../releases) 下载最新 APK，直接安装到 Android 设备（无需编译）。
+
+> iOS 需要从源码构建，详见下方[移动端应用](#移动端应用appsmobile)章节。
+
+---
+
 ## 工作原理
 
 ```
@@ -74,7 +98,7 @@ apps/mobile              ← @iron-vault/wallet, @iron-vault/apdu, @iron-vault/t
 
 ---
 
-## 快速开始
+## 开发环境搭建
 
 ### 环境要求
 
@@ -127,7 +151,6 @@ npx react-native run-ios --device
 ```
 
 或用 Xcode 打开 `apps/mobile/ios/IronVault.xcworkspace`，连接设备后直接运行。
-```
 
 ### 启动 Metro 打包器
 
