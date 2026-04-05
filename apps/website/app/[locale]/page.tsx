@@ -61,7 +61,8 @@ export default function LocalePage({ params: { locale } }: Props) {
       {/* Nav bar */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-outline-variant max-w-5xl mx-auto">
         <span className="flex items-center gap-2 font-headline font-bold text-on-surface">
-          <Image src="/logo.png" alt="IRON Vault" width={28} height={28} unoptimized />
+          <Image src="/logo-dark.svg"  alt="IRON Vault" width={28} height={28} unoptimized className="logo-dark" />
+          <Image src="/logo-light.svg" alt="IRON Vault" width={28} height={28} unoptimized className="logo-light" />
           IRON Vault
         </span>
         <div className="flex items-center gap-4 text-sm">
@@ -87,7 +88,8 @@ export default function LocalePage({ params: { locale } }: Props) {
 
       {/* Hero */}
       <section className="flex flex-col items-center justify-center text-center px-6 pt-20 pb-16 gap-6 max-w-3xl mx-auto">
-        <Image src="/logo.png" alt="IRON Vault" width={96} height={96} unoptimized />
+        <Image src="/logo-dark.svg"  alt="IRON Vault" width={96} height={96} unoptimized className="logo-dark" />
+        <Image src="/logo-light.svg" alt="IRON Vault" width={96} height={96} unoptimized className="logo-light" />
         <h1 className="text-5xl font-headline font-bold text-on-surface">
           IRON Vault
         </h1>

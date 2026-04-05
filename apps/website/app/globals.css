@@ -49,3 +49,9 @@
 .prose th  { @apply text-left font-label font-semibold text-on-surface px-3 py-2 first:pl-0; }
 .prose td  { @apply text-on-surface-variant px-3 py-2.5 border-b border-outline-variant first:pl-0 align-top; }
 .prose tr:last-child td { @apply border-b-0; }
+
+/* ── Theme-aware logo visibility ── */
+.logo-dark  { display: block; }
+.logo-light { display: none; }
+.light-theme .logo-dark  { display: none; }
+.light-theme .logo-light { display: block; }
