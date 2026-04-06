@@ -12,7 +12,8 @@
     "@iron-vault/wallet": "workspace:*",
     "next": "^14.2.0",
     "react": "^18.3.0",
-    "react-dom": "^18.3.0"
+    "react-dom": "^18.3.0",
+    "@iron-vault/i18n": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

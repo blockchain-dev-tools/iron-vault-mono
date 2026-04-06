@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@ble-vault/simulator'],
+  transpilePackages: ['@iron-vault/simulator', '@iron-vault/i18n'],
 };
 export default nextConfig;

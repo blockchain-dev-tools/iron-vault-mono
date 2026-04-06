@@ -18,7 +18,8 @@
     "@iron-vault/theme": "workspace:*",
     "@iron-vault/wallet": "workspace:*",
     "react": "^18.3.0",
-    "react-dom": "^18.3.0"
+    "react-dom": "^18.3.0",
+    "@iron-vault/i18n": "workspace:*"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.0",

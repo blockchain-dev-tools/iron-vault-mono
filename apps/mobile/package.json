@@ -23,7 +23,8 @@
     "react-native-safe-area-context": "^5.5.2",
     "react-native-vector-icons": "^10.3.0",
     "react-native-qrcode-svg": "^6.3.14",
-    "react-native-svg": "^15.11.2"
+    "react-native-svg": "^15.11.2",
+    "@iron-vault/i18n": "workspace:*"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

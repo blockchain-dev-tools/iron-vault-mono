@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Svg, { Path, Rect, Circle, Defs, Pattern, Line } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { generateMnemonic } from '@iron-vault/wallet';
 import { useApp, useTheme, useLocale } from '../store/AppContext';
@@ -22,6 +23,31 @@ const THEME_ICON: Record<ThemeMode, string> = {
   dark: 'dark-mode',
   system: 'brightness-auto',
 };
+
+function BgLines({ color }: { color: string }) {
+  return (
+    <Svg style={StyleSheet.absoluteFill} opacity={0.025}>
+      <Defs>
+        <Pattern id="diag" x="0" y="0" width="57" height="57" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <Line x1="0" y1="0" x2="0" y2="57" stroke={color} strokeWidth="1" />
+        </Pattern>
+      </Defs>
+      <Rect x="0" y="0" width="100%" height="100%" fill="url(#diag)" />
+    </Svg>
+  );
+}
+
+function ShieldLogo({ primary }: { primary: string }) {
+  return (
+    <Svg width={88} height={100} viewBox="0 0 80 92" fill="none">
+      <Path d="M40 0L80 18V52C80 72 60 88 40 92C20 88 0 72 0 52V18L40 0Z" fill={primary} />
+      <Rect x="28" y="32" width="24" height="30" rx="4" fill="#0D1A00" />
+      <Rect x="33" y="24" width="14" height="12" rx="7" stroke="#0D1A00" strokeWidth="3" fill="none" />
+      <Circle cx="40" cy="47" r="3" fill={primary} />
+      <Rect x="39" y="49" width="2" height="6" rx="1" fill={primary} />
+    </Svg>
+  );
+}
 
 export default function WelcomeScreen() {
   const { go, setGeneratedWords, localeMode, setLocaleMode, themeMode, setThemeMode } = useApp();
@@ -48,7 +74,9 @@ export default function WelcomeScreen() {
 
   return (
     <View style={[s.root, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 16 }]}>
-      {/* Top controls: theme + language */}
+      <BgLines color={C.primary} />
+
+      {/* Top controls */}
       <View style={s.topRow}>
         <TouchableOpacity style={s.themeBtn} onPress={cycleTheme} activeOpacity={0.7}>
           <Icon name={THEME_ICON[themeMode]} size={18} color={C.text2} />
@@ -62,11 +90,17 @@ export default function WelcomeScreen() {
 
       {/* Hero */}
       <View style={s.hero}>
-        <View style={s.logoBox}>
-          <Icon name="lock" size={52} color={C.primary} />
-          <View style={s.pingDot} />
+        <View style={s.logoWrap}>
+          <ShieldLogo primary={C.primary} />
         </View>
-        <Text style={s.title}>{t.welcome.title}</Text>
+
+        {/* Title block */}
+        <View style={s.titleBlock}>
+          <Text style={s.titleIron}>IRON</Text>
+          <Text style={s.titleVault}>VAULT</Text>
+        </View>
+
+        {/* Subtitle */}
         <Text style={s.sub}>{t.welcome.sub}</Text>
       </View>
 
@@ -79,12 +113,10 @@ export default function WelcomeScreen() {
         <Button variant="secondary" icon="upload" onPress={() => go('ImportMnemonic')}>{t.welcome.importWallet}</Button>
       </View>
 
-      {/* Security card */}
-      <View style={s.secCard}>
-        <View style={s.secIconWrap}>
-          <Icon name="verified_user" size={22} color={C.primary} />
-        </View>
-        <View style={{ flex: 1 }}>
+      {/* Security info */}
+      <View style={s.secRow}>
+        <Icon name="verified_user" size={20} color={C.primary} />
+        <View style={{ marginLeft: 10 }}>
           <Text style={s.secTitle}>{t.welcome.airGapped}</Text>
           <Text style={s.secSub}>{t.welcome.airGappedSub}</Text>
         </View>
@@ -110,18 +142,25 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   },
   langBtnText: { color: C.text2, fontSize: 12, fontWeight: '700' },
   hero: { alignItems: 'center' },
-  logoBox: { position: 'relative', width: 100, height: 100, backgroundColor: C.surface, borderRadius: 24, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border, marginBottom: 24 },
-  pingDot: { position: 'absolute', bottom: 0, right: 0, width: 18, height: 18, borderRadius: 9, backgroundColor: C.primary, borderWidth: 2, borderColor: C.bg },
-  title: { color: C.text, fontSize: 40, fontWeight: '800', textAlign: 'center', lineHeight: 46, marginBottom: 12 },
-  titleAccent: { color: C.primary },
-  sub: { color: C.text2, fontSize: 15, textAlign: 'center', lineHeight: 22, maxWidth: 260 },
-  actions: { width: '100%', marginBottom: 16 },
-  secCard: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    padding: 16, backgroundColor: C.surface, borderRadius: R.xl,
-    borderWidth: 1, borderColor: C.border, marginTop: 8,
+  logoWrap: { marginBottom: 40 },
+  titleBlock: { alignSelf: 'center' },
+  titleIron: {
+    fontSize: 52, fontWeight: '900', letterSpacing: -2, lineHeight: 44, textAlign: 'center',
+    color: C.text,
   },
-  secIconWrap: { backgroundColor: C.primary12, padding: 8, borderRadius: R.lg },
-  secTitle: { color: C.primary, fontSize: 10, fontWeight: '700', letterSpacing: 1.5 },
+  titleVault: {
+    fontSize: 52, fontWeight: '900', letterSpacing: -2, lineHeight: 44, textAlign: 'center',
+    color: C.primary, marginBottom: 20,
+  },
+  sub: {
+    color: C.text2, fontSize: 15, textAlign: 'center', lineHeight: 22,
+    maxWidth: 240, marginTop: 20,
+  },
+  actions: { width: '100%', marginBottom: 16 },
+  secRow: {
+    flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'center', marginTop: 20,
+  },
+  secTitle: { color: C.primary, fontSize: 10, fontWeight: '700', letterSpacing: 2, textTransform: 'uppercase' },
   secSub: { color: C.text2, fontSize: 12, marginTop: 2 },
 });

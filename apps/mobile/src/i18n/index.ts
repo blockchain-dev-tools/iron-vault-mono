@@ -1,9 +1,7 @@
 import { NativeModules, Platform } from 'react-native';
-import { EN } from './locales/en';
-import { ZH } from './locales/zh';
+import { EN, ZH, type Translations, type LocaleMode } from '@iron-vault/i18n';
 
-export type LocaleMode = 'system' | 'en' | 'zh';
-export type { Translations } from './locales/en';
+export type { LocaleMode, Translations };
 
 export function getSystemLang(): 'en' | 'zh' {
   try {
@@ -21,7 +19,7 @@ export function getSystemLang(): 'en' | 'zh' {
   return 'en';
 }
 
-export function resolveTranslations(mode: LocaleMode): typeof EN {
+export function resolveTranslations(mode: LocaleMode): Translations {
   const lang = mode === 'system' ? getSystemLang() : mode;
-  return lang === 'zh' ? (ZH as unknown as typeof EN) : EN;
+  return lang === 'zh' ? (ZH as unknown as Translations) : EN;
 }
