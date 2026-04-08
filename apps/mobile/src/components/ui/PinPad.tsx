@@ -10,7 +10,12 @@ interface PinPadProps {
   error?: boolean;
 }
 
-const KEYS = [1, 2, 3, 4, 5, 6, 7, 8, 9, null, 0, 'DEL'] as const;
+const ROWS = [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9],
+  [null, 0, 'DEL'],
+] as const;
 
 // Spring config for key press/release
 const PRESS_SPRING   = { damping: 14, mass: 0.5, stiffness: 350, useNativeDriver: true } as const;
@@ -21,8 +26,8 @@ export default function PinPad({ onComplete, error }: PinPadProps) {
   const C = useTheme();
   const s = useMemo(() => makeStyles(C), [C]);
 
-  // One Animated.Value per key slot
-  const scales = useRef(KEYS.map(() => new Animated.Value(1))).current;
+  // One Animated.Value per key slot (row-major order, matches ROWS)
+  const scales = useRef(ROWS.flat().map(() => new Animated.Value(1))).current;
 
   const reset = () => setPin('');
 
@@ -56,32 +61,35 @@ export default function PinPad({ onComplete, error }: PinPadProps) {
     <View>
       <PinDots length={pin.length} error={error} />
       <View style={s.pad}>
-        {KEYS.map((k, i) => {
-          if (k === null) {
-            return <View key={i} style={[s.key, s.keyEmpty]} />;
-          }
-          return (
-            <TouchableWithoutFeedback
-              key={i}
-              onPress={() => handleKey(k)}
-              onPressIn={() => pressIn(i)}
-              onPressOut={() => pressOut(i)}>
-              <Animated.View style={[s.key, { transform: [{ scale: scales[i] }] }]}>
-                <Text style={s.keyText}>{k === 'DEL' ? '⌫' : k}</Text>
-              </Animated.View>
-            </TouchableWithoutFeedback>
-          );
-        })}
+        {ROWS.map((row, ri) => (
+          <View key={ri} style={s.row}>
+            {row.map((k, ci) => {
+              const i = ri * 3 + ci;
+              if (k === null) {
+                return <View key={ci} style={[s.key, s.keyEmpty]} />;
+              }
+              return (
+                <TouchableWithoutFeedback
+                  key={ci}
+                  onPress={() => handleKey(k)}
+                  onPressIn={() => pressIn(i)}
+                  onPressOut={() => pressOut(i)}>
+                  <Animated.View style={[s.key, { transform: [{ scale: scales[i] }] }]}>
+                    <Text style={s.keyText}>{k === 'DEL' ? '⌫' : k}</Text>
+                  </Animated.View>
+                </TouchableWithoutFeedback>
+              );
+            })}
+          </View>
+        ))}
       </View>
     </View>
   );
 }
 
 const makeStyles = (C: ColorTokens) => StyleSheet.create({
-  pad: {
-    flexDirection: 'row', flexWrap: 'wrap',
-    maxWidth: 264, alignSelf: 'center', gap: 12,
-  },
+  pad: { alignSelf: 'center', gap: 12 },
+  row: { flexDirection: 'row', gap: 12 },
   key: {
     width: 72, height: 56, borderRadius: R.lg,
     backgroundColor: C.surfaceContainer,
