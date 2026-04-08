@@ -44,7 +44,7 @@ export const LIGHT: ColorTokens = {
   primary:             '#5f8a0e',
   onPrimary:           '#F3F7E6',
   bg:                  '#FAFCF5',
-  surface:             '#FAFDF2',
+  surface:             '#FFFFFF',
   surfaceContainer:    '#E8F0D0',
   surfaceContainerLow: '#EDF4D8',
   text:                '#1A2200',
