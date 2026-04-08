@@ -9,7 +9,6 @@ import {
 import { useApp, useTheme, useLocale } from '../store/AppContext';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
-import TopBar from '../components/ui/TopBar';
 import Button from '../components/ui/Button';
 import Icon from '../components/ui/Icon';
 import { useBleSession } from '../hooks/useBleSession';
@@ -120,7 +119,6 @@ export default function WalletManagerScreen() {
 
   return (
     <View style={s.root}>
-      <TopBar title={t.vault.title} hideBack />
 
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.hero}>

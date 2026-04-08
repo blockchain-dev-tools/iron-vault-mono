@@ -9,7 +9,6 @@ import { useApp, useTheme, useLocale } from '../store/AppContext';
 import type { ThemeMode, LocaleMode } from '../store/AppContext';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
-import TopBar from '../components/ui/TopBar';
 import Button from '../components/ui/Button';
 import SectionLabel from '../components/ui/SectionLabel';
 
@@ -94,7 +93,7 @@ function Row({ label, value, onPress }: {
 
 export default function SettingsScreen() {
   const {
-    go, goBack, reset: navReset,
+    go, reset: navReset,
     setAccounts, setBleState,
     themeMode, setThemeMode,
     localeMode, setLocaleMode,
@@ -132,7 +131,6 @@ export default function SettingsScreen() {
 
   return (
     <View style={s.root}>
-      <TopBar title={t.settings.title} onBack={goBack} />
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
         {/* Appearance */}
