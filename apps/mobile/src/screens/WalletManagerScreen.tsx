@@ -374,7 +374,7 @@ const makeChainStyles = (C: ColorTokens) => StyleSheet.create({
   connectBtn: { backgroundColor: C.primary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: R.lg, flexDirection: 'row', alignItems: 'center', gap: 6 },
   connectText: { color: C.onPrimary, fontSize: 12, fontWeight: '800', letterSpacing: 1 },
   acctCard: {
-    backgroundColor: C.surfaceContainer, borderRadius: R.xl, padding: 16,
+    backgroundColor: C.surfaceContainer, borderRadius: 0, padding: 16,
     borderLeftWidth: 3, borderLeftColor: C.primary,
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
   },
