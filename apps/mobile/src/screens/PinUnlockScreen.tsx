@@ -138,7 +138,7 @@ export default function PinUnlockScreen() {
 }
 
 const makeStyles = (C: ColorTokens) => StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.bg, paddingHorizontal: 24 },
+  root: { flex: 1, backgroundColor: C.surface, paddingHorizontal: 24 },
   center: { alignItems: 'center' },
   logoWrap: { marginBottom: 28 },
   title: {
