@@ -157,14 +157,6 @@ export default function WalletManagerScreen() {
           onLongPressAccount={idx => handleRemoveAccount('sol', accounts.sol[idx]?.path)}
         />
 
-        <View style={s.bleCard}>
-          <View style={s.bleDot} /><View style={s.bleDotPulse} />
-          <View style={{ flex: 1 }}>
-            <Text style={s.bleTitle}>{t.vault.hardwareLinked}</Text>
-            <Text style={s.bleSub}>{t.vault.bleEncrypted}</Text>
-          </View>
-          <Icon name="verified_user" size={22} color={C.primary} />
-        </View>
         <View style={{ height: 100 }} />
       </ScrollView>
 
@@ -405,11 +397,6 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   heroSub: { color: C.text2, fontSize: 13, marginTop: 4 },
   badge: { backgroundColor: C.primary15, paddingHorizontal: 10, paddingVertical: 4, borderRadius: R.sm },
   badgeText: { color: C.primary, fontSize: 11, fontWeight: '700' },
-  bleCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.surfaceContainer, borderRadius: R.xl, padding: 16 },
-  bleDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: C.primary },
-  bleDotPulse: { position: 'absolute', left: 20, width: 10, height: 10, borderRadius: 5, backgroundColor: C.primary, opacity: 0.4 },
-  bleTitle: { color: C.text, fontSize: 13, fontWeight: '700' },
-  bleSub: { color: C.text2, fontSize: 10, letterSpacing: 1.2, marginTop: 2 },
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' },
   sheet: { backgroundColor: C.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, overflow: 'hidden', maxHeight: '80%' },
   slideClip: { overflow: 'hidden' },
