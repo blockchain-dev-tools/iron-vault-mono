@@ -11,6 +11,7 @@ import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import Button from '../components/ui/Button';
 import Icon from '../components/ui/Icon';
+import Svg, { Path } from 'react-native-svg';
 import { useBleSession } from '../hooks/useBleSession';
 import type { BleState } from '../store/AppContext';
 
@@ -131,7 +132,7 @@ export default function WalletManagerScreen() {
 
         <ChainSection
           label={t.vault.ethLabel} sub={t.vault.ethSub}
-          icon="toll"
+          iconNode={<EthIcon size={22} />}
           accounts={ethAccts}
           connectLabel={t.vault.connect}
           accountLabel={t.vault.account}
@@ -144,7 +145,7 @@ export default function WalletManagerScreen() {
 
         <ChainSection
           label={t.vault.solLabel} sub={t.vault.solSub}
-          icon="flash_on"
+          iconNode={<SolIcon size={22} />}
           accounts={solAccts}
           connectLabel={t.vault.connect}
           accountLabel={t.vault.account}
@@ -315,8 +316,30 @@ const makeBleStatusStyles = (C: ColorTokens) => StyleSheet.create({
   sub: { color: C.text2, fontSize: 12, marginTop: 2 },
 });
 
-function ChainSection({ label, sub, icon, accounts, connectLabel, accountLabel, addLabel, onConnect, onAccountClick, onAddAccount, onLongPressAccount }: {
-  label: string; sub: string; icon: string;
+
+function EthIcon({ size = 22 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M12 2L4.5 14L12 18V2Z" fill="#627EEA" />
+      <Path d="M12 2L19.5 14L12 18V2Z" fill="#627EEA" opacity="0.6" />
+      <Path d="M12 19.5V22L4.5 15.5L12 19.5Z" fill="#627EEA" />
+      <Path d="M12 19.5V22L19.5 15.5L12 19.5Z" fill="#627EEA" opacity="0.6" />
+    </Svg>
+  );
+}
+
+function SolIcon({ size = 22 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M3 5.5H17.5L21 8H6.5L3 5.5Z" fill="#9945FF" />
+      <Path d="M3 11H17.5L21 13.5H6.5L3 11Z" fill="#AB5BE8" />
+      <Path d="M3 16.5H17.5L21 19H6.5L3 16.5Z" fill="#14F195" />
+    </Svg>
+  );
+}
+
+function ChainSection({ label, sub, iconNode, accounts, connectLabel, accountLabel, addLabel, onConnect, onAccountClick, onAddAccount, onLongPressAccount }: {
+  label: string; sub: string; iconNode: React.ReactNode;
   accounts: { short: string; full: string; path: string }[];
   connectLabel: string;
   accountLabel: (n: number) => string;
@@ -333,7 +356,7 @@ function ChainSection({ label, sub, icon, accounts, connectLabel, accountLabel, 
       <View style={s.header}>
         <View style={s.chainLeft}>
           <View style={s.chainIconWrap}>
-            <Icon name={icon} size={22} color={C.text} />
+            {iconNode}
           </View>
           <View>
             <Text style={s.chainLabel}>{label}</Text>
