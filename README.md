@@ -152,12 +152,32 @@ npx react-native run-ios --device
 
 Or open `apps/mobile/ios/IronVault.xcworkspace` in Xcode and run on a connected device.
 
-### Start Metro bundler
+### Makefile (recommended, for monorepo dev)
+
+From the project root on the **host machine** (requires `cs-agent.js`):
+
+```bash
+make metro          # Start Metro + ADB forwarding (auto-waits for ready)
+make restart        # Restart Metro
+make stop           # Stop Metro
+make metro-log      # View Metro log
+make metro-status   # Check if Metro is running
+make build          # Build debug APK
+make install        # Install APK to device
+make app            # build + install
+make launch         # Force-stop + reopen app
+make dev            # metro + launch
+make all            # build + install + metro + launch
+```
+
+### Start Metro bundler (manual)
 
 ```bash
 cd apps/mobile
-npx react-native start --reset-cache
+node node_modules/.bin/react-native start --no-interactive
 ```
+
+> **Note:** Root `node_modules` must be in Metro watchFolders (`metro.config.js`) because pnpm hoists all deps to the monorepo root.
 
 ### ADB helpers
 
@@ -169,7 +189,6 @@ adb reverse tcp:8081 tcp:8081
 adb shell am start -n com.ironvault/.MainActivity
 adb shell am force-stop com.ironvault
 ```
-
 ---
 
 ## Packages
