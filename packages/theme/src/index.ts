@@ -39,11 +39,11 @@ export const DARK: ColorTokens = {
   primary25:           'rgba(143,195,34,0.25)',
 };
 
-// Light palette — matches web prototype (#FAFCF5 bg, #5f8a0e primary)
+// Light palette — matches web prototype (#FFFFFF bg, #5f8a0e primary)
 export const LIGHT: ColorTokens = {
   primary:             '#5f8a0e',
   onPrimary:           '#F3F7E6',
-  bg:                  '#FAFCF5',
+  bg:                  '#FFFFFF',
   surface:             '#FFFFFF',
   surfaceContainer:    '#E8F0D0',
   surfaceContainerLow: '#EDF4D8',
