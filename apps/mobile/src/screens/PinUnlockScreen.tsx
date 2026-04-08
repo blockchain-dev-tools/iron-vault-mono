@@ -28,8 +28,8 @@ function ShieldLogo({ primary }: { primary: string }) {
   return (
     <Svg width={62} height={70} viewBox="0 0 80 92" fill="none">
       <Path d="M40 0L80 18V52C80 72 60 88 40 92C20 88 0 72 0 52V18L40 0Z" fill={primary} />
-      <Rect x="28" y="32" width="24" height="30" rx="4" fill="#0D1A00" />
-      <Rect x="33" y="24" width="14" height="12" rx="7" stroke="#0D1A00" strokeWidth="3" fill="none" />
+      <Rect x="28" y="32" width="24" height="30" rx="4" fill="white" />
+      <Rect x="33" y="24" width="14" height="12" rx="7" stroke="white" strokeWidth="3" fill="none" />
       <Circle cx="40" cy="47" r="3" fill={primary} />
       <Rect x="39" y="49" width="2" height="6" rx="1" fill={primary} />
     </Svg>
