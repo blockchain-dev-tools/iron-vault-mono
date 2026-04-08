@@ -21,7 +21,7 @@ export default function P11() {
   const reset = () => { setDone(false); setRawOpen(false); goBack(); };
 
   if (done) return (
-    <div className="flex flex-col min-h-screen items-center justify-center px-6 text-center relative overflow-hidden">
+    <div className="flex flex-col min-h-full items-center justify-center px-6 text-center relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/10 blur-[120px] rounded-full" />
       </div>
@@ -35,7 +35,7 @@ export default function P11() {
   );
 
   return (
-    <div className="flex flex-col min-h-screen pt-16 pb-32">
+    <div className="flex flex-col min-h-full pt-16 pb-32">
       <TopBar title="Sign Request" hideBack />
       <div className="flex-1 px-6 pt-6 space-y-4 overflow-y-auto">
         {/* Origin */}

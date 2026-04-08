@@ -33,7 +33,7 @@ export default function P03() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pt-16 pb-8">
+    <div className="flex flex-col min-h-full pt-16 pb-8">
       <TopBar title="Verify Phrase" />
       <div className="flex-1 px-6 pt-6 space-y-6">
         {groups.map(({ pos, correct, opts }) => (

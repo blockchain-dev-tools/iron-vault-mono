@@ -21,7 +21,7 @@ export default function P05() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pt-16 pb-8">
+    <div className="flex flex-col min-h-full pt-16 pb-8">
       <TopBar title="Import Wallet" onBack={() => go('Welcome')} />
       <div className="flex-1 px-6 pt-6 flex flex-col gap-4">
         <p className="text-on-surface-variant text-sm font-body">Enter your 12-word BIP-39 seed phrase, separated by spaces.</p>

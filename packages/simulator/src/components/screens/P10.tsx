@@ -51,7 +51,7 @@ export default function P10() {
 
   if (!acct) {
     return (
-      <div className="flex flex-col min-h-screen pt-16 pb-24">
+      <div className="flex flex-col min-h-full pt-16 pb-24">
         <TopBar title="Account" />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-on-surface-variant text-sm font-body">No account selected</p>
@@ -61,7 +61,7 @@ export default function P10() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen pt-16 pb-24">
+    <div className="flex flex-col min-h-full pt-16 pb-24">
       <TopBar title={`${isEth ? 'Ethereum' : 'Solana'} Account ${idx + 1}`} bleState={ble} />
 
       <div className="flex-1 px-6 pt-6 space-y-4">

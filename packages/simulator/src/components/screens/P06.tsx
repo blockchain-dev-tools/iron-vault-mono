@@ -27,7 +27,7 @@ export default function P06() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pt-16 pb-24">
+    <div className="flex flex-col min-h-full pt-16 pb-24">
       <TopBar
         title="Vault"
         hideBack

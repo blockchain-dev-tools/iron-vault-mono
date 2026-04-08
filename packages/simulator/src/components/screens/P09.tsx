@@ -29,7 +29,7 @@ export default function P09() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen relative overflow-hidden">
+    <div className="flex flex-col min-h-full relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/5 blur-[120px] rounded-full" />
       </div>

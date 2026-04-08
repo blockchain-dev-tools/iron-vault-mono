@@ -12,7 +12,7 @@ export default function PhoneFrame({ children, style, className }: PhoneFramePro
   const { appLight } = useApp();
   return (
     <div
-      className={`relative overflow-hidden ${appLight ? 'light-theme' : ''} ${className ?? ''}`}
+      className={`h-full relative overflow-hidden ${appLight ? 'light-theme' : ''} ${className ?? ''}`}
       style={{ transform: 'translateZ(0)', ...style }}
     >
       {children}

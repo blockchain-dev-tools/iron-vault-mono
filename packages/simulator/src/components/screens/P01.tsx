@@ -23,7 +23,7 @@ export default function P01() {
 
   return (
     <div
-      className="flex flex-col min-h-screen px-6 relative overflow-hidden"
+      className="flex flex-col min-h-full px-6 relative overflow-hidden"
       style={{ paddingTop: 56, paddingBottom: 24, background: 'var(--c-background)' }}
     >
       {/* Geometric background */}

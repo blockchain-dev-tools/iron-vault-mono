@@ -46,7 +46,7 @@ export default function P04() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pt-16 pb-8">
+    <div className="flex flex-col min-h-full pt-16 pb-8">
       <TopBar title="Set PIN" />
       <div className="flex-1 flex flex-col items-center justify-center px-6">
         <SectionLabel error={error}>{label}</SectionLabel>

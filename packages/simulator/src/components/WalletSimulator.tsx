@@ -29,8 +29,8 @@ function PhoneContent() {
     direction === 'back'    ? 'screen-enter-back' : '';
 
   return (
-    <div className="min-h-screen max-w-md mx-auto relative bg-background overflow-hidden">
-      <div key={current} className={animClass}>
+    <div className="h-full max-w-md mx-auto relative bg-background overflow-hidden">
+      <div key={current} className={animClass + " h-full"}>
         <Screen />
       </div>
     </div>
