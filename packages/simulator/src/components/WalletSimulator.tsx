@@ -3,22 +3,22 @@ import React from 'react';
 import { NavProvider, type ScreenId } from '../lib/nav';
 import { AppProvider } from '../lib/app-context';
 import PhoneFrame from './PhoneFrame';
-import P01 from './screens/P01';
-import P02 from './screens/P02';
-import P03 from './screens/P03';
-import P04 from './screens/P04';
-import P05 from './screens/P05';
-import P06 from './screens/P06';
-import P08 from './screens/P08';
-import P09 from './screens/P09';
-import P10 from './screens/P10';
-import P11 from './screens/P11';
+import WelcomeScreen from './screens/WelcomeScreen';
+import GenerateMnemonicScreen from './screens/GenerateMnemonicScreen';
+import VerifyMnemonicScreen from './screens/VerifyMnemonicScreen';
+import SetPinScreen from './screens/SetPinScreen';
+import ImportMnemonicScreen from './screens/ImportMnemonicScreen';
+import WalletManagerScreen from './screens/WalletManagerScreen';
+import SettingsScreen from './screens/SettingsScreen';
+import PinUnlockScreen from './screens/PinUnlockScreen';
+import AccountDetailScreen from './screens/AccountDetailScreen';
+import TransactionScreen from './screens/TransactionScreen';
 import { useNav } from '../lib/nav';
 import type { WalletStorage } from '@iron-vault/wallet';
 
 const SCREENS = {
-  Welcome: P01, GenerateMnemonic: P02, VerifyMnemonic: P03, SetPin: P04, ImportMnemonic: P05,
-  Vault: P06, Settings: P08, Unlock: P09, AccountDetail: P10, Transaction: P11,
+  Welcome: WelcomeScreen, GenerateMnemonic: GenerateMnemonicScreen, VerifyMnemonic: VerifyMnemonicScreen, SetPin: SetPinScreen, ImportMnemonic: ImportMnemonicScreen,
+  Vault: WalletManagerScreen, Settings: SettingsScreen, Unlock: PinUnlockScreen, AccountDetail: AccountDetailScreen, Transaction: TransactionScreen,
 };
 
 function PhoneContent() {
