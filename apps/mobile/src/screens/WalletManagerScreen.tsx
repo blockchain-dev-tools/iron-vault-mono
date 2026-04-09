@@ -320,10 +320,16 @@ const makeBleStatusStyles = (C: ColorTokens) => StyleSheet.create({
 function EthIcon({ size = 22 }: { size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path d="M12 2L4.5 14L12 18V2Z" fill="#627EEA" />
-      <Path d="M12 2L19.5 14L12 18V2Z" fill="#627EEA" opacity="0.6" />
-      <Path d="M12 19.5V22L4.5 15.5L12 19.5Z" fill="#627EEA" />
-      <Path d="M12 19.5V22L19.5 15.5L12 19.5Z" fill="#627EEA" opacity="0.6" />
+      <Defs>
+        <LinearGradient id="ethGrad" x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">
+          <Stop offset="0" stopColor="#A78BFA" />
+          <Stop offset="1" stopColor="#3B82F6" />
+        </LinearGradient>
+      </Defs>
+      <Path d="M12 2L4.5 14L12 18V2Z" fill="url(#ethGrad)" />
+      <Path d="M12 2L19.5 14L12 18V2Z" fill="url(#ethGrad)" opacity="0.6" />
+      <Path d="M12 19.5V22L4.5 15.5L12 19.5Z" fill="url(#ethGrad)" />
+      <Path d="M12 19.5V22L19.5 15.5L12 19.5Z" fill="url(#ethGrad)" opacity="0.6" />
     </Svg>
   );
 }
