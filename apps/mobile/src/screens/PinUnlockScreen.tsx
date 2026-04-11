@@ -32,7 +32,7 @@ function ShieldLogo({ primary }: { primary: string }) {
         d="M40 0L80 18V52C80 72 60 88 40 92C20 88 0 72 0 52V18L40 0Z M32 32H48Q52 32 52 36V58Q52 62 48 62H32Q28 62 28 58V36Q28 32 32 32Z"
         fill={primary}
       />
-      <Rect x="33" y="24" width="14" height="12" rx="7" stroke="white" strokeWidth="3" fill="none" />
+      <Rect x="33" y="24" width="14" height="12" rx="7" stroke={primary} strokeWidth="3" fill="none" />
       <Circle cx="40" cy="47" r="3" fill={primary} />
       <Rect x="39" y="49" width="2" height="6" rx="1" fill={primary} />
     </Svg>
