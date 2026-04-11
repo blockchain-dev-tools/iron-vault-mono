@@ -12,7 +12,7 @@ export const EN = {
   },
   welcome: {
     title: 'Iron\nVault',
-    sub: 'Transform your old phone into a secure hardware wallet.',
+    sub: 'Transform your phone into a secure cold wallet',
     createWallet: 'Create New Wallet',
     importWallet: 'Import Existing Wallet',
     airGapped: 'AIR-GAPPED READY',

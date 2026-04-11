@@ -14,10 +14,10 @@ export const ZH: Translations = {
   },
   welcome: {
     title: 'Iron\nVault',
-    sub: '将旧手机变成安全的硬件钱包。',
+    sub: '将你的手机变成安全的冷钱包',
     createWallet: '创建新钱包',
     importWallet: '导入已有钱包',
-    airGapped: '气隙安全',
+    airGapped: '离线安全',
     airGappedSub: '私钥永远不接触互联网。',
   },
   generateMnemonic: {
