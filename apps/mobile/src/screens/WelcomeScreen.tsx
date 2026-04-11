@@ -10,6 +10,7 @@ import Button from '../components/ui/Button';
 import Icon from '../components/ui/Icon';
 import BgLines from '../components/ui/BgLines';
 import IronVaultHero from '../components/ui/IronVaultHero';
+import { Fonts } from '../lib/fonts';
 
 const LOCALE_CYCLE: LocaleMode[] = ['en', 'zh', 'system'];
 const LOCALE_LABEL: Record<LocaleMode, string> = {
@@ -106,8 +107,9 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     borderRadius: R.lg, backgroundColor: C.surfaceContainer,
     borderWidth: 1, borderColor: C.borderVariant,
   },
-  langBtnText: { color: C.text2, fontSize: 12, fontWeight: '700' },
+  langBtnText: { fontFamily: Fonts.spaceGrotesk.semiBold, color: C.text2, fontSize: 12 },
   sub: {
+    fontFamily: Fonts.manrope.regular,
     color: C.text2, fontSize: 15, textAlign: 'center', lineHeight: 22,
     maxWidth: 240, marginTop: 20,
   },
@@ -116,6 +118,6 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     flexDirection: 'row', alignItems: 'center',
     justifyContent: 'center', marginTop: 20,
   },
-  secTitle: { color: C.primary, fontSize: 10, fontWeight: '700', letterSpacing: 2, textTransform: 'uppercase' },
-  secSub: { color: C.text2, fontSize: 12, marginTop: 2 },
+  secTitle: { fontFamily: Fonts.spaceGrotesk.semiBold, color: C.primary, fontSize: 10, letterSpacing: 2, textTransform: 'uppercase' },
+  secSub: { fontFamily: Fonts.manrope.regular, color: C.text2, fontSize: 12, marginTop: 2 },
 });

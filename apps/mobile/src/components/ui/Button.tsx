@@ -4,6 +4,7 @@ import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import { useTheme } from '../../store/AppContext';
 import Icon from './Icon';
+import { Fonts } from '../../lib/fonts';
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline-danger';
 
@@ -79,5 +80,5 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     borderRadius: R.xl, width: '100%',
   },
   btnDisabled: { opacity: 0.4 },
-  text: { fontSize: 16, fontWeight: '800', letterSpacing: 1.5, textTransform: 'uppercase' },
+  text: { fontFamily: Fonts.spaceGrotesk.semiBold, fontSize: 16, letterSpacing: 1.5, textTransform: 'uppercase' },
 });

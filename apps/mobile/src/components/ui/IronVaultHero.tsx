@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../store/AppContext';
 import type { ColorTokens } from '@iron-vault/theme';
 import ShieldLogo from './ShieldLogo';
+import { Fonts } from '../../lib/fonts';
 
 export default function IronVaultHero() {
   const C = useTheme();
@@ -25,11 +26,13 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   logoWrap: { marginBottom: 40 },
   titleBlock: { alignSelf: 'center' },
   titleIron: {
-    fontSize: 52, fontWeight: '900', letterSpacing: -2, lineHeight: 44,
+    fontFamily: Fonts.spaceGrotesk.bold,
+    fontSize: 52, letterSpacing: -2, lineHeight: 44,
     textAlign: 'center', color: C.text,
   },
   titleVault: {
-    fontSize: 52, fontWeight: '900', letterSpacing: -2, lineHeight: 44,
+    fontFamily: Fonts.spaceGrotesk.bold,
+    fontSize: 52, letterSpacing: -2, lineHeight: 44,
     textAlign: 'center', color: C.primary, marginBottom: 20,
   },
 });
