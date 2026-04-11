@@ -1,10 +1,15 @@
 import 'react-native-get-random-values';
 import React, { useEffect, useState } from 'react';
+import { Text, SafeAreaView } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppProvider, useApp } from './src/store/AppContext';
 import Navigator from './src/navigation/Navigator';
 import { hasWallet } from '@iron-vault/wallet';
 import { walletStorage } from './src/lib/storage';
+
+// Global default font — applies to all <Text> unless overridden by fontFamily
+if (!Text.defaultProps) (Text as any).defaultProps = {};
+(Text as any).defaultProps.style = { fontFamily: 'SpaceGrotesk_400Regular' };
 
 function AppRoot() {
   const { reset } = useApp();

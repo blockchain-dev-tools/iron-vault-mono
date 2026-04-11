@@ -3,6 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import { useTheme } from '../../store/AppContext';
+import { Fonts } from '../../lib/fonts';
 
 export interface SegmentOption<T extends string> {
   value: T;
@@ -44,6 +45,6 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     borderWidth: 1.5, borderColor: 'transparent',
   },
   btnActive: { borderColor: C.primary, backgroundColor: C.primary12 },
-  label: { color: C.text, fontSize: 14, fontWeight: '700' },
+  label: { color: C.text, fontSize: 14, fontFamily: Fonts.spaceGrotesk.bold },
   labelActive: { color: C.primary },
 });

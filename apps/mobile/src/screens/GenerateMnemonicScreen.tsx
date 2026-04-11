@@ -6,6 +6,7 @@ import type { ColorTokens } from '@iron-vault/theme';
 import TopBar from '../components/ui/TopBar';
 import Button from '../components/ui/Button';
 import AlertBanner from '../components/ui/AlertBanner';
+import { Fonts } from '../lib/fonts';
 
 export default function GenerateMnemonicScreen() {
   const { go, goBack, generatedWords } = useApp();
@@ -19,7 +20,7 @@ export default function GenerateMnemonicScreen() {
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <AlertBanner icon={<Text style={s.warnIcon}>⚠️</Text>}>
           <Text style={s.warnText}>
-            <Text style={{ color: C.text, fontWeight: '700' }}>{t.generateMnemonic.warning}</Text>
+            <Text style={{ color: C.text, fontFamily: Fonts.spaceGrotesk.bold }}>{t.generateMnemonic.warning}</Text>
             {t.generateMnemonic.warningSub}
           </Text>
         </AlertBanner>
@@ -54,5 +55,5 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 10,
   },
   chipNum: { color: C.text2, fontSize: 11, minWidth: 18 },
-  chipWord: { color: C.text, fontSize: 14, fontWeight: '600' },
+  chipWord: { color: C.text, fontSize: 14, fontFamily: Fonts.spaceGrotesk.semiBold },
 });

@@ -5,6 +5,7 @@ import { useApp, useTheme, useLocale } from '../../store/AppContext';
 import type { ScreenName } from '../../store/AppContext';
 import type { ColorTokens } from '@iron-vault/theme';
 import Icon from './Icon';
+import { Fonts } from '../../lib/fonts';
 
 export default function BottomNav() {
   const { current, go } = useApp();
@@ -51,6 +52,6 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   },
   item: { flex: 1, alignItems: 'center', gap: 3, paddingVertical: 2, borderRadius: 12 },
   itemActive: { backgroundColor: C.primary12 },
-  label: { color: C.textDisabled, fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', fontWeight: '600' },
+  label: { color: C.textDisabled, fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', fontFamily: Fonts.spaceGrotesk.semiBold },
   labelActive: { color: C.primary },
 });

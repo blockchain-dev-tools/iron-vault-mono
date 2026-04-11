@@ -4,6 +4,7 @@ import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import { useTheme } from '../../store/AppContext';
 import PinDots from './PinDots';
+import { Fonts } from '../../lib/fonts';
 
 interface PinPadProps {
   onComplete: (pin: string, reset: () => void) => void;
@@ -96,5 +97,5 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   keyEmpty: { backgroundColor: 'transparent' },
-  keyText: { color: C.text, fontSize: 24, fontWeight: '500' },
+  keyText: { color: C.text, fontSize: 24, fontFamily: Fonts.spaceGrotesk.regular },
 });

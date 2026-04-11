@@ -12,6 +12,7 @@ import SectionLabel from '../components/ui/SectionLabel';
 import Icon from '../components/ui/Icon';
 import LogViewer from '../components/ui/LogViewer';
 import { useBleSession } from '../hooks/useBleSession';
+import { Fonts } from '../lib/fonts';
 
 export default function AccountDetailScreen() {
   const { goBack, accounts, currentChain, currentAcctIdx, bleState } = useApp();
@@ -110,7 +111,7 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   content: { paddingHorizontal: 20, paddingTop: 20, gap: 16 },
   addrHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   copyIconWrap: { padding: 6, backgroundColor: C.surfaceContainerLow, borderRadius: R.lg },
-  addrNetwork: { color: C.text, fontSize: 16, fontWeight: '700', marginBottom: 12 },
+  addrNetwork: { color: C.text, fontSize: 16, fontFamily: Fonts.spaceGrotesk.bold, marginBottom: 12 },
   addrBox: { backgroundColor: C.surfaceContainerLow, borderRadius: R.lg, padding: 14, borderWidth: 1, borderColor: C.borderVariant },
   addrText: { color: C.primary, fontSize: 13, fontFamily: 'monospace', lineHeight: 20 },
   qrWrap: { alignItems: 'center', paddingVertical: 20 },

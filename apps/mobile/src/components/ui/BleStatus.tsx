@@ -3,6 +3,7 @@ import { Animated, StyleSheet, Text, View } from 'react-native';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import { useTheme } from '../../store/AppContext';
+import { Fonts } from '../../lib/fonts';
 
 type BleState = 'idle' | 'broadcasting' | 'connected' | 'error';
 
@@ -118,7 +119,7 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     borderRadius: 5, backgroundColor: C.primary, opacity: 0.5,
   },
   textWrap: { flex: 1 },
-  title: { color: C.text, fontSize: 13, fontWeight: '700', letterSpacing: 0.3 },
+  title: { color: C.text, fontSize: 13, fontFamily: Fonts.spaceGrotesk.bold, letterSpacing: 0.3 },
   titleError: { color: '#DC2626' },
   sub: { color: C.text2, fontSize: 11, marginTop: 2 },
   icon: { fontSize: 18 },
@@ -127,6 +128,6 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     backgroundColor: C.surfaceContainer,
     borderWidth: 1, borderColor: C.borderVariant,
   },
-  tipsTitle: { color: C.text, fontSize: 12, fontWeight: '700', marginBottom: 8, letterSpacing: 0.5 },
+  tipsTitle: { color: C.text, fontSize: 12, fontFamily: Fonts.spaceGrotesk.bold, marginBottom: 8, letterSpacing: 0.5 },
   tipLine: { color: C.text2, fontSize: 12, lineHeight: 20 },
 });

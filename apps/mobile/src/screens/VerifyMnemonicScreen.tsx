@@ -5,6 +5,7 @@ import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import TopBar from '../components/ui/TopBar';
 import SectionLabel from '../components/ui/SectionLabel';
+import { Fonts } from '../lib/fonts';
 
 const POSITIONS = [2, 6, 10];
 function shuffle<T>(arr: T[]): T[] { return [...arr].sort(() => Math.random() - 0.5); }
@@ -84,7 +85,7 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
   content: { paddingHorizontal: 20, paddingTop: 20 },
   errorBanner: { backgroundColor: C.errorContainer, borderWidth: 1, borderColor: C.error, borderRadius: R.lg, padding: 12, marginBottom: 16, alignItems: 'center' },
-  errorText: { color: C.error, fontSize: 13, fontWeight: '700' },
+  errorText: { color: C.error, fontSize: 13, fontFamily: Fonts.spaceGrotesk.bold },
   group: { marginBottom: 24 },
   opts: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   opt: {

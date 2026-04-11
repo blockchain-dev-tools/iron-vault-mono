@@ -3,6 +3,7 @@ import { Modal, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, Vi
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import { useTheme } from '../../store/AppContext';
+import { Fonts } from '../../lib/fonts';
 
 export interface DropdownOption<T extends string> {
   value: T;
@@ -80,6 +81,6 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   },
   itemBorder: { borderBottomWidth: 1, borderBottomColor: C.borderVariant },
   itemText: { color: C.text, fontSize: 16 },
-  itemTextActive: { color: C.primary, fontWeight: '700' },
-  check: { color: C.primary, fontSize: 16, fontWeight: '700' },
+  itemTextActive: { color: C.primary, fontFamily: Fonts.spaceGrotesk.bold },
+  check: { color: C.primary, fontSize: 16, fontFamily: Fonts.spaceGrotesk.bold },
 });

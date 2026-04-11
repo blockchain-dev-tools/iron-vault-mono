@@ -10,6 +10,7 @@ import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import TopBar from '../components/ui/TopBar';
 import Button from '../components/ui/Button';
+import { Fonts } from '../lib/fonts';
 
 export default function ImportMnemonicScreen() {
   const { go, setGeneratedWords, setPassphrase } = useApp();
@@ -163,19 +164,19 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   suggestChip: { backgroundColor: C.surfaceContainer, borderWidth: 1, borderColor: C.border, borderRadius: R.lg, paddingHorizontal: 14, paddingVertical: 7 },
   suggestChipExact: { backgroundColor: C.primary15, borderColor: C.primary },
   suggestText: { color: C.text2, fontSize: 13, fontFamily: 'monospace' },
-  suggestTextExact: { color: C.primary, fontWeight: '700' },
+  suggestTextExact: { color: C.primary, fontFamily: Fonts.spaceGrotesk.bold },
   status: { fontSize: 12, marginTop: 8, letterSpacing: 1, textTransform: 'uppercase' },
   statusValid: { color: C.primary },
   statusInvalid: { color: C.error },
   advancedToggle: { flexDirection: 'row', alignItems: 'center', marginTop: 20, paddingVertical: 8, gap: 8 },
-  advancedToggleText: { color: C.text2, fontSize: 13, fontWeight: '600' },
+  advancedToggleText: { color: C.text2, fontSize: 13, fontFamily: Fonts.spaceGrotesk.semiBold },
   activeDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: C.primary },
   advancedBox: {
     backgroundColor: C.surfaceContainer, borderRadius: R.xl,
     borderWidth: 1, borderColor: C.borderVariant,
     padding: 16, gap: 10,
   },
-  advancedLabel: { color: C.text, fontSize: 14, fontWeight: '700' },
+  advancedLabel: { color: C.text, fontSize: 14, fontFamily: Fonts.spaceGrotesk.bold },
   advancedDesc: { color: C.text2, fontSize: 12, lineHeight: 18 },
   passphraseRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   passphraseInput: {

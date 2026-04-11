@@ -5,6 +5,7 @@ import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import { useTheme } from '../../store/AppContext';
 import Icon from './Icon';
+import { Fonts } from '../../lib/fonts';
 
 interface TopBarProps {
   title: string;
@@ -61,12 +62,12 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   right: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   backBtn: { padding: 4 },
   shieldWrap: { padding: 4 },
-  title: { color: C.text, fontSize: 15, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase' },
+  title: { color: C.text, fontSize: 15, fontFamily: Fonts.spaceGrotesk.bold, letterSpacing: 0.5, textTransform: 'uppercase' },
   bleBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 10, paddingVertical: 5,
     backgroundColor: C.surfaceContainerLow, borderRadius: R.lg,
   },
-  bleText: { color: C.text2, fontSize: 10, letterSpacing: 1.2, textTransform: 'uppercase', fontWeight: '500' },
+  bleText: { color: C.text2, fontSize: 10, letterSpacing: 1.2, textTransform: 'uppercase', fontFamily: Fonts.spaceGrotesk.regular },
   bleTextActive: { color: C.text2 },
 });

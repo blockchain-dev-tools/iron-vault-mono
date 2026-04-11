@@ -9,6 +9,7 @@ import PinPad from '../components/ui/PinPad';
 import PinDots from '../components/ui/PinDots';
 import BgLines from '../components/ui/BgLines';
 import IronVaultHero from '../components/ui/IronVaultHero';
+import { Fonts } from '../lib/fonts';
 
 const MAX_ATTEMPTS = 5;
 
@@ -122,7 +123,7 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     marginTop: 32, paddingVertical: 14, paddingHorizontal: 40,
     borderRadius: 10, borderWidth: 1.5, borderColor: C.error,
   },
-  resetBtnLargeText: { color: C.error, fontSize: 15, fontWeight: '700' },
+  resetBtnLargeText: { color: C.error, fontSize: 15, fontFamily: Fonts.spaceGrotesk.bold },
   resetLink: { alignItems: 'center', paddingVertical: 12 },
   resetLinkText: { color: C.textDisabled, fontSize: 12, textDecorationLine: 'underline' },
 });

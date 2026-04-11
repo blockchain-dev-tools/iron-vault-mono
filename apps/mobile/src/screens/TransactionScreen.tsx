@@ -9,6 +9,7 @@ import SectionLabel from '../components/ui/SectionLabel';
 import Button from '../components/ui/Button';
 import Icon from '../components/ui/Icon';
 import AlertBanner from '../components/ui/AlertBanner';
+import { Fonts } from '../lib/fonts';
 
 export default function TransactionScreen() {
   const { pendingTx, setPendingTx, goBack } = useApp();
@@ -108,7 +109,7 @@ export default function TransactionScreen() {
         {/* Warning */}
         <AlertBanner icon={<Icon name="warning" size={18} color={C.error} />}>
           <Text style={s.warnText}>
-            <Text style={{ color: C.error, fontWeight: '700' }}>{t.transaction.warningTitle}</Text>
+            <Text style={{ color: C.error, fontFamily: Fonts.spaceGrotesk.bold }}>{t.transaction.warningTitle}</Text>
             {t.transaction.warningSub}
           </Text>
         </AlertBanner>
@@ -135,11 +136,11 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   content: { paddingHorizontal: 20, paddingTop: 20, gap: 16 },
   originRow: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 4 },
   originIconWrap: { width: 52, height: 52, borderRadius: 16, backgroundColor: C.primary12, alignItems: 'center', justifyContent: 'center' },
-  originName: { color: C.text, fontSize: 17, fontWeight: '700' },
+  originName: { color: C.text, fontSize: 17, fontFamily: Fonts.spaceGrotesk.bold },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: C.borderVariant },
   rowLabel: { color: C.text2, fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase' },
-  rowValue: { color: C.text, fontSize: 14, fontWeight: '500', maxWidth: '60%', textAlign: 'right' },
-  rowValueAccent: { color: C.primary, fontSize: 16, fontWeight: '700' },
+  rowValue: { color: C.text, fontSize: 14, fontFamily: Fonts.spaceGrotesk.regular, maxWidth: '60%', textAlign: 'right' },
+  rowValueAccent: { color: C.primary, fontSize: 16, fontFamily: Fonts.spaceGrotesk.bold },
   rawToggle: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderTopWidth: 1, borderTopColor: C.borderVariant },
   rawLabel: { color: C.text2, fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase' },
   rawChevron: { color: C.text2, fontSize: 12 },
@@ -153,6 +154,6 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   secureNote: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5 },
   secureNoteText: { color: C.textDisabled, fontSize: 9, letterSpacing: 2 },
   successRoot: { flex: 1, backgroundColor: C.bg, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 },
-  successTitle: { color: C.text, fontSize: 32, fontWeight: '800', marginBottom: 8, marginTop: 16 },
+  successTitle: { color: C.text, fontSize: 32, fontFamily: Fonts.spaceGrotesk.bold, marginBottom: 8, marginTop: 16 },
   successSub: { color: C.text2, fontSize: 15, textAlign: 'center' },
 });

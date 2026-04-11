@@ -15,6 +15,7 @@ import LogViewer from '../components/ui/LogViewer';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useBleSession } from '../hooks/useBleSession';
 import type { BleState } from '../store/AppContext';
+import { Fonts } from '../lib/fonts';
 
 const PATH_RE = /^m(\/\d+'?)+$/;
 
@@ -296,7 +297,7 @@ const makeBleStatusStyles = (C: ColorTokens) => StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.primary8, borderRadius: R.xl, padding: 14, borderWidth: 1, borderColor: C.primary25, marginBottom: 14 },
   dot: { width: 12, height: 12, borderRadius: 6, backgroundColor: C.primary, flexShrink: 0 },
   dotConnected: { backgroundColor: '#4caf50' },
-  title: { color: C.text, fontSize: 14, fontWeight: '700' },
+  title: { color: C.text, fontSize: 14, fontFamily: Fonts.spaceGrotesk.bold },
   sub: { color: C.text2, fontSize: 12, marginTop: 2 },
 });
 
@@ -389,11 +390,11 @@ const makeChainStyles = (C: ColorTokens) => StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   chainLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   chainIconWrap: { width: 40, height: 40, borderRadius: 20, backgroundColor: C.surfaceContainer, alignItems: 'center', justifyContent: 'center' },
-  chainLabel: { color: C.text, fontSize: 20, fontWeight: '800' },
+  chainLabel: { color: C.text, fontSize: 20, fontFamily: Fonts.spaceGrotesk.bold },
   chainSub: { color: C.text2, fontSize: 12, fontFamily: 'monospace' },
   btnRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   connectBtn: { backgroundColor: C.primary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: R.lg, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  connectText: { color: C.onPrimary, fontSize: 12, fontWeight: '800', letterSpacing: 1 },
+  connectText: { color: C.onPrimary, fontSize: 12, fontFamily: Fonts.spaceGrotesk.bold, letterSpacing: 1 },
   acctCard: {
     backgroundColor: C.surfaceContainer, borderRadius: 0, padding: 16,
     borderLeftWidth: 3, borderLeftColor: C.primary,
@@ -404,7 +405,7 @@ const makeChainStyles = (C: ColorTokens) => StyleSheet.create({
   acctAddr: { color: C.text, fontSize: 14, fontFamily: 'monospace', fontWeight: '600' },
   acctPath: { color: C.text2, fontSize: 10, fontFamily: 'monospace' },
   addRow: { paddingVertical: 14, alignItems: 'center', borderRadius: R.xl, borderWidth: 1.5, borderColor: C.primary, borderStyle: 'dashed' },
-  addRowText: { color: C.primary, fontSize: 13, fontWeight: '700' },
+  addRowText: { color: C.primary, fontSize: 13, fontFamily: Fonts.spaceGrotesk.bold },
 });
 
 const makeStyles = (C: ColorTokens) => StyleSheet.create({
@@ -412,30 +413,30 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   scroll: { flex: 1 },
   content: { paddingHorizontal: 20, paddingTop: 20, gap: 24 },
   hero: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  heroTitle: { color: C.text, fontSize: 28, fontWeight: '800' },
+  heroTitle: { color: C.text, fontSize: 28, fontFamily: Fonts.spaceGrotesk.bold },
   heroSub: { color: C.text2, fontSize: 13, marginTop: 4 },
   badge: { backgroundColor: C.primary15, paddingHorizontal: 10, paddingVertical: 4, borderRadius: R.sm },
-  badgeText: { color: C.primary, fontSize: 11, fontWeight: '700' },
+  badgeText: { color: C.primary, fontSize: 11, fontFamily: Fonts.spaceGrotesk.bold },
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' },
   sheet: { backgroundColor: C.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, overflow: 'hidden', maxHeight: '80%' },
   slideClip: { overflow: 'hidden' },
   slideRow: { flexDirection: 'row' },
   panel: { padding: 24 },
   sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  sheetTitle: { color: C.text, fontSize: 18, fontWeight: '800' },
+  sheetTitle: { color: C.text, fontSize: 18, fontFamily: Fonts.spaceGrotesk.bold },
   detailBtn: { paddingVertical: 4, paddingHorizontal: 10, borderRadius: R.lg, backgroundColor: C.surfaceContainer },
-  detailBtnText: { color: C.primary, fontSize: 13, fontWeight: '700' },
+  detailBtnText: { color: C.primary, fontSize: 13, fontFamily: Fonts.spaceGrotesk.bold },
   backBtn: { paddingVertical: 4, paddingHorizontal: 10, borderRadius: R.lg, backgroundColor: C.surfaceContainer },
-  backBtnText: { color: C.primary, fontSize: 13, fontWeight: '700' },
+  backBtnText: { color: C.primary, fontSize: 13, fontFamily: Fonts.spaceGrotesk.bold },
   clearBtn: { paddingVertical: 4, paddingHorizontal: 10, borderRadius: R.lg, backgroundColor: C.surfaceContainer },
   clearBtnText: { color: C.text2, fontSize: 12 },
   step: { flexDirection: 'row', gap: 12, marginBottom: 14, alignItems: 'flex-start' },
   stepNum: { width: 24, height: 24, borderRadius: 12, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  stepNumText: { color: C.onPrimary, fontSize: 12, fontWeight: '800' },
+  stepNumText: { color: C.onPrimary, fontSize: 12, fontFamily: Fonts.spaceGrotesk.bold },
   stepText: { color: C.text2, fontSize: 13, flex: 1, lineHeight: 18 },
   // Add account sheet
   advToggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, paddingHorizontal: 14, borderRadius: R.lg, backgroundColor: C.surfaceContainer, marginBottom: 4 },
-  advToggleText: { color: C.primary, fontSize: 13, fontWeight: '700' },
+  advToggleText: { color: C.primary, fontSize: 13, fontFamily: Fonts.spaceGrotesk.bold },
   pathLabel: { color: C.text2, fontSize: 11, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 8, marginTop: 8 },
   pathInput: {
     backgroundColor: C.surfaceContainer, borderRadius: R.lg,
