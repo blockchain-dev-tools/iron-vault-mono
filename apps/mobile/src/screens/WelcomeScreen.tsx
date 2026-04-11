@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Svg, { Path, Rect, Circle, Defs, Pattern, Line } from 'react-native-svg';
+import Svg, { Path, Rect, Defs, Pattern, Line } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { generateMnemonic } from '@iron-vault/wallet';
 import { useApp, useTheme, useLocale } from '../store/AppContext';
@@ -40,11 +40,12 @@ function BgLines({ color }: { color: string }) {
 function ShieldLogo({ primary }: { primary: string }) {
   return (
     <Svg width={88} height={100} viewBox="0 0 80 92" fill="none">
-      <Path d="M40 0L80 18V52C80 72 60 88 40 92C20 88 0 72 0 52V18L40 0Z" fill={primary} />
-      <Rect x="28" y="32" width="24" height="30" rx="4" fill="#0D1A00" />
-      <Rect x="33" y="24" width="14" height="12" rx="7" stroke="#0D1A00" strokeWidth="3" fill="none" />
-      <Circle cx="40" cy="47" r="3" fill={primary} />
-      <Rect x="39" y="49" width="2" height="6" rx="1" fill={primary} />
+      <Path
+        fillRule="evenodd"
+        d="M40 0L80 18V52C80 72 60 88 40 92C20 88 0 72 0 52V18L40 0Z M32 32H48Q52 32 52 36V58Q52 62 48 62H32Q28 62 28 58V36Q28 32 32 32Z"
+        fill={primary}
+      />
+      <Rect x="33" y="24" width="14" height="12" rx="7" stroke="white" strokeWidth="3" fill="none" />
     </Svg>
   );
 }
