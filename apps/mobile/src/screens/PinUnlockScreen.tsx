@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Svg, { Path, Rect, Defs, Pattern, Line } from 'react-native-svg';
+import Svg, { Path, Rect, Circle, Defs, Pattern, Line } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { unlockWallet, clearWallet } from '@iron-vault/wallet';
 import { walletStorage } from '../lib/storage';
@@ -33,6 +33,8 @@ function ShieldLogo({ primary }: { primary: string }) {
         fill={primary}
       />
       <Rect x="33" y="24" width="14" height="12" rx="7" stroke="white" strokeWidth="3" fill="none" />
+      <Circle cx="40" cy="47" r="3" fill={primary} />
+      <Rect x="39" y="49" width="2" height="6" rx="1" fill={primary} />
     </Svg>
   );
 }
