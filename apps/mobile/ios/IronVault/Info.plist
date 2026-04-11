@@ -46,6 +46,9 @@
 		<string>Manrope_500Medium.ttf</string>
 		<string>Manrope_700Bold.ttf</string>
 		<string>Manrope_800ExtraBold.ttf</string>
+		<string>NotoSansSC-Regular.ttf</string>
+		<string>NotoSansSC-Medium.ttf</string>
+		<string>NotoSansSC-Bold.ttf</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
