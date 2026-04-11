@@ -3,6 +3,7 @@ node_modules/
 dist/
 .next/
 *.log
+.omc/
 
 # TypeScript build cache
 *.tsbuildinfo
@@ -13,3 +14,6 @@ apps/mobile/android/app/.cxx/
 
 # SSG build output
 apps/website/out/
+
+# Superpowers AI planning artifacts
+docs/superpowers/

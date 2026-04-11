@@ -1,0 +1,18 @@
+import React from 'react';
+
+export default function EthIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="ethgrad" x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#A78BFA" />
+          <stop offset="100%" stopColor="#3B82F6" />
+        </linearGradient>
+      </defs>
+      <path d="M12 2L4.5 14L12 18V2Z" fill="url(#ethgrad)" />
+      <path d="M12 2L19.5 14L12 18V2Z" fill="url(#ethgrad)" opacity="0.6" />
+      <path d="M12 19.5V22L4.5 15.5L12 19.5Z" fill="url(#ethgrad)" />
+      <path d="M12 19.5V22L19.5 15.5L12 19.5Z" fill="url(#ethgrad)" opacity="0.6" />
+    </svg>
+  );
+}

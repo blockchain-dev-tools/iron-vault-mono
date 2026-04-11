@@ -8,6 +8,7 @@
     "start": "next start -p 3002"
   },
   "dependencies": {
+    "@iron-vault/assets": "workspace:*",
     "@iron-vault/simulator": "workspace:^",
     "@iron-vault/wallet": "workspace:*",
     "next": "^14.2.0",
