@@ -112,7 +112,7 @@ export default function WelcomeScreen() {
       <View style={s.actions}>
         <Button variant="primary" icon="arrow_forward" onPress={handleCreate}>{t.welcome.createWallet}</Button>
         <View style={{ height: 12 }} />
-        <Button variant="secondary" icon="arrow_downward" onPress={() => go('ImportMnemonic')}>{t.welcome.importWallet}</Button>
+        <Button variant="secondary" icon="download" onPress={() => go('ImportMnemonic')}>{t.welcome.importWallet}</Button>
       </View>
 
       {/* Security info */}
