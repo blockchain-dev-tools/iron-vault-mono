@@ -82,11 +82,11 @@ export default function WelcomeScreen() {
 
       {/* Security info */}
       <View style={s.secRow}>
-        <Icon name="verified_user" size={20} color={C.primary} />
-        <View style={{ marginLeft: 10 }}>
-          <Text style={s.secTitle}>{t.welcome.airGapped}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Icon name="verified_user" size={18} color={C.primary} />
+            <Text style={s.secTitle}>{t.welcome.airGapped}</Text>
+          </View>
           <Text style={s.secSub}>{t.welcome.airGappedSub}</Text>
-        </View>
       </View>
     </View>
   );
@@ -115,9 +115,9 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   },
   actions: { width: '100%', marginBottom: 16 },
   secRow: {
-    flexDirection: 'row', alignItems: 'center',
+    flexDirection: 'column', alignItems: 'center',
     justifyContent: 'center', marginTop: 20,
   },
-  secTitle: { fontFamily: Fonts.spaceGrotesk.semiBold, color: C.primary, fontSize: 10, letterSpacing: 2, textTransform: 'uppercase' },
+  secTitle: { fontFamily: Fonts.spaceGrotesk.semiBold, color: C.primary, fontSize: 14, letterSpacing: 2, textTransform: 'uppercase' },
   secSub: { fontFamily: Fonts.manrope.regular, color: C.text2, fontSize: 12, marginTop: 2 },
 });
