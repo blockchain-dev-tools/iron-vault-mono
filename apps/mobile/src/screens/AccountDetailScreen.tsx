@@ -10,6 +10,7 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import SectionLabel from '../components/ui/SectionLabel';
 import Icon from '../components/ui/Icon';
+import LogViewer from '../components/ui/LogViewer';
 import { useBleSession } from '../hooks/useBleSession';
 
 export default function AccountDetailScreen() {
@@ -84,15 +85,7 @@ export default function AccountDetailScreen() {
         {logs.length > 0 && (
           <View>
             <SectionLabel>{t.accountDetail.activity}</SectionLabel>
-            <View style={s.logBox}>
-              <ScrollView style={{ maxHeight: 140 }} showsVerticalScrollIndicator={false}>
-                {logs.map((l, i) => (
-                  <Text key={i} style={s.logLine}>
-                    <Text style={s.logTime}>{l.time} </Text>{l.msg}
-                  </Text>
-                ))}
-              </ScrollView>
-            </View>
+            <LogViewer logs={logs} maxHeight={140} />
           </View>
         )}
 
@@ -123,9 +116,6 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   qrWrap: { alignItems: 'center', paddingVertical: 20 },
   qrInner: { padding: 12, borderRadius: R.lg },
   addrPath: { color: C.text2, fontSize: 10, fontFamily: 'monospace', marginTop: 4 },
-  logBox: { backgroundColor: C.surfaceContainer, borderRadius: R.lg, padding: 12 },
-  logLine: { color: C.text2, fontSize: 11, fontFamily: 'monospace', lineHeight: 16 },
-  logTime: { color: C.textDisabled },
   hint: { color: C.text2, fontSize: 13, textAlign: 'center', lineHeight: 18 },
   btnWrap: { paddingHorizontal: 20, paddingBottom: 8 },
 });

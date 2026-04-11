@@ -11,6 +11,7 @@ import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import Button from '../components/ui/Button';
 import Icon from '../components/ui/Icon';
+import LogViewer from '../components/ui/LogViewer';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useBleSession } from '../hooks/useBleSession';
 import type { BleState } from '../store/AppContext';
@@ -29,7 +30,6 @@ export default function WalletManagerScreen() {
   const [adding, setAdding] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
-  const logScrollRef = useRef<ScrollView>(null);
   const { width: screenWidth } = useWindowDimensions();
 
   const ethAccts = accounts.eth;
@@ -209,23 +209,7 @@ export default function WalletManagerScreen() {
 
                   <BleStatusRow state={bleState} />
 
-                  <View style={s.logBox}>
-                    <ScrollView
-                      ref={logScrollRef}
-                      onContentSizeChange={() => logScrollRef.current?.scrollToEnd({ animated: true })}
-                      style={{ flex: 1 }}
-                      showsVerticalScrollIndicator={false}>
-                      {logs.length === 0 ? (
-                        <Text style={s.logEmpty}>{t.vault.waitingBle}</Text>
-                      ) : (
-                        logs.map((l, i) => (
-                          <Text key={i} style={s.logLine}>
-                            <Text style={s.logTime}>{l.time} </Text>{l.msg}
-                          </Text>
-                        ))
-                      )}
-                    </ScrollView>
-                  </View>
+                  <LogViewer logs={logs} emptyText={t.vault.waitingBle} height={200} />
                   <View style={{ height: 12 }} />
                   <Button variant="outline-danger" onPress={closeConnectSheet}>{t.vault.stopClose}</Button>
                 </View>
@@ -449,10 +433,6 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   stepNum: { width: 24, height: 24, borderRadius: 12, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   stepNumText: { color: C.onPrimary, fontSize: 12, fontWeight: '800' },
   stepText: { color: C.text2, fontSize: 13, flex: 1, lineHeight: 18 },
-  logBox: { backgroundColor: C.surfaceContainer, borderRadius: R.lg, padding: 12, height: 200 },
-  logLine: { color: C.text2, fontSize: 11, fontFamily: 'monospace', lineHeight: 16 },
-  logTime: { color: C.textDisabled },
-  logEmpty: { color: C.textDisabled, fontSize: 12, textAlign: 'center', marginTop: 16 },
   // Add account sheet
   advToggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, paddingHorizontal: 14, borderRadius: R.lg, backgroundColor: C.surfaceContainer, marginBottom: 4 },
   advToggleText: { color: C.primary, fontSize: 13, fontWeight: '700' },

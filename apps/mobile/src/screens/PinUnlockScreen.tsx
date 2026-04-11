@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Svg, { Path, Rect, Circle, Defs, Pattern, Line } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { unlockWallet, clearWallet } from '@iron-vault/wallet';
 import { walletStorage } from '../lib/storage';
@@ -8,35 +7,10 @@ import { useApp, useTheme, useLocale } from '../store/AppContext';
 import type { ColorTokens } from '@iron-vault/theme';
 import PinPad from '../components/ui/PinPad';
 import PinDots from '../components/ui/PinDots';
+import BgLines from '../components/ui/BgLines';
+import IronVaultHero from '../components/ui/IronVaultHero';
 
 const MAX_ATTEMPTS = 5;
-
-function BgLines({ color }: { color: string }) {
-  return (
-    <Svg style={StyleSheet.absoluteFill} opacity={0.025}>
-      <Defs>
-        <Pattern id="diag" x="0" y="0" width="57" height="57" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-          <Line x1="0" y1="0" x2="0" y2="57" stroke={color} strokeWidth="1" />
-        </Pattern>
-      </Defs>
-      <Rect x="0" y="0" width="100%" height="100%" fill="url(#diag)" />
-    </Svg>
-  );
-}
-
-function ShieldLogo({ primary }: { primary: string }) {
-  return (
-    <Svg width={88} height={100} viewBox="0 0 80 92" fill="none">
-      <Path
-        fillRule="evenodd"
-        d="M40 0L80 18V52C80 72 60 88 40 92C20 88 0 72 0 52V18L40 0Z M32 32H48Q52 32 52 36V52Q52 56 48 56H32Q28 56 28 52V36Q28 32 32 32Z M33 32Q33 24 40 24Q47 24 47 32Z M36 32Q36 27 40 27Q44 27 44 32Z"
-        fill={primary}
-      />
-      <Circle cx="40" cy="42" r="3" fill={primary} />
-      <Rect x="39" y="44" width="2" height="6" rx="1" fill={primary} />
-    </Svg>
-  );
-}
 
 export default function PinUnlockScreen() {
   const { reset: navReset, setAccounts } = useApp();
@@ -101,13 +75,7 @@ export default function PinUnlockScreen() {
 
       <View style={s.center}>
         {/* Hero */}
-        <View style={s.logoWrap}>
-          <ShieldLogo primary={C.primary} />
-        </View>
-        <View style={s.titleBlock}>
-          <Text style={s.titleIron}>IRON</Text>
-          <Text style={s.titleVault}>VAULT</Text>
-        </View>
+        <IronVaultHero />
 
         <Text style={s.sub}>{locked ? t.pinUnlock.locked : t.pinUnlock.enterPin}</Text>
 
@@ -145,16 +113,6 @@ export default function PinUnlockScreen() {
 const makeStyles = (C: ColorTokens) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.surface, paddingHorizontal: 24 },
   center: { alignItems: 'center' },
-  logoWrap: { marginBottom: 40 },
-  titleBlock: { alignSelf: 'center' },
-  titleIron: {
-    fontSize: 52, fontWeight: '900', letterSpacing: -2, lineHeight: 44, textAlign: 'center',
-    color: C.text,
-  },
-  titleVault: {
-    fontSize: 52, fontWeight: '900', letterSpacing: -2, lineHeight: 44, textAlign: 'center',
-    color: C.primary, marginBottom: 20,
-  },
   sub: { color: C.text2, fontSize: 11, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 4 },
   loadingArea: { alignItems: 'center' },
   spinner: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },

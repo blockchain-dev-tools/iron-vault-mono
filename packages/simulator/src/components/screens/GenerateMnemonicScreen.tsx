@@ -5,6 +5,7 @@ import { useApp } from '../../lib/app-context';
 import { generateMnemonic } from '@iron-vault/wallet';
 import TopBar from '../ui/TopBar';
 import Button from '../ui/Button';
+import AlertBanner from '../ui/AlertBanner';
 
 export default function P02() {
   const { go } = useNav();
@@ -22,12 +23,13 @@ export default function P02() {
     <div className="flex flex-col min-h-full pt-16 pb-8">
       <TopBar title="Backup Seed Phrase" />
       <div className="flex-1 px-6 pt-6 flex flex-col">
-        <div className="flex gap-3 p-4 bg-error-container/10 border border-error/20 rounded-xl mb-6">
-          <span className="material-symbols-outlined text-error flex-shrink-0">warning</span>
-          <p className="text-xs text-on-surface-variant leading-relaxed font-body">
-            <span className="font-bold text-on-surface">Write these 12 words on paper.</span>{' '}
-            This is the only way to recover your wallet. Never screenshot or share.
-          </p>
+        <div className="mb-6">
+          <AlertBanner icon={<span className="material-symbols-outlined text-error flex-shrink-0">warning</span>}>
+            <p className="text-xs text-on-surface-variant leading-relaxed font-body">
+              <span className="font-bold text-on-surface">Write these 12 words on paper.</span>{' '}
+              This is the only way to recover your wallet. Never screenshot or share.
+            </p>
+          </AlertBanner>
         </div>
 
         <div className="grid grid-cols-2 gap-2 mb-6">

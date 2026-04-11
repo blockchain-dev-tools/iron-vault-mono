@@ -8,6 +8,7 @@ import Card from '../components/ui/Card';
 import SectionLabel from '../components/ui/SectionLabel';
 import Button from '../components/ui/Button';
 import Icon from '../components/ui/Icon';
+import AlertBanner from '../components/ui/AlertBanner';
 
 export default function TransactionScreen() {
   const { pendingTx, setPendingTx, goBack } = useApp();
@@ -105,13 +106,12 @@ export default function TransactionScreen() {
         )}
 
         {/* Warning */}
-        <View style={s.warn}>
-          <Icon name="warning" size={18} color={C.error} />
+        <AlertBanner icon={<Icon name="warning" size={18} color={C.error} />}>
           <Text style={s.warnText}>
             <Text style={{ color: C.error, fontWeight: '700' }}>{t.transaction.warningTitle}</Text>
             {t.transaction.warningSub}
           </Text>
-        </View>
+        </AlertBanner>
         <View style={{ height: 120 }} />
       </ScrollView>
 
@@ -145,7 +145,6 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   rawChevron: { color: C.text2, fontSize: 12 },
   rawBox: { backgroundColor: C.surfaceContainerLow, borderRadius: R.lg, padding: 12, borderWidth: 1, borderColor: C.borderVariant },
   rawText: { color: C.text2, fontSize: 10, fontFamily: 'monospace', lineHeight: 16 },
-  warn: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', backgroundColor: C.errorContainer, borderRadius: R.xl, padding: 14, borderWidth: 1, borderColor: C.error },
   warnText: { color: C.text2, fontSize: 13, lineHeight: 18, flex: 1 },
   actions: { paddingHorizontal: 20, paddingBottom: 24, paddingTop: 12, borderTopWidth: 1, borderTopColor: C.border, backgroundColor: C.surface },
   actionRow: { flexDirection: 'row', gap: 12, marginBottom: 10 },

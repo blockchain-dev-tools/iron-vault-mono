@@ -7,6 +7,7 @@ import TopBar from '../ui/TopBar';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import SectionLabel from '../ui/SectionLabel';
+import AlertBanner from '../ui/AlertBanner';
 
 const RAW = '0xa9059cbb000000000000000000000000b38553a5ee906bea5b8a0195b7725b58b3f89c23880000000000000000000000000000000000000000000000008ac7230489e80000';
 
@@ -81,12 +82,11 @@ export default function P11() {
         </div>
 
         {/* Warning */}
-        <div className="flex gap-3 p-4 bg-error-container/10 border border-error/20 rounded-xl">
-          <span className="material-symbols-outlined text-error flex-shrink-0">warning</span>
+        <AlertBanner icon={<span className="material-symbols-outlined text-error flex-shrink-0">warning</span>}>
           <p className="text-xs text-on-surface-variant leading-relaxed font-body">
             <span className="font-bold text-error">Double-check recipient.</span> Signed transactions are permanent and cannot be reversed.
           </p>
-        </div>
+        </AlertBanner>
       </div>
 
       {/* Bottom actions */}
