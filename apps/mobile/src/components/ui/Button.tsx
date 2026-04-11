@@ -79,5 +79,5 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     borderRadius: R.xl, width: '100%',
   },
   btnDisabled: { opacity: 0.4 },
-  text: { fontSize: 14, fontWeight: '800', letterSpacing: 1.5, textTransform: 'uppercase' },
+  text: { fontSize: 16, fontWeight: '800', letterSpacing: 1.5, textTransform: 'uppercase' },
 });
