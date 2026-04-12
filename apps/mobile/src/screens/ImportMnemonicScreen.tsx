@@ -11,6 +11,7 @@ import type { ColorTokens } from '@iron-vault/theme';
 import TopBar from '../components/ui/TopBar';
 import Button from '../components/ui/Button';
 import LangPicker from '../components/ui/LangPicker';
+import PassphraseBox from '../components/ui/PassphraseBox';
 import { Fonts } from '../lib/fonts';
 
 export default function ImportMnemonicScreen() {
@@ -20,9 +21,7 @@ export default function ImportMnemonicScreen() {
   const s = useMemo(() => makeStyles(C), [C]);
   const [input, setInput] = useState('');
   const [selectedLang, setSelectedLang] = useState<Bip39Language>('en');
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [passphraseInput, setPassphraseInput] = useState('');
-  const [showPassphrase, setShowPassphrase] = useState(false);
 
   const words = input.trim().split(/[\s\u3000]+/).filter(Boolean);
   const isValid = words.length === 12 && validateMnemonicWithWordlist(input.trim(), selectedLang);
@@ -58,9 +57,11 @@ export default function ImportMnemonicScreen() {
     return t.importMnemonic.valid;
   };
 
+  const status = statusText();
+
   const handleConfirm = () => {
     if (!isValid) return;
-    setGeneratedWords(input.trim().split(/[\s\u3000]+/));
+    setGeneratedWords(words);
     setPassphrase(passphraseInput);
     go('SetPin');
   };
@@ -86,6 +87,7 @@ export default function ImportMnemonicScreen() {
           placeholderTextColor={C.textDisabled}
           autoCapitalize="none"
           autoCorrect={false}
+          // secureTextEntry breaks CJK IME composition; only mask latin wordlists
           secureTextEntry={selectedLang === 'en'}
           spellCheck={false}
         />
@@ -104,51 +106,17 @@ export default function ImportMnemonicScreen() {
           </View>
         )}
 
-        {!!statusText() && (
-          <Text style={[s.status, isValid ? s.statusValid : s.statusInvalid]}>
-            {statusText()}
-          </Text>
-        )}
+        {!!status && <Text style={[s.status, isValid ? s.statusValid : s.statusInvalid]}>{status}</Text>}
 
-        <TouchableOpacity
-          style={s.advancedToggle}
-          onPress={() => setShowAdvanced(v => !v)}
-          activeOpacity={0.7}>
-          <Text style={s.advancedToggleText}>
-            {showAdvanced ? '▾' : '▸'} {t.importMnemonic.advanced}
-          </Text>
-          {passphraseInput.length > 0 && !showAdvanced && (
-            <View style={s.activeDot} />
-          )}
-        </TouchableOpacity>
-
-        {showAdvanced && (
-          <View style={s.advancedBox}>
-            <Text style={s.advancedLabel}>{t.importMnemonic.passphraseLabel}</Text>
-            <Text style={s.advancedDesc}>{t.importMnemonic.passphraseDesc}</Text>
-            <View style={s.passphraseRow}>
-              <TextInput
-                style={s.passphraseInput}
-                value={passphraseInput}
-                onChangeText={setPassphraseInput}
-                placeholder={t.importMnemonic.passphrasePlaceholder}
-                placeholderTextColor={C.textDisabled}
-                secureTextEntry={true}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-              <TouchableOpacity
-                style={s.eyeBtn}
-                onPress={() => setShowPassphrase(v => !v)}
-                activeOpacity={0.7}>
-                <Text style={s.eyeIcon}>{showPassphrase ? '🙈' : '👁'}</Text>
-              </TouchableOpacity>
-            </View>
-            {passphraseInput.length > 0 && (
-              <Text style={s.passphraseHint}>{t.importMnemonic.passphraseHint}</Text>
-            )}
-          </View>
-        )}
+        <PassphraseBox
+          value={passphraseInput}
+          onChange={setPassphraseInput}
+          toggleLabel={t.importMnemonic.advanced}
+          label={t.importMnemonic.passphraseLabel}
+          description={t.importMnemonic.passphraseDesc}
+          placeholder={t.importMnemonic.passphrasePlaceholder}
+          hint={t.importMnemonic.passphraseHint}
+        />
 
         <View style={{ height: 24 }} />
         <Button variant="primary" disabled={!isValid} onPress={handleConfirm}>
@@ -180,23 +148,5 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   status: { fontSize: 12, marginTop: 8, letterSpacing: 1, textTransform: 'uppercase' },
   statusValid: { color: C.primary },
   statusInvalid: { color: C.error },
-  advancedToggle: { flexDirection: 'row', alignItems: 'center', marginTop: 20, paddingVertical: 8, gap: 8 },
-  advancedToggleText: { color: C.text2, fontSize: 13, fontFamily: Fonts.spaceGrotesk.semiBold },
-  activeDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: C.primary },
-  advancedBox: {
-    backgroundColor: C.surfaceContainer, borderRadius: R.xl,
-    borderWidth: 1, borderColor: C.borderVariant,
-    padding: 16, gap: 10,
-  },
-  advancedLabel: { color: C.text, fontSize: 14, fontFamily: Fonts.spaceGrotesk.bold },
-  advancedDesc: { color: C.text2, fontSize: 12, lineHeight: 18 },
-  passphraseRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  passphraseInput: {
-    flex: 1, backgroundColor: C.bg, borderWidth: 1.5, borderColor: C.border,
-    borderRadius: R.lg, color: C.text, fontSize: 14, padding: 12,
-  },
-  eyeBtn: { padding: 8 },
-  eyeIcon: { fontSize: 20 },
-  passphraseHint: { color: C.error, fontSize: 11, lineHeight: 16 },
   hint: { color: C.text2, fontSize: 11, textAlign: 'center', marginTop: 10 },
 });

@@ -1,8 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import {
-  ScrollView, StyleSheet, Text, TextInput,
-  TouchableOpacity, View,
-} from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { reencodeMnemonic } from '@iron-vault/wallet';
 import type { Bip39Language } from '@iron-vault/wallet';
 import { useApp, useTheme, useLocale } from '../store/AppContext';
@@ -12,6 +9,7 @@ import TopBar from '../components/ui/TopBar';
 import Button from '../components/ui/Button';
 import AlertBanner from '../components/ui/AlertBanner';
 import LangPicker from '../components/ui/LangPicker';
+import PassphraseBox from '../components/ui/PassphraseBox';
 import { Fonts } from '../lib/fonts';
 
 export default function GenerateMnemonicScreen() {
@@ -19,9 +17,7 @@ export default function GenerateMnemonicScreen() {
   const C = useTheme();
   const t = useLocale();
   const s = useMemo(() => makeStyles(C), [C]);
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [passphraseInput, setPassphraseInput] = useState('');
-  const [showPassphrase, setShowPassphrase] = useState(false);
 
   const handleLangChange = (newLang: Bip39Language) => {
     if (newLang === mnemonicLang) return;
@@ -58,46 +54,15 @@ export default function GenerateMnemonicScreen() {
           ))}
         </View>
 
-        {/* Advanced passphrase */}
-        <TouchableOpacity
-          style={s.advancedToggle}
-          onPress={() => setShowAdvanced(v => !v)}
-          activeOpacity={0.7}>
-          <Text style={s.advancedToggleText}>
-            {showAdvanced ? '▾' : '▸'} {t.generateMnemonic.advanced}
-          </Text>
-          {passphraseInput.length > 0 && !showAdvanced && (
-            <View style={s.activeDot} />
-          )}
-        </TouchableOpacity>
-
-        {showAdvanced && (
-          <View style={s.advancedBox}>
-            <Text style={s.advancedLabel}>{t.generateMnemonic.passphraseLabel}</Text>
-            <Text style={s.advancedDesc}>{t.generateMnemonic.passphraseDesc}</Text>
-            <View style={s.passphraseRow}>
-              <TextInput
-                style={s.passphraseInput}
-                value={passphraseInput}
-                onChangeText={setPassphraseInput}
-                placeholder={t.generateMnemonic.passphrasePlaceholder}
-                placeholderTextColor={C.textDisabled}
-                secureTextEntry={!showPassphrase}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-              <TouchableOpacity
-                style={s.eyeBtn}
-                onPress={() => setShowPassphrase(v => !v)}
-                activeOpacity={0.7}>
-                <Text style={s.eyeIcon}>{showPassphrase ? '🙈' : '👁'}</Text>
-              </TouchableOpacity>
-            </View>
-            {passphraseInput.length > 0 && (
-              <Text style={s.passphraseHint}>{t.generateMnemonic.passphraseHint}</Text>
-            )}
-          </View>
-        )}
+        <PassphraseBox
+          value={passphraseInput}
+          onChange={setPassphraseInput}
+          toggleLabel={t.generateMnemonic.advanced}
+          label={t.generateMnemonic.passphraseLabel}
+          description={t.generateMnemonic.passphraseDesc}
+          placeholder={t.generateMnemonic.passphrasePlaceholder}
+          hint={t.generateMnemonic.passphraseHint}
+        />
 
         <View style={{ height: 24 }} />
         <Button variant="primary" onPress={handleContinue}>{t.generateMnemonic.writtenDown}</Button>
@@ -121,22 +86,4 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   },
   chipNum: { color: C.text2, fontSize: 11, minWidth: 18 },
   chipWord: { color: C.text, fontSize: 14, fontFamily: Fonts.spaceGrotesk.semiBold },
-  advancedToggle: { flexDirection: 'row', alignItems: 'center', marginTop: 20, paddingVertical: 8, gap: 8 },
-  advancedToggleText: { color: C.text2, fontSize: 13, fontFamily: Fonts.spaceGrotesk.semiBold },
-  activeDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: C.primary },
-  advancedBox: {
-    backgroundColor: C.surfaceContainer, borderRadius: R.xl,
-    borderWidth: 1, borderColor: C.borderVariant,
-    padding: 16, gap: 10,
-  },
-  advancedLabel: { color: C.text, fontSize: 14, fontFamily: Fonts.spaceGrotesk.bold },
-  advancedDesc: { color: C.text2, fontSize: 12, lineHeight: 18 },
-  passphraseRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  passphraseInput: {
-    flex: 1, backgroundColor: C.bg, borderWidth: 1.5, borderColor: C.border,
-    borderRadius: R.lg, color: C.text, fontSize: 14, padding: 12,
-  },
-  eyeBtn: { padding: 8 },
-  eyeIcon: { fontSize: 20 },
-  passphraseHint: { color: C.error, fontSize: 11, lineHeight: 16 },
 });
