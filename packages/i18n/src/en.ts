@@ -19,7 +19,7 @@ export const EN = {
     airGappedSub: 'Private keys never touch the internet.',
   },
   collectEntropy: {
-    title: 'Collect Entropy',
+    title: 'Add Randomness',
     hint: 'Draw randomly on the canvas to add entropy',
     hintDone: 'Entropy collected',
     continue: 'Continue',

@@ -115,6 +115,6 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     flexDirection: 'column', alignItems: 'center',
     justifyContent: 'center', marginTop: 20,
   },
-  secTitle: { fontFamily: Fonts.spaceGrotesk.semiBold, color: C.primary, fontSize: 14, letterSpacing: 2, textTransform: 'uppercase' },
+  secTitle: { fontFamily: Fonts.spaceGrotesk.semiBold, color: C.primary, fontSize: 14, textTransform: 'uppercase' },
   secSub: { fontFamily: Fonts.manrope.regular, color: C.text2, fontSize: 12, marginTop: 2 },
 });

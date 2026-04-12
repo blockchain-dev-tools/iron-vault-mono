@@ -21,7 +21,7 @@ export const ZH: Translations = {
     airGappedSub: '私钥永远不接触互联网。',
   },
   collectEntropy: {
-    title: '收集熵值',
+    title: '生成随机种子',
     hint: '在画布上随意涂画以增加随机性',
     hintDone: '熵值收集完毕',
     continue: '继续',
