@@ -86,6 +86,7 @@ export default function ImportMnemonicScreen() {
           placeholderTextColor={C.textDisabled}
           autoCapitalize="none"
           autoCorrect={false}
+          secureTextEntry={selectedLang === 'en'}
           spellCheck={false}
         />
 
@@ -132,7 +133,7 @@ export default function ImportMnemonicScreen() {
                 onChangeText={setPassphraseInput}
                 placeholder={t.importMnemonic.passphrasePlaceholder}
                 placeholderTextColor={C.textDisabled}
-                secureTextEntry={!showPassphrase}
+                secureTextEntry={true}
                 autoCapitalize="none"
                 autoCorrect={false}
               />
