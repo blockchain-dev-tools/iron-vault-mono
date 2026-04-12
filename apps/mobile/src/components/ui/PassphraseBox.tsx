@@ -4,6 +4,7 @@ import { useTheme } from '../../store/AppContext';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import { Fonts } from '../../lib/fonts';
+import Icon from './Icon';
 
 interface Props {
   value: string;
@@ -49,7 +50,7 @@ export default function PassphraseBox({ value, onChange, toggleLabel, label, des
               autoCorrect={false}
             />
             <TouchableOpacity style={s.eyeBtn} onPress={() => setShowPassphrase(v => !v)} activeOpacity={0.7}>
-              <Text style={s.eyeIcon}>{showPassphrase ? '🙈' : '👁'}</Text>
+              <Icon name={showPassphrase ? 'visibility-off' : 'visibility'} size={20} color={C.text2} />
             </TouchableOpacity>
           </View>
           {value.length > 0 && <Text style={s.hint}>{hint}</Text>}
@@ -76,6 +77,5 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     borderRadius: R.lg, color: C.text, fontSize: 14, padding: 12,
   },
   eyeBtn: { padding: 8 },
-  eyeIcon: { fontSize: 20 },
   hint: { color: C.error, fontSize: 11, lineHeight: 16 },
 });
