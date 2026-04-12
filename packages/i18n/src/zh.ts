@@ -20,11 +20,22 @@ export const ZH: Translations = {
     airGapped: '离线安全',
     airGappedSub: '私钥永远不接触互联网。',
   },
+  collectEntropy: {
+    title: '收集熵值',
+    hint: '在画布上随意涂画以增加随机性',
+    hintDone: '熵值收集完毕',
+    continue: '继续',
+  },
   generateMnemonic: {
     title: '备份助记词',
     writtenDown: '我已抄写完毕',
     warning: '请将这 12 个词抄写在纸上。',
     warningSub: '这是找回钱包的唯一方式，切勿截图或分享。',
+    advanced: '高级选项',
+    passphraseLabel: 'BIP-39 密语',
+    passphraseDesc: '可选的额外安全短语（第 25 个词）。留空则为标准钱包。不同的密语会派生出完全不同的地址集合。',
+    passphrasePlaceholder: '输入助记词密语（可选）',
+    passphraseHint: '⚠ 请牢记此密语 — 丢失密语将导致无法访问钱包。',
   },
   verifyMnemonic: {
     title: '验证助记词',
@@ -168,5 +179,18 @@ export const ZH: Translations = {
   nav: {
     vault: '资产库',
     settings: '设置',
+  },
+  languages: {
+    selectorLabel: '词库语言',
+    en: 'English',
+    'zh-Hans': '简体中文',
+    'zh-Hant': '繁體中文',
+    cs: 'Čeština',
+    fr: 'Français',
+    it: 'Italiano',
+    ja: '日本語',
+    ko: '한국어',
+    pt: 'Português',
+    es: 'Español',
   },
 };

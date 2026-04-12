@@ -18,11 +18,22 @@ export const EN = {
     airGapped: 'AIR-GAPPED READY',
     airGappedSub: 'Private keys never touch the internet.',
   },
+  collectEntropy: {
+    title: 'Collect Entropy',
+    hint: 'Draw randomly on the canvas to add entropy',
+    hintDone: 'Entropy collected',
+    continue: 'Continue',
+  },
   generateMnemonic: {
     title: 'Backup Seed Phrase',
     writtenDown: "I've Written It Down",
     warning: 'Write these 12 words on paper.',
     warningSub: ' This is the only way to recover your wallet. Never screenshot or share.',
+    advanced: 'Advanced',
+    passphraseLabel: 'BIP-39 Passphrase',
+    passphraseDesc: 'Optional extra security phrase (25th word). Leave empty for standard wallet. A different passphrase derives a completely different set of addresses.',
+    passphrasePlaceholder: 'Enter passphrase (optional)',
+    passphraseHint: '⚠ Remember this phrase — losing it means losing access to your wallet.',
   },
   verifyMnemonic: {
     title: 'Verify Phrase',
@@ -166,6 +177,19 @@ export const EN = {
   nav: {
     vault: 'Vault',
     settings: 'Settings',
+  },
+  languages: {
+    selectorLabel: 'Wordlist',
+    en: 'English',
+    'zh-Hans': '简体中文',
+    'zh-Hant': '繁體中文',
+    cs: 'Čeština',
+    fr: 'Français',
+    it: 'Italiano',
+    ja: '日本語',
+    ko: '한국어',
+    pt: 'Português',
+    es: 'Español',
   },
 };
 

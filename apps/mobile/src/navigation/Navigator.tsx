@@ -24,9 +24,11 @@ import SettingsScreen         from '../screens/SettingsScreen';
 import PinUnlockScreen        from '../screens/PinUnlockScreen';
 import AccountDetailScreen    from '../screens/AccountDetailScreen';
 import TransactionScreen      from '../screens/TransactionScreen';
+import EntropyScreen         from '../screens/EntropyScreen';
 
 const SCREENS = {
   Welcome:          WelcomeScreen,
+  Entropy:          EntropyScreen,
   GenerateMnemonic: GenerateMnemonicScreen,
   VerifyMnemonic:   VerifyMnemonicScreen,
   SetPin:           SetPinScreen,

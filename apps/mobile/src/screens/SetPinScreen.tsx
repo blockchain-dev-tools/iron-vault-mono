@@ -8,7 +8,7 @@ import TopBar from '../components/ui/TopBar';
 import PinPad from '../components/ui/PinPad';
 
 export default function SetPinScreen() {
-  const { reset: navReset, goBack, generatedWords, passphrase, setAccounts, setGeneratedWords, setPassphrase } = useApp();
+  const { reset: navReset, goBack, generatedWords, passphrase, setAccounts, setGeneratedWords, setPassphrase, mnemonicLang, setMnemonicEntropy, setMnemonicLang } = useApp();
   const C = useTheme();
   const t = useLocale();
   const s = useMemo(() => makeStyles(C), [C]);
@@ -38,7 +38,7 @@ export default function SetPinScreen() {
         try {
           const mnemonic = isChangingPin
             ? (await walletStorage.getItem('wallet.mnemonic')) ?? ''
-            : generatedWords.join(' ');
+            : generatedWords.join(mnemonicLang === 'ja' ? '\u3000' : ' ');
           const accts = await setupWallet(walletStorage, mnemonic, pin, passphrase);
           setAccounts(accts);
           if (isChangingPin) {
@@ -46,6 +46,8 @@ export default function SetPinScreen() {
           } else {
             setGeneratedWords([]);
             setPassphrase('');
+            setMnemonicEntropy(null);
+            setMnemonicLang('en');
             navReset('Vault');
           }
         } catch (e: any) {

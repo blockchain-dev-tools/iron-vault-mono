@@ -1,10 +1,19 @@
 import { sha256 } from '@noble/hashes/sha2.js';
 import { pbkdf2Async } from '@noble/hashes/pbkdf2.js';
 import { bytesToHex, hexToBytes, randomBytes } from '@noble/hashes/utils.js';
-import { generateMnemonic, validateMnemonic, deriveAccountsFromPaths } from '@iron-vault/crypto';
+import {
+  generateMnemonic, validateMnemonic, deriveAccountsFromPaths,
+  generateMnemonicWithWordlist, validateMnemonicWithWordlist,
+  mnemonicToEntropy, entropyToMnemonic, reencodeMnemonic, BIP39_WORDLISTS,
+} from '@iron-vault/crypto';
 import type { WalletStorage, WalletAccounts } from './types';
 
-export { generateMnemonic, validateMnemonic };
+export {
+  generateMnemonic, validateMnemonic,
+  generateMnemonicWithWordlist, validateMnemonicWithWordlist,
+  mnemonicToEntropy, entropyToMnemonic, reencodeMnemonic, BIP39_WORDLISTS,
+};
+export type { Bip39Language } from '@iron-vault/crypto';
 
 // Storage keys
 const PIN_KDF_KEY       = 'wallet.pinKdf';
@@ -57,7 +66,7 @@ export async function setupWallet(
   s: WalletStorage,
   mnemonic: string,
   pin: string,
-  _passphrase = '',
+  passphrase = '',
 ): Promise<WalletAccounts> {
   const salt = randomBytes(16);
   const hash = await kdfPin(pin, salt);
@@ -65,7 +74,7 @@ export async function setupWallet(
   await s.removeItem(PIN_HASH_KEY);
   await s.setItem(MNEMONIC_KEY, mnemonic);
   await s.setItem(ACCOUNT_PATHS_KEY, JSON.stringify(DEFAULT_PATHS));
-  return deriveAccountsFromPaths(mnemonic, DEFAULT_PATHS.eth, DEFAULT_PATHS.sol);
+  return deriveAccountsFromPaths(mnemonic, DEFAULT_PATHS.eth, DEFAULT_PATHS.sol, passphrase);
 }
 
 export async function unlockWallet(

@@ -3,13 +3,14 @@ import {
   ScrollView, StyleSheet, Text, TextInput,
   TouchableOpacity, View,
 } from 'react-native';
-import { wordlist } from '@scure/bip39/wordlists/english.js';
-import { validateMnemonic } from '@iron-vault/wallet';
+import { BIP39_WORDLISTS, validateMnemonicWithWordlist } from '@iron-vault/wallet';
+import type { Bip39Language } from '@iron-vault/wallet';
 import { useApp, useTheme, useLocale } from '../store/AppContext';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import TopBar from '../components/ui/TopBar';
 import Button from '../components/ui/Button';
+import LangPicker from '../components/ui/LangPicker';
 import { Fonts } from '../lib/fonts';
 
 export default function ImportMnemonicScreen() {
@@ -18,28 +19,35 @@ export default function ImportMnemonicScreen() {
   const t = useLocale();
   const s = useMemo(() => makeStyles(C), [C]);
   const [input, setInput] = useState('');
+  const [selectedLang, setSelectedLang] = useState<Bip39Language>('en');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [passphraseInput, setPassphraseInput] = useState('');
   const [showPassphrase, setShowPassphrase] = useState(false);
 
-  const words = input.trim().split(/\s+/).filter(Boolean);
-  const isValid = words.length === 12 && validateMnemonic(input.trim());
+  const words = input.trim().split(/[\s\u3000]+/).filter(Boolean);
+  const isValid = words.length === 12 && validateMnemonicWithWordlist(input.trim(), selectedLang);
 
   const lastPartial = useMemo(() => {
-    if (!input || input.endsWith(' ')) return '';
-    const parts = input.split(' ');
+    if (!input || input.match(/[\s\u3000]$/)) return '';
+    const parts = input.split(/[\s\u3000]/);
     return parts[parts.length - 1].toLowerCase();
   }, [input]);
 
   const suggestions = useMemo(() => {
     if (lastPartial.length < 2) return [];
-    return wordlist.filter(w => w.startsWith(lastPartial)).slice(0, 5);
-  }, [lastPartial]);
+    return BIP39_WORDLISTS[selectedLang].filter(w => w.startsWith(lastPartial)).slice(0, 5);
+  }, [lastPartial, selectedLang]);
 
   const applySuggestion = (word: string) => {
-    const parts = input.split(' ');
+    const sep = selectedLang === 'ja' ? '\u3000' : ' ';
+    const parts = input.split(/[\s\u3000]/);
     parts[parts.length - 1] = word;
-    setInput(parts.join(' ') + ' ');
+    setInput(parts.join(sep) + sep);
+  };
+
+  const handleLangChange = (lang: Bip39Language) => {
+    setSelectedLang(lang);
+    setInput('');
   };
 
   const statusText = () => {
@@ -52,7 +60,7 @@ export default function ImportMnemonicScreen() {
 
   const handleConfirm = () => {
     if (!isValid) return;
-    setGeneratedWords(input.trim().split(/\s+/));
+    setGeneratedWords(input.trim().split(/[\s\u3000]+/));
     setPassphrase(passphraseInput);
     go('SetPin');
   };
@@ -66,6 +74,8 @@ export default function ImportMnemonicScreen() {
         showsVerticalScrollIndicator={false}>
 
         <Text style={s.sub}>{t.importMnemonic.sub}</Text>
+
+        <LangPicker value={selectedLang} onChange={handleLangChange} />
 
         <TextInput
           style={[s.input, !!lastPartial && suggestions.length > 0 && s.inputActive]}
@@ -155,13 +165,14 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   content: { paddingHorizontal: 20, paddingTop: 20 },
   sub: { color: C.text2, fontSize: 14, marginBottom: 14, lineHeight: 20 },
   input: {
-    backgroundColor: C.surfaceContainer, borderWidth: 1.5, borderColor: C.border,
+    marginTop: 12,
+    backgroundColor: C.surfaceContainerLow, borderWidth: 1.5, borderColor: C.border,
     borderRadius: R.xl, color: C.text, fontSize: 14, lineHeight: 21,
     padding: 16, minHeight: 120, textAlignVertical: 'top',
   },
   inputActive: { borderColor: C.primary },
   suggestRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10, marginBottom: 2 },
-  suggestChip: { backgroundColor: C.surfaceContainer, borderWidth: 1, borderColor: C.border, borderRadius: R.lg, paddingHorizontal: 14, paddingVertical: 7 },
+  suggestChip: { backgroundColor: C.surfaceContainerLow, borderWidth: 1, borderColor: C.border, borderRadius: R.lg, paddingHorizontal: 14, paddingVertical: 7 },
   suggestChipExact: { backgroundColor: C.primary15, borderColor: C.primary },
   suggestText: { color: C.text2, fontSize: 13, fontFamily: 'monospace' },
   suggestTextExact: { color: C.primary, fontFamily: Fonts.spaceGrotesk.bold },

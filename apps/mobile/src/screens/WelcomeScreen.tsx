@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { generateMnemonic } from '@iron-vault/wallet';
 import { useApp, useTheme, useLocale } from '../store/AppContext';
 import type { LocaleMode, ThemeMode } from '../store/AppContext';
 import { R } from '@iron-vault/theme';
@@ -27,16 +26,14 @@ const THEME_ICON: Record<ThemeMode, string> = {
 };
 
 export default function WelcomeScreen() {
-  const { go, setGeneratedWords, localeMode, setLocaleMode, themeMode, setThemeMode } = useApp();
+  const { go, localeMode, setLocaleMode, themeMode, setThemeMode } = useApp();
   const C = useTheme();
   const t = useLocale();
   const s = useMemo(() => makeStyles(C), [C]);
   const insets = useSafeAreaInsets();
 
   const handleCreate = () => {
-    const m = generateMnemonic(128);
-    setGeneratedWords(m.split(' '));
-    go('GenerateMnemonic');
+    go('Entropy');
   };
 
   const cycleLocale = () => {

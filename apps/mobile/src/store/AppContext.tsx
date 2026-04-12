@@ -11,6 +11,7 @@ import { AppState, useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { WalletAccounts } from '@iron-vault/wallet';
 import { addAccount as serviceAddAccount, removeAccount as serviceRemoveAccount } from '@iron-vault/wallet';
+import type { Bip39Language } from '@iron-vault/wallet';
 import { DARK, LIGHT } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import { resolveTranslations } from '../i18n';
@@ -23,7 +24,7 @@ const THEME_KEY = 'app.theme';
 const LOCALE_KEY = 'app.locale';
 
 export type ScreenName =
-  | 'Welcome' | 'GenerateMnemonic' | 'VerifyMnemonic' | 'SetPin' | 'ImportMnemonic'
+  | 'Welcome' | 'Entropy' | 'GenerateMnemonic' | 'VerifyMnemonic' | 'SetPin' | 'ImportMnemonic'
   | 'Vault' | 'Settings' | 'Unlock' | 'AccountDetail' | 'Transaction';
 
 export interface ScreenEntry {
@@ -59,6 +60,10 @@ interface AppCtx {
   setAccounts: (a: WalletAccounts) => void;
   generatedWords: string[];
   setGeneratedWords: (w: string[]) => void;
+  mnemonicEntropy: Uint8Array | null;
+  setMnemonicEntropy: (e: Uint8Array | null) => void;
+  mnemonicLang: Bip39Language;
+  setMnemonicLang: (l: Bip39Language) => void;
   passphrase: string;
   setPassphrase: (p: string) => void;
   currentChain: 'eth' | 'sol';
@@ -108,6 +113,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [direction, setDirection] = useState<NavDirection>('reset');
   const [accounts, setAccounts] = useState<WalletAccounts>(EMPTY_ACCOUNTS);
   const [generatedWords, setGeneratedWords] = useState<string[]>([]);
+  const [mnemonicEntropy, setMnemonicEntropy] = useState<Uint8Array | null>(null);
+  const [mnemonicLang, setMnemonicLang] = useState<Bip39Language>('en');
   const [passphrase, setPassphrase] = useState('');
   const [currentChain, setCurrentChain] = useState<'eth' | 'sol'>('eth');
   const [currentAcctIdx, setCurrentAcctIdx] = useState(0);
@@ -206,6 +213,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       current, direction, go, goBack, reset, canGoBack,
       accounts, setAccounts,
       generatedWords, setGeneratedWords,
+      mnemonicEntropy, setMnemonicEntropy,
+      mnemonicLang, setMnemonicLang,
       passphrase, setPassphrase,
       currentChain, currentAcctIdx, setCurrentAccount,
       addAccount,
@@ -215,7 +224,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       themeMode, setThemeMode,
       localeMode, setLocaleMode,
     }),
-    [current, direction, canGoBack, accounts, generatedWords, passphrase,
+    [current, direction, canGoBack, accounts, generatedWords, mnemonicEntropy, mnemonicLang, passphrase,
      currentChain, currentAcctIdx, bleState, pendingTx, themeMode, localeMode,
      addAccount, removeAccount],
   );
