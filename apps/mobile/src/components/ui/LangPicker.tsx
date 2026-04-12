@@ -108,7 +108,7 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: C.surfaceContainer,
+    backgroundColor: C.surfaceContainerLow,
     borderWidth: 1,
     borderColor: C.borderVariant,
     borderRadius: R.xl,

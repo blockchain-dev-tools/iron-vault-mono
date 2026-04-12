@@ -115,7 +115,7 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   warnText: { color: C.text2, fontSize: 13, lineHeight: 19, flex: 1 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 20 },
   chip: {
-    width: '47%', backgroundColor: C.surfaceContainer, borderRadius: R.lg,
+    width: '47%', backgroundColor: C.surfaceContainerLow, borderRadius: R.lg,
     paddingVertical: 12, paddingHorizontal: 14,
     flexDirection: 'row', alignItems: 'center', gap: 10,
   },
