@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Animated, Easing, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View,
+  Animated, Dimensions, Easing, Modal, Pressable, StatusBar, StyleSheet, Text, TouchableOpacity, View, useColorScheme,
 } from 'react-native';
 import type { Bip39Language } from '@iron-vault/wallet';
-import { useTheme, useLocale } from '../../store/AppContext';
+import { useTheme, useLocale, useApp } from '../../store/AppContext';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import { Fonts } from '../../lib/fonts';
@@ -13,7 +13,7 @@ export const BIP39_LANGS: Bip39Language[] = [
   'en', 'zh-Hans', 'zh-Hant', 'cs', 'fr', 'it', 'ja', 'ko', 'pt', 'es',
 ];
 
-const SHEET_HEIGHT = 480;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface Props {
   value: Bip39Language;
@@ -23,15 +23,18 @@ interface Props {
 export default function LangPicker({ value, onChange }: Props) {
   const C = useTheme();
   const t = useLocale();
+  const { themeMode } = useApp();
+  const systemScheme = useColorScheme();
+  const isDark = themeMode === 'dark' || (themeMode === 'system' && systemScheme === 'dark');
   const s = useMemo(() => makeStyles(C), [C]);
   const [open, setOpen] = useState(false);
-  const slideY = useRef(new Animated.Value(SHEET_HEIGHT)).current;
+  const slideY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
   useEffect(() => {
     if (open) {
       Animated.timing(slideY, {
         toValue: 0,
-        duration: 340,
+        duration: 380,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }).start();
@@ -40,12 +43,12 @@ export default function LangPicker({ value, onChange }: Props) {
 
   const close = (cb?: () => void) => {
     Animated.timing(slideY, {
-      toValue: SHEET_HEIGHT,
+      toValue: SCREEN_HEIGHT,
       duration: 220,
       useNativeDriver: true,
     }).start(() => {
       setOpen(false);
-      slideY.setValue(SHEET_HEIGHT);
+      slideY.setValue(SCREEN_HEIGHT);
       cb?.();
     });
   };
@@ -66,37 +69,38 @@ export default function LangPicker({ value, onChange }: Props) {
 
       {/* Modal: fade for backdrop, Animated for sheet */}
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => close()}>
-        <Pressable style={s.backdrop} onPress={() => close()} />
-        <Animated.View style={[s.sheet, { transform: [{ translateY: slideY }] }]}>
-          <View style={s.handle} />
+        {!isDark && <StatusBar backgroundColor="rgba(0,0,0,0.3)" barStyle="light-content" />}
+        <View style={s.modalRoot}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => close()} />
+          <Animated.View style={[s.sheet, { transform: [{ translateY: slideY }] }]}>
+            <View style={s.handle} />
 
-          <View style={s.sheetHeader}>
-            <Text style={s.sheetTitle}>{t.languages.selectorLabel}</Text>
-            <TouchableOpacity onPress={() => close()} hitSlop={12}>
-              <Icon name="close" size={20} color={C.text2} />
-            </TouchableOpacity>
-          </View>
-
-          {BIP39_LANGS.map((lang, i) => {
-            const active = lang === value;
-            return (
-              <TouchableOpacity
-                key={lang}
-                style={[s.row, i < BIP39_LANGS.length - 1 && s.rowBorder]}
-                onPress={() => select(lang)}
-                activeOpacity={0.7}>
-                <Text style={[s.rowText, active && s.rowTextActive]}>
-                  {t.languages[lang]}
-                </Text>
-                {active && <Icon name="check" size={18} color={C.primary} />}
+            <View style={s.sheetHeader}>
+              <Text style={s.sheetTitle}>{t.languages.selectorLabel}</Text>
+              <TouchableOpacity onPress={() => close()} hitSlop={12}>
+                <Icon name="close" size={20} color={C.text2} />
               </TouchableOpacity>
-            );
-          })}
+            </View>
 
-          <View style={s.sheetBottom} />
-          {/* Overflow buffer — covers the gap exposed when sheet slides off screen */}
-          <View style={s.sheetOverflow} />
-        </Animated.View>
+            {BIP39_LANGS.map((lang, i) => {
+              const active = lang === value;
+              return (
+                <TouchableOpacity
+                  key={lang}
+                  style={[s.row, i < BIP39_LANGS.length - 1 && s.rowBorder]}
+                  onPress={() => select(lang)}
+                  activeOpacity={0.7}>
+                  <Text style={[s.rowText, active && s.rowTextActive]}>
+                    {t.languages[lang]}
+                  </Text>
+                  {active && <Icon name="check" size={18} color={C.primary} />}
+                </TouchableOpacity>
+              );
+            })}
+
+            <View style={s.sheetBottom} />
+          </Animated.View>
+        </View>
       </Modal>
     </>
   );
@@ -126,9 +130,10 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     fontSize: 13,
     fontFamily: Fonts.spaceGrotesk.semiBold,
   },
-  backdrop: {
+  modalRoot: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.55)',
+    justifyContent: 'flex-end',
   },
   sheet: {
     backgroundColor: C.surface,
@@ -175,5 +180,4 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     color: C.primary,
   },
   sheetBottom: { height: 24 },
-  sheetOverflow: { height: 300, backgroundColor: C.surface },
 });
