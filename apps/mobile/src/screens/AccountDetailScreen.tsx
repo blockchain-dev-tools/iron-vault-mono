@@ -81,7 +81,7 @@ export default function AccountDetailScreen() {
         }
       />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        <Card accent>
+        <Card accent style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}>
           <View style={s.addrHeader}>
             <SectionLabel>{t.accountDetail.publicAddress}</SectionLabel>
             <TouchableOpacity style={s.copyIconWrap} onPress={handleCopyAddress} activeOpacity={0.7}>

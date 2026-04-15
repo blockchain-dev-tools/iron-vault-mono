@@ -34,15 +34,11 @@ export default function TopBar({ title, onBack, hideBack, right, bleState }: Top
         <Text style={s.title}>{title}</Text>
       </View>
       <View style={s.right}>
-        {bleState && (
+        {bleState && bleState !== 'idle' && (
           <View style={s.bleBadge}>
-            <Icon
-              name="sensors"
-              size={14}
-              color={bleState !== 'idle' ? C.primary : C.text2}
-            />
-            <Text style={[s.bleText, bleState !== 'idle' && s.bleTextActive]}>
-              {bleState === 'connected' ? 'BLE Active' : bleState === 'broadcasting' ? 'BLE Scan' : 'BLE Standby'}
+            <Icon name="sensors" size={14} color={C.primary} />
+            <Text style={[s.bleText, s.bleTextActive]}>
+              {bleState === 'connected' ? 'BLE Active' : 'BLE Scan'}
             </Text>
           </View>
         )}
