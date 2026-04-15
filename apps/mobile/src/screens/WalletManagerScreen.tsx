@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
 import {
-  Alert, Animated, Modal,
+  Alert, Animated,
   ScrollView, StyleSheet,
   Text, TextInput, TouchableOpacity, View,
   ActivityIndicator,
@@ -9,6 +9,7 @@ import {
 import { useApp, useTheme, useLocale } from '../store/AppContext';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
+import BottomSheet from '../components/ui/BottomSheet';
 import Button from '../components/ui/Button';
 import Icon from '../components/ui/Icon';
 import LogViewer from '../components/ui/LogViewer';
@@ -69,8 +70,6 @@ export default function WalletManagerScreen() {
   const closeConnectSheet = () => {
     if (bleState !== 'idle') stopBle();
     setConnectSheet(null);
-    setShowDetail(false);
-    slideAnim.setValue(0);
   };
 
   const handleRemoveAccount = (chain: 'eth' | 'sol', path: string) => {
@@ -162,112 +161,105 @@ export default function WalletManagerScreen() {
 
 
       {/* ── Connect sheet ── */}
-      <Modal visible={!!connectSheet} transparent animationType="slide" onRequestClose={closeConnectSheet}>
-        <View style={s.overlay}>
-          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={closeConnectSheet} />
+      <BottomSheet
+        visible={!!connectSheet}
+        onClose={closeConnectSheet}
+        onClosed={() => { setShowDetail(false); slideAnim.setValue(0); }}
+      >
+        <View style={s.slideClip}>
+          <Animated.View style={[s.slideRow, { width: screenWidth * 2, transform: [{ translateX }] }]}>
 
-          <View style={s.sheet}>
-            <View style={s.slideClip}>
-              <Animated.View style={[s.slideRow, { width: screenWidth * 2, transform: [{ translateX }] }]}>
-
-                {/* ── Panel 1: Connect steps ── */}
-                <View style={[s.panel, { width: screenWidth }]}>
-                  <View style={s.sheetHeader}>
-                    <Text style={s.sheetTitle}>{t.vault.connectWallet}</Text>
-                    <TouchableOpacity onPress={openDetail} style={s.detailBtn}>
-                      <Text style={s.detailBtnText}>{t.common.detail}</Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  <BleStatusRow state={bleState} />
-
-                  {[
-                    t.vault.okxStep1,
-                    t.vault.okxStep2,
-                    t.vault.okxStep3(connectSheet === 'eth' ? 'Ethereum' : 'Solana'),
-                    t.vault.okxStep4,
-                  ].map((step, i) => (
-                    <View key={i} style={s.step}>
-                      <View style={s.stepNum}><Text style={s.stepNumText}>{i + 1}</Text></View>
-                      <Text style={s.stepText}>{step}</Text>
-                    </View>
-                  ))}
-                  <View style={{ height: 16 }} />
-                  <Button variant="outline-danger" onPress={closeConnectSheet}>{t.vault.stopClose}</Button>
-                </View>
-
-                {/* ── Panel 2: BLE activity log ── */}
-                <View style={[s.panel, { width: screenWidth }]}>
-                  <View style={s.sheetHeader}>
-                    <TouchableOpacity onPress={closeDetail} style={s.backBtn}>
-                      <Text style={s.backBtnText}>{t.vault.backBtn}</Text>
-                    </TouchableOpacity>
-                    <Text style={s.sheetTitle}>{t.vault.activityLog}</Text>
-                    <TouchableOpacity onPress={clearLogs} style={s.clearBtn}>
-                      <Text style={s.clearBtnText}>{t.common.clear}</Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  <BleStatusRow state={bleState} />
-
-                  <LogViewer logs={logs} emptyText={t.vault.waitingBle} height={200} />
-                  <View style={{ height: 12 }} />
-                  <Button variant="outline-danger" onPress={closeConnectSheet}>{t.vault.stopClose}</Button>
-                </View>
-
-              </Animated.View>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* ── Add Account sheet ── */}
-      <Modal visible={!!addSheet} transparent animationType="slide" onRequestClose={closeAddSheet}>
-        <View style={s.overlay}>
-          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={closeAddSheet} />
-          <View style={s.sheet}>
-            <View style={s.panel}>
+            {/* ── Panel 1: Connect steps ── */}
+            <View style={[s.panel, { width: screenWidth }]}>
               <View style={s.sheetHeader}>
-                <Text style={s.sheetTitle}>{t.vault.addAccount}</Text>
-                <TouchableOpacity onPress={closeAddSheet} style={s.detailBtn}>
-                  <Text style={s.detailBtnText}>{t.common.cancel}</Text>
+                <Text style={s.sheetTitle}>{t.vault.connectWallet}</Text>
+                <TouchableOpacity onPress={openDetail} style={s.detailBtn}>
+                  <Text style={s.detailBtnText}>{t.common.detail}</Text>
                 </TouchableOpacity>
               </View>
 
-              <TouchableOpacity onPress={() => setShowAdvanced(v => !v)} style={s.advToggle}>
-                <Text style={s.advToggleText}>{showAdvanced ? t.vault.advancedHide : t.vault.advancedShow}</Text>
-              </TouchableOpacity>
-              {showAdvanced && (
-                <>
-                  <Text style={s.pathLabel}>{t.vault.addAccountPath}</Text>
-                  <TextInput
-                    style={[s.pathInput, !pathValid && inputPath.length > 0 && s.pathInputError]}
-                    value={inputPath}
-                    onChangeText={setInputPath}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    spellCheck={false}
-                    placeholder="m/44'/60'/0'/0/1"
-                    placeholderTextColor={s.pathPlaceholder.color}
-                  />
-                  {!pathValid && inputPath.length > 0 && (
-                    <Text style={s.pathError}>{t.vault.addAccountInvalidPath}</Text>
-                  )}
-                  <View style={{ height: 12 }} />
-                </>
-              )}
+              <BleStatusRow state={bleState} />
 
-              <View style={{ height: 20 }} />
-              <Button
-                variant="primary"
-                onPress={confirmAddAccount}
-                disabled={!canConfirm || adding}>
-                {adding ? t.vault.addAccountAdding : t.vault.addAccountConfirm}
-              </Button>
+              {[
+                t.vault.okxStep1,
+                t.vault.okxStep2,
+                t.vault.okxStep3(connectSheet === 'eth' ? 'Ethereum' : 'Solana'),
+                t.vault.okxStep4,
+              ].map((step, i) => (
+                <View key={i} style={s.step}>
+                  <View style={s.stepNum}><Text style={s.stepNumText}>{i + 1}</Text></View>
+                  <Text style={s.stepText}>{step}</Text>
+                </View>
+              ))}
+              <View style={{ height: 16 }} />
+              <Button variant="outline-danger" onPress={closeConnectSheet}>{t.vault.stopClose}</Button>
             </View>
-          </View>
+
+            {/* ── Panel 2: BLE activity log ── */}
+            <View style={[s.panel, { width: screenWidth }]}>
+              <View style={s.sheetHeader}>
+                <TouchableOpacity onPress={closeDetail} style={s.backBtn}>
+                  <Text style={s.backBtnText}>{t.vault.backBtn}</Text>
+                </TouchableOpacity>
+                <Text style={s.sheetTitle}>{t.vault.activityLog}</Text>
+                <TouchableOpacity onPress={clearLogs} style={s.clearBtn}>
+                  <Text style={s.clearBtnText}>{t.common.clear}</Text>
+                </TouchableOpacity>
+              </View>
+
+              <BleStatusRow state={bleState} />
+
+              <LogViewer logs={logs} emptyText={t.vault.waitingBle} height={200} />
+              <View style={{ height: 12 }} />
+              <Button variant="outline-danger" onPress={closeConnectSheet}>{t.vault.stopClose}</Button>
+            </View>
+
+          </Animated.View>
         </View>
-      </Modal>
+      </BottomSheet>
+
+      {/* ── Add Account sheet ── */}
+      <BottomSheet visible={!!addSheet} onClose={closeAddSheet}>
+        <View style={s.panel}>
+          <View style={s.sheetHeader}>
+            <Text style={s.sheetTitle}>{t.vault.addAccount}</Text>
+            <TouchableOpacity onPress={closeAddSheet} style={s.detailBtn}>
+              <Text style={s.detailBtnText}>{t.common.cancel}</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity onPress={() => setShowAdvanced(v => !v)} style={s.advToggle}>
+            <Text style={s.advToggleText}>{showAdvanced ? t.vault.advancedHide : t.vault.advancedShow}</Text>
+          </TouchableOpacity>
+          {showAdvanced && (
+            <>
+              <Text style={s.pathLabel}>{t.vault.addAccountPath}</Text>
+              <TextInput
+                style={[s.pathInput, !pathValid && inputPath.length > 0 && s.pathInputError]}
+                value={inputPath}
+                onChangeText={setInputPath}
+                autoCapitalize="none"
+                autoCorrect={false}
+                spellCheck={false}
+                placeholder="m/44'/60'/0'/0/1"
+                placeholderTextColor={s.pathPlaceholder.color}
+              />
+              {!pathValid && inputPath.length > 0 && (
+                <Text style={s.pathError}>{t.vault.addAccountInvalidPath}</Text>
+              )}
+              <View style={{ height: 12 }} />
+            </>
+          )}
+
+          <View style={{ height: 20 }} />
+          <Button
+            variant="primary"
+            onPress={confirmAddAccount}
+            disabled={!canConfirm || adding}>
+            {adding ? t.vault.addAccountAdding : t.vault.addAccountConfirm}
+          </Button>
+        </View>
+      </BottomSheet>
     </View>
   );
 }
@@ -417,8 +409,6 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   heroSub: { color: C.text2, fontSize: 13, marginTop: 4 },
   badge: { backgroundColor: C.primary15, paddingHorizontal: 10, paddingVertical: 4, borderRadius: R.sm },
   badgeText: { color: C.primary, fontSize: 11, fontFamily: Fonts.spaceGrotesk.bold },
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' },
-  sheet: { backgroundColor: C.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, overflow: 'hidden', maxHeight: '80%' },
   slideClip: { overflow: 'hidden' },
   slideRow: { flexDirection: 'row' },
   panel: { padding: 24 },
