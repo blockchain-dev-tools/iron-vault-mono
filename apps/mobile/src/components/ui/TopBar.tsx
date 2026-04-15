@@ -12,10 +12,9 @@ interface TopBarProps {
   onBack?: () => void;
   hideBack?: boolean;
   right?: React.ReactNode;
-  bleState?: 'idle' | 'broadcasting' | 'connected';
 }
 
-export default function TopBar({ title, onBack, hideBack, right, bleState }: TopBarProps) {
+export default function TopBar({ title, onBack, hideBack, right }: TopBarProps) {
   const insets = useSafeAreaInsets();
   const C = useTheme();
   const s = useMemo(() => makeStyles(C), [C]);
@@ -34,14 +33,6 @@ export default function TopBar({ title, onBack, hideBack, right, bleState }: Top
         <Text style={s.title}>{title}</Text>
       </View>
       <View style={s.right}>
-        {bleState && bleState !== 'idle' && (
-          <View style={s.bleBadge}>
-            <Icon name="sensors" size={14} color={C.primary} />
-            <Text style={[s.bleText, s.bleTextActive]}>
-              {bleState === 'connected' ? 'BLE Active' : 'BLE Scan'}
-            </Text>
-          </View>
-        )}
         {right}
       </View>
     </View>
@@ -59,11 +50,4 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   backBtn: { padding: 4 },
   shieldWrap: { padding: 4 },
   title: { color: C.text, fontSize: 15, fontFamily: Fonts.spaceGrotesk.bold, letterSpacing: 0.5, textTransform: 'uppercase' },
-  bleBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingHorizontal: 10, paddingVertical: 5,
-    backgroundColor: C.surfaceContainerLow, borderRadius: R.lg,
-  },
-  bleText: { color: C.text2, fontSize: 10, letterSpacing: 1.2, textTransform: 'uppercase', fontFamily: Fonts.spaceGrotesk.regular },
-  bleTextActive: { color: C.text2 },
 });
