@@ -126,7 +126,7 @@ export const ZH: Translations = {
     ethMainnet: '以太坊主网',
     solMainnet: 'Solana 主网',
     activity: '活动记录',
-    hint: '此设备将作为 Ledger 硬件钱包，接受来自 OKX 的签名请求。',
+    hint: '此设备将模拟 Ledger 硬件钱包，响应来自钱包 App 的签名请求。',
     startAccepting: '接收请求',
     stop: '停止',
     retryBle: '重试',
