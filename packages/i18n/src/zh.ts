@@ -127,7 +127,7 @@ export const ZH: Translations = {
     solMainnet: 'Solana 主网',
     activity: '活动记录',
     hint: '此设备将作为 Ledger 硬件钱包，接受来自 OKX 的签名请求。',
-    startAccepting: '开始接受',
+    startAccepting: '接收请求',
     stop: '停止',
     retryBle: '重试',
   },
