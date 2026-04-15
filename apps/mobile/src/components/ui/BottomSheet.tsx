@@ -57,6 +57,7 @@ export default function BottomSheet({ visible, onClose, onClosed, children, maxH
           { backgroundColor: C.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, overflow: 'hidden', maxHeight },
           { transform: [{ translateY: sheetAnim }] },
         ]}>
+          <View style={styles.handle} />
           {children}
         </Animated.View>
       </View>
@@ -67,4 +68,5 @@ export default function BottomSheet({ visible, onClose, onClosed, children, maxH
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'flex-end' },
   backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.75)' },
+  handle: { width: 36, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.2)', alignSelf: 'center', marginTop: 10 },
 });

@@ -28,9 +28,6 @@ export default function WalletManagerScreen() {
   const [connectSheet, setConnectSheet] = useState<null | 'eth' | 'sol'>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [addSheet, setAddSheet] = useState<null | 'eth' | 'sol'>(null);
-  const [inputPath, setInputPath] = useState('');
-  const [adding, setAdding] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const { width: screenWidth } = useWindowDimensions();
 
@@ -85,33 +82,8 @@ export default function WalletManagerScreen() {
     );
   };
 
-  const defaultPath = (chain: 'eth' | 'sol') =>
-    chain === 'eth'
-      ? `m/44'/60'/0'/0/${accounts.eth.length}`
-      : `m/44'/501'/${accounts.sol.length}'/0'`;
-
-  const openAddSheet = (chain: 'eth' | 'sol') => {
-    setInputPath(defaultPath(chain));
-    setShowAdvanced(false);
-    setAddSheet(chain);
-  };
-
+  const openAddSheet = (chain: 'eth' | 'sol') => setAddSheet(chain);
   const closeAddSheet = () => setAddSheet(null);
-
-  const pathValid = PATH_RE.test(inputPath);
-  const canConfirm = !showAdvanced || pathValid;
-  const effectivePath = showAdvanced ? inputPath : (addSheet ? defaultPath(addSheet) : '');
-
-  const confirmAddAccount = async () => {
-    if (!addSheet) return;
-    setAdding(true);
-    try {
-      await addAccount(addSheet, effectivePath);
-      closeAddSheet();
-    } finally {
-      setAdding(false);
-    }
-  };
 
   const translateX = slideAnim.interpolate({
     inputRange: [0, 1],
@@ -220,45 +192,14 @@ export default function WalletManagerScreen() {
 
       {/* ── Add Account sheet ── */}
       <BottomSheet visible={!!addSheet} onClose={closeAddSheet}>
-        <View style={s.panel}>
-          <View style={s.sheetHeader}>
-            <Text style={s.sheetTitle}>{t.vault.addAccount}</Text>
-            <TouchableOpacity onPress={closeAddSheet} style={s.detailBtn}>
-              <Text style={s.detailBtnText}>{t.common.cancel}</Text>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity onPress={() => setShowAdvanced(v => !v)} style={s.advToggle}>
-            <Text style={s.advToggleText}>{showAdvanced ? t.vault.advancedHide : t.vault.advancedShow}</Text>
-          </TouchableOpacity>
-          {showAdvanced && (
-            <>
-              <Text style={s.pathLabel}>{t.vault.addAccountPath}</Text>
-              <TextInput
-                style={[s.pathInput, !pathValid && inputPath.length > 0 && s.pathInputError]}
-                value={inputPath}
-                onChangeText={setInputPath}
-                autoCapitalize="none"
-                autoCorrect={false}
-                spellCheck={false}
-                placeholder="m/44'/60'/0'/0/1"
-                placeholderTextColor={s.pathPlaceholder.color}
-              />
-              {!pathValid && inputPath.length > 0 && (
-                <Text style={s.pathError}>{t.vault.addAccountInvalidPath}</Text>
-              )}
-              <View style={{ height: 12 }} />
-            </>
-          )}
-
-          <View style={{ height: 20 }} />
-          <Button
-            variant="primary"
-            onPress={confirmAddAccount}
-            disabled={!canConfirm || adding}>
-            {adding ? t.vault.addAccountAdding : t.vault.addAccountConfirm}
-          </Button>
-        </View>
+        {addSheet && (
+          <AddAccountSheet
+            chain={addSheet}
+            accounts={accounts}
+            onClose={closeAddSheet}
+            onAdd={addAccount}
+          />
+        )}
       </BottomSheet>
     </View>
   );
@@ -362,12 +303,20 @@ function ChainSection({ label, sub, iconNode, accounts, connectLabel, accountLab
         </View>
       </View>
       {accounts.map((a, i) => (
-        <TouchableOpacity key={i} style={s.acctCard} onPress={() => onAccountClick(i)} onLongPress={() => onLongPressAccount(i)} activeOpacity={0.8}>
+        <TouchableOpacity key={i} style={s.acctCard} onPress={() => onAccountClick(i)} activeOpacity={0.8}>
           <View style={s.acctLeft}>
             <Text style={s.acctNum}>{accountLabel(i + 1)}</Text>
             <Text style={s.acctAddr}>{a.short}</Text>
           </View>
-          <Text style={s.acctPath}>{a.path}</Text>
+          <View style={s.acctRight}>
+            <Text style={s.acctPath}>{a.path}</Text>
+            <TouchableOpacity
+              onPress={() => onLongPressAccount(i)}
+              style={s.removeAcctBtn}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Icon name="mci:dots-vertical" size={16} color={C.text2} />
+            </TouchableOpacity>
+          </View>
         </TouchableOpacity>
       ))}
       <TouchableOpacity style={s.addRow} onPress={onAddAccount} activeOpacity={0.7}>
@@ -393,9 +342,11 @@ const makeChainStyles = (C: ColorTokens) => StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
   },
   acctLeft: { gap: 4 },
+  acctRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   acctNum: { color: C.text2, fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase' },
   acctAddr: { color: C.text, fontSize: 14, fontFamily: 'monospace', fontWeight: '600' },
   acctPath: { color: C.text2, fontSize: 10, fontFamily: 'monospace' },
+  removeAcctBtn: { padding: 2 },
   addRow: { paddingVertical: 14, alignItems: 'center', borderRadius: R.xl, borderWidth: 1.5, borderColor: C.primary, borderStyle: 'dashed' },
   addRowText: { color: C.primary, fontSize: 13, fontFamily: Fonts.spaceGrotesk.bold },
 });
@@ -424,10 +375,112 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   stepNum: { width: 24, height: 24, borderRadius: 12, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   stepNumText: { color: C.onPrimary, fontSize: 12, fontFamily: Fonts.spaceGrotesk.bold },
   stepText: { color: C.text2, fontSize: 13, flex: 1, lineHeight: 18 },
-  // Add account sheet
-  advToggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, paddingHorizontal: 14, borderRadius: R.lg, backgroundColor: C.surfaceContainer, marginBottom: 4 },
-  advToggleText: { color: C.primary, fontSize: 13, fontFamily: Fonts.spaceGrotesk.bold },
-  pathLabel: { color: C.text2, fontSize: 11, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 8, marginTop: 8 },
+});
+
+// ─── AddAccountSheet ──────────────────────────────────────────────────────────
+
+function AddAccountSheet({ chain, accounts, onClose, onAdd }: {
+  chain: 'eth' | 'sol';
+  accounts: { eth: { short: string; full: string; path: string }[]; sol: { short: string; full: string; path: string }[] };
+  onClose: () => void;
+  onAdd: (chain: 'eth' | 'sol', path: string) => Promise<void>;
+}) {
+  const C = useTheme();
+  const t = useLocale();
+  const s = useMemo(() => makeAddAccountStyles(C), [C]);
+
+  const computedDefault = chain === 'eth'
+    ? `m/44'/60'/0'/0/${accounts.eth.length}`
+    : `m/44'/501'/${accounts.sol.length}'/0'`;
+  const nextNum = (chain === 'eth' ? accounts.eth : accounts.sol).length + 1;
+
+  const [inputPath, setInputPath] = useState(computedDefault);
+  const [showCustom, setShowCustom] = useState(false);
+  const [adding, setAdding] = useState(false);
+
+  const pathValid = PATH_RE.test(inputPath);
+  const canConfirm = !showCustom || pathValid;
+  const effectivePath = showCustom ? inputPath : computedDefault;
+
+  const handleAdd = async () => {
+    setAdding(true);
+    try {
+      await onAdd(chain, effectivePath);
+      onClose();
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const toggleCustom = () => {
+    setShowCustom(v => !v);
+    setInputPath(computedDefault);
+  };
+
+  const chainLabel = chain === 'eth' ? t.vault.ethLabel : t.vault.solLabel;
+
+  return (
+    <View style={s.panel}>
+      <Text style={s.title}>{chainLabel} {t.vault.addAccount}</Text>
+
+      {showCustom ? (
+        <View>
+          <Text style={s.inputLabel}>{t.vault.addAccountPath}</Text>
+          <TextInput
+            style={[s.pathInput, !pathValid && inputPath.length > 0 && s.pathInputError]}
+            value={inputPath}
+            onChangeText={setInputPath}
+            autoCapitalize="none"
+            autoCorrect={false}
+            spellCheck={false}
+            placeholder={computedDefault}
+            placeholderTextColor={C.textDisabled}
+          />
+          {!pathValid && inputPath.length > 0 && (
+            <Text style={s.pathError}>{t.vault.addAccountInvalidPath}</Text>
+          )}
+          {inputPath !== computedDefault && (
+            <TouchableOpacity onPress={() => setInputPath(computedDefault)} style={s.useDefaultRow}>
+              <Text style={s.useDefaultText}>{t.vault.addAccountUseDefault}</Text>
+              <Text style={s.useDefaultPath} numberOfLines={1}>{computedDefault}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      ) : (
+        <View style={s.infoCard}>
+          <Text style={s.infoAcct}>{t.vault.account(nextNum)}</Text>
+          <Text style={s.infoPath}>{computedDefault}</Text>
+        </View>
+      )}
+
+      <TouchableOpacity onPress={toggleCustom} style={s.customToggle}>
+        <Icon name={showCustom ? 'expand-less' : 'expand-more'} size={14} color={C.text2} />
+        <Text style={s.customToggleText}>
+          {showCustom ? t.vault.advancedHide : t.vault.addAccountCustomPath}
+        </Text>
+      </TouchableOpacity>
+      <View style={{ height: 12 }} />
+      <Button
+        variant="primary"
+        onPress={handleAdd}
+        disabled={!canConfirm}
+        loading={adding}>
+        {t.vault.addAccountConfirm}
+      </Button>
+    </View>
+  );
+}
+
+const makeAddAccountStyles = (C: ColorTokens) => StyleSheet.create({
+  panel: { padding: 24, paddingTop: 12 },
+  title: { color: C.text, fontSize: 18, fontFamily: Fonts.spaceGrotesk.bold, marginBottom: 20 },
+  infoCard: {
+    backgroundColor: C.surfaceContainer,
+    padding: 16, borderLeftWidth: 3, borderLeftColor: C.primary,
+  },
+  infoAcct: { color: C.text, fontSize: 15, fontFamily: Fonts.spaceGrotesk.bold, marginBottom: 6 },
+  infoPath: { color: C.text2, fontSize: 12, fontFamily: 'monospace' },
+  inputLabel: { color: C.text2, fontSize: 11, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 8 },
   pathInput: {
     backgroundColor: C.surfaceContainer, borderRadius: R.lg,
     borderWidth: 1.5, borderColor: C.borderVariant,
@@ -436,5 +489,9 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   },
   pathInputError: { borderColor: C.error },
   pathError: { color: C.error, fontSize: 12, marginTop: 6 },
-  pathPlaceholder: { color: C.textDisabled },
+  useDefaultRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 },
+  useDefaultText: { color: C.primary, fontSize: 12, fontFamily: Fonts.spaceGrotesk.bold },
+  useDefaultPath: { color: C.text2, fontSize: 11, fontFamily: 'monospace', flex: 1 },
+  customToggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 10 },
+  customToggleText: { color: C.text2, fontSize: 12 },
 });
