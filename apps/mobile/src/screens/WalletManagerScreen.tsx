@@ -303,20 +303,12 @@ function ChainSection({ label, sub, iconNode, accounts, connectLabel, accountLab
         </View>
       </View>
       {accounts.map((a, i) => (
-        <TouchableOpacity key={i} style={s.acctCard} onPress={() => onAccountClick(i)} activeOpacity={0.8}>
-          <View style={s.acctLeft}>
+        <TouchableOpacity key={i} style={s.acctCard} onPress={() => onAccountClick(i)} onLongPress={() => onLongPressAccount(i)} activeOpacity={0.8}>
+          <View style={s.acctMeta}>
             <Text style={s.acctNum}>{accountLabel(i + 1)}</Text>
-            <Text style={s.acctAddr}>{a.short}</Text>
-          </View>
-          <View style={s.acctRight}>
             <Text style={s.acctPath}>{a.path}</Text>
-            <TouchableOpacity
-              onPress={() => onLongPressAccount(i)}
-              style={s.removeAcctBtn}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Icon name="mci:dots-vertical" size={16} color={C.text2} />
-            </TouchableOpacity>
           </View>
+          <Text style={s.acctAddr} numberOfLines={1} ellipsizeMode="middle">{a.full}</Text>
         </TouchableOpacity>
       ))}
       <TouchableOpacity style={s.addRow} onPress={onAddAccount} activeOpacity={0.7}>
@@ -328,7 +320,7 @@ function ChainSection({ label, sub, iconNode, accounts, connectLabel, accountLab
 
 const makeChainStyles = (C: ColorTokens) => StyleSheet.create({
   section: { gap: 10 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   chainLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   chainIconWrap: { width: 40, height: 40, borderRadius: 20, backgroundColor: C.surfaceContainer, alignItems: 'center', justifyContent: 'center' },
   chainLabel: { color: C.text, fontSize: 20, fontFamily: Fonts.spaceGrotesk.bold },
@@ -337,17 +329,17 @@ const makeChainStyles = (C: ColorTokens) => StyleSheet.create({
   connectBtn: { backgroundColor: C.primary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: R.lg, flexDirection: 'row', alignItems: 'center', gap: 6 },
   connectText: { color: C.onPrimary, fontSize: 12, fontFamily: Fonts.spaceGrotesk.bold, letterSpacing: 1 },
   acctCard: {
-    backgroundColor: C.surfaceContainer, borderRadius: 0, padding: 16,
+    backgroundColor: C.surfaceContainer,
+    borderTopRightRadius: R.md, borderBottomRightRadius: R.md,
+    padding: 16,
     borderLeftWidth: 3, borderLeftColor: C.primary,
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    flexDirection: 'column', gap: 6,
   },
-  acctLeft: { gap: 4 },
-  acctRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  acctMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   acctNum: { color: C.text2, fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase' },
-  acctAddr: { color: C.text, fontSize: 14, fontFamily: 'monospace', fontWeight: '600' },
+  acctAddr: { color: C.text, fontSize: 13, fontFamily: 'monospace', fontWeight: '600' },
   acctPath: { color: C.text2, fontSize: 10, fontFamily: 'monospace' },
-  removeAcctBtn: { padding: 2 },
-  addRow: { paddingVertical: 14, alignItems: 'center', borderRadius: R.xl, borderWidth: 1.5, borderColor: C.primary, borderStyle: 'dashed' },
+  addRow: { paddingVertical: 14, alignItems: 'center', borderRadius: R.xl, borderWidth: 1.5, borderColor: C.primary },
   addRowText: { color: C.primary, fontSize: 13, fontFamily: Fonts.spaceGrotesk.bold },
 });
 
