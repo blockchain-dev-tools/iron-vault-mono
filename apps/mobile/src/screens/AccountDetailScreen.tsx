@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { useApp, useTheme, useLocale } from '../store/AppContext';
 import { R } from '@iron-vault/theme';
@@ -15,15 +15,34 @@ import { useBleSession } from '../hooks/useBleSession';
 import { Fonts } from '../lib/fonts';
 
 export default function AccountDetailScreen() {
-  const { goBack, accounts, currentChain, currentAcctIdx, bleState } = useApp();
+  const { goBack, accounts, currentChain, currentAcctIdx, bleState, removeAccount } = useApp();
   const C = useTheme();
   const t = useLocale();
   const s = useMemo(() => makeStyles(C), [C]);
   const isEth = currentChain === 'eth';
   const accts = isEth ? accounts.eth : accounts.sol;
-  const acct = accts[currentAcctIdx] ?? { short: '—', full: '—', path: '—' };
+  const acct = accts[currentAcctIdx] ?? { short: '—', full: '—', path: '—', custom: false };
+  const canDelete = accts.length > 1;
 
   const { logs, startBle, stopBle } = useBleSession(currentChain, acct);
+
+  const handleRemoveAccount = () => {
+    Alert.alert(
+      t.vault.removeAccountTitle,
+      t.vault.removeAccountMsg(acct.short),
+      [
+        { text: t.common.cancel, style: 'cancel' },
+        {
+          text: t.vault.removeAccountConfirm,
+          style: 'destructive',
+          onPress: () => {
+            removeAccount(currentChain, acct.path);
+            goBack();
+          },
+        },
+      ],
+    );
+  };
 
   const toggleBle = async () => {
     if (bleState === 'broadcasting' || bleState === 'connected') {
@@ -51,6 +70,15 @@ export default function AccountDetailScreen() {
         title={`${isEth ? 'Ethereum' : 'Solana'} #${currentAcctIdx + 1}`}
         onBack={goBack}
         bleState={bleState}
+        right={
+          <TouchableOpacity
+            onPress={handleRemoveAccount}
+            disabled={!canDelete}
+            style={s.deleteBtn}
+            activeOpacity={0.7}>
+            <Icon name="delete-outline" size={20} color={canDelete ? C.error : C.textDisabled} />
+          </TouchableOpacity>
+        }
       />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <Card accent>
@@ -119,4 +147,5 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   addrPath: { color: C.text2, fontSize: 10, fontFamily: 'monospace', marginTop: 4 },
   hint: { color: C.text2, fontSize: 13, textAlign: 'center', lineHeight: 18 },
   btnWrap: { paddingHorizontal: 20, paddingBottom: 8 },
+  deleteBtn: { padding: 6 },
 });

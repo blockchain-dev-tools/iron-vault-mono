@@ -21,7 +21,7 @@ import { Fonts } from '../lib/fonts';
 const PATH_RE = /^m(\/\d+'?)+$/;
 
 export default function WalletManagerScreen() {
-  const { go, accounts, addAccount, removeAccount, setCurrentAccount, currentChain, currentAcctIdx, bleState, setBleState } = useApp();
+  const { go, accounts, addAccount, setCurrentAccount, currentChain, currentAcctIdx, bleState, setBleState } = useApp();
   const C = useTheme();
   const t = useLocale();
   const s = useMemo(() => makeStyles(C), [C]);
@@ -69,19 +69,6 @@ export default function WalletManagerScreen() {
     setConnectSheet(null);
   };
 
-  const handleRemoveAccount = (chain: 'eth' | 'sol', path: string) => {
-    const list = chain === 'eth' ? accounts.eth : accounts.sol;
-    if (list.length <= 1) return;
-    Alert.alert(
-      t.vault.removeAccountTitle,
-      t.vault.removeAccountMsg(path),
-      [
-        { text: t.common.cancel, style: 'cancel' },
-        { text: t.vault.removeAccountConfirm, style: 'destructive', onPress: () => removeAccount(chain, path) },
-      ],
-    );
-  };
-
   const openAddSheet = (chain: 'eth' | 'sol') => setAddSheet(chain);
   const closeAddSheet = () => setAddSheet(null);
 
@@ -112,7 +99,6 @@ export default function WalletManagerScreen() {
           onConnect={() => openConnectSheet('eth')}
           onAccountClick={idx => openAccount('eth', idx)}
           onAddAccount={() => openAddSheet('eth')}
-          onLongPressAccount={idx => handleRemoveAccount('eth', accounts.eth[idx]?.path)}
         />
 
         <ChainSection
@@ -125,7 +111,6 @@ export default function WalletManagerScreen() {
           onConnect={() => openConnectSheet('sol')}
           onAccountClick={idx => openAccount('sol', idx)}
           onAddAccount={() => openAddSheet('sol')}
-          onLongPressAccount={idx => handleRemoveAccount('sol', accounts.sol[idx]?.path)}
         />
 
         <View style={{ height: 100 }} />
@@ -270,7 +255,7 @@ function SolIcon({ size = 22 }: { size?: number }) {
   );
 }
 
-function ChainSection({ label, sub, iconNode, accounts, connectLabel, accountLabel, addLabel, onConnect, onAccountClick, onAddAccount, onLongPressAccount }: {
+function ChainSection({ label, sub, iconNode, accounts, connectLabel, accountLabel, addLabel, onConnect, onAccountClick, onAddAccount }: {
   label: string; sub: string; iconNode: React.ReactNode;
   accounts: { short: string; full: string; path: string; custom: boolean }[];
   connectLabel: string;
@@ -279,7 +264,6 @@ function ChainSection({ label, sub, iconNode, accounts, connectLabel, accountLab
   onConnect: () => void;
   onAccountClick: (idx: number) => void;
   onAddAccount: () => void;
-  onLongPressAccount: (idx: number) => void;
 }) {
   const C = useTheme();
   const t = useLocale();
@@ -304,7 +288,7 @@ function ChainSection({ label, sub, iconNode, accounts, connectLabel, accountLab
         </View>
       </View>
       {accounts.map((a, i) => (
-        <TouchableOpacity key={i} style={s.acctCard} onPress={() => onAccountClick(i)} onLongPress={() => onLongPressAccount(i)} activeOpacity={0.8}>
+        <TouchableOpacity key={i} style={s.acctCard} onPress={() => onAccountClick(i)} activeOpacity={0.8}>
           <View style={s.acctMeta}>
             <Text style={s.acctNum}>{accountLabel(i + 1)}</Text>
             <View style={s.acctPathRow}>
