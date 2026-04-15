@@ -69,7 +69,7 @@ interface AppCtx {
   currentChain: 'eth' | 'sol';
   currentAcctIdx: number;
   setCurrentAccount: (chain: 'eth' | 'sol', idx: number) => void;
-  addAccount: (chain: 'eth' | 'sol', path: string) => Promise<void>;
+  addAccount: (chain: 'eth' | 'sol', path: string, custom: boolean) => Promise<void>;
   removeAccount: (chain: 'eth' | 'sol', path: string) => Promise<void>;
   bleState: BleState;
   setBleState: (s: BleState) => void;
@@ -198,8 +198,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setCurrentAcctIdx(idx);
   }, []);
 
-  const addAccount = useCallback(async (chain: 'eth' | 'sol', path: string) => {
-    const updated = await serviceAddAccount(walletStorage, chain, path);
+  const addAccount = useCallback(async (chain: 'eth' | 'sol', path: string, custom: boolean) => {
+    const updated = await serviceAddAccount(walletStorage, chain, path, custom);
     if (updated) setAccounts(updated);
   }, []);
 

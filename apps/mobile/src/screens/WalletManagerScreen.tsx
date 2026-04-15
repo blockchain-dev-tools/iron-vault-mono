@@ -272,7 +272,7 @@ function SolIcon({ size = 22 }: { size?: number }) {
 
 function ChainSection({ label, sub, iconNode, accounts, connectLabel, accountLabel, addLabel, onConnect, onAccountClick, onAddAccount, onLongPressAccount }: {
   label: string; sub: string; iconNode: React.ReactNode;
-  accounts: { short: string; full: string; path: string }[];
+  accounts: { short: string; full: string; path: string; custom: boolean }[];
   connectLabel: string;
   accountLabel: (n: number) => string;
   addLabel: string;
@@ -282,6 +282,7 @@ function ChainSection({ label, sub, iconNode, accounts, connectLabel, accountLab
   onLongPressAccount: (idx: number) => void;
 }) {
   const C = useTheme();
+  const t = useLocale();
   const s = useMemo(() => makeChainStyles(C), [C]);
   return (
     <View style={s.section}>
@@ -306,7 +307,10 @@ function ChainSection({ label, sub, iconNode, accounts, connectLabel, accountLab
         <TouchableOpacity key={i} style={s.acctCard} onPress={() => onAccountClick(i)} onLongPress={() => onLongPressAccount(i)} activeOpacity={0.8}>
           <View style={s.acctMeta}>
             <Text style={s.acctNum}>{accountLabel(i + 1)}</Text>
-            <Text style={s.acctPath}>{a.path}</Text>
+            <View style={s.acctPathRow}>
+              {a.custom && <View style={s.customBadge}><Text style={s.customBadgeText}>{t.vault.pathCustom}</Text></View>}
+              <Text style={s.acctPath}>{a.path}</Text>
+            </View>
           </View>
           <Text style={s.acctAddr} numberOfLines={1} ellipsizeMode="middle">{a.full}</Text>
         </TouchableOpacity>
@@ -336,9 +340,12 @@ const makeChainStyles = (C: ColorTokens) => StyleSheet.create({
     flexDirection: 'column', gap: 6,
   },
   acctMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  acctPathRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   acctNum: { color: C.text2, fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase' },
   acctAddr: { color: C.text, fontSize: 13, fontFamily: 'monospace', fontWeight: '600' },
   acctPath: { color: C.text2, fontSize: 10, fontFamily: 'monospace' },
+  customBadge: { backgroundColor: C.primary15, paddingHorizontal: 5, paddingVertical: 1, borderRadius: R.sm },
+  customBadgeText: { color: C.primary, fontSize: 9, fontFamily: Fonts.spaceGrotesk.bold, letterSpacing: 0.5 },
   addRow: { paddingVertical: 14, alignItems: 'center', borderRadius: R.xl, borderWidth: 1.5, borderColor: C.primary },
   addRowText: { color: C.primary, fontSize: 13, fontFamily: Fonts.spaceGrotesk.bold },
 });
@@ -371,20 +378,52 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
 
 // ─── AddAccountSheet ──────────────────────────────────────────────────────────
 
+function buildDefaultPath(chain: 'eth' | 'sol', idx: number): string {
+  return chain === 'eth'
+    ? `m/44'/60'/0'/0/${idx}`
+    : `m/44'/501'/${idx}'/0'`;
+}
+
+function parseDefaultIndex(chain: 'eth' | 'sol', path: string): number {
+  const segs = path.split('/');
+  if (chain === 'eth') return parseInt(segs[segs.length - 1], 10);
+  return parseInt(segs[3].replace("'", ''), 10);
+}
+
+function isDefaultPath(chain: 'eth' | 'sol', path: string): boolean {
+  const re = chain === 'eth'
+    ? /^m\/44'\/60'\/0'\/0\/\d+$/
+    : /^m\/44'\/501'\/\d+'\/0'$/;
+  return re.test(path);
+}
+
+function computeNextDefaultPath(
+  chain: 'eth' | 'sol',
+  accts: { path: string; custom: boolean }[],
+): string {
+  const defaults = accts.filter(a => !a.custom && isDefaultPath(chain, a.path));
+  const maxIdx = defaults.length > 0
+    ? Math.max(...defaults.map(a => parseDefaultIndex(chain, a.path)))
+    : -1;
+  const allPaths = new Set(accts.map(a => a.path));
+  let idx = maxIdx + 1;
+  while (allPaths.has(buildDefaultPath(chain, idx))) idx++;
+  return buildDefaultPath(chain, idx);
+}
+
 function AddAccountSheet({ chain, accounts, onClose, onAdd }: {
   chain: 'eth' | 'sol';
-  accounts: { eth: { short: string; full: string; path: string }[]; sol: { short: string; full: string; path: string }[] };
+  accounts: { eth: { short: string; full: string; path: string; custom: boolean }[]; sol: { short: string; full: string; path: string; custom: boolean }[] };
   onClose: () => void;
-  onAdd: (chain: 'eth' | 'sol', path: string) => Promise<void>;
+  onAdd: (chain: 'eth' | 'sol', path: string, custom: boolean) => Promise<void>;
 }) {
   const C = useTheme();
   const t = useLocale();
   const s = useMemo(() => makeAddAccountStyles(C), [C]);
 
-  const computedDefault = chain === 'eth'
-    ? `m/44'/60'/0'/0/${accounts.eth.length}`
-    : `m/44'/501'/${accounts.sol.length}'/0'`;
-  const nextNum = (chain === 'eth' ? accounts.eth : accounts.sol).length + 1;
+  const accts = chain === 'eth' ? accounts.eth : accounts.sol;
+  const computedDefault = computeNextDefaultPath(chain, accts);
+  const nextNum = accts.length + 1;
 
   const [inputPath, setInputPath] = useState(computedDefault);
   const [showCustom, setShowCustom] = useState(false);
@@ -393,11 +432,12 @@ function AddAccountSheet({ chain, accounts, onClose, onAdd }: {
   const pathValid = PATH_RE.test(inputPath);
   const canConfirm = !showCustom || pathValid;
   const effectivePath = showCustom ? inputPath : computedDefault;
+  const isCustom = showCustom && inputPath !== computedDefault;
 
   const handleAdd = async () => {
     setAdding(true);
     try {
-      await onAdd(chain, effectivePath);
+      await onAdd(chain, effectivePath, isCustom);
       onClose();
     } finally {
       setAdding(false);

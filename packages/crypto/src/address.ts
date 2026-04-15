@@ -7,6 +7,7 @@ export interface Account {
   full: string;
   short: string;
   path: string;
+  custom: boolean;
 }
 
 export interface WalletAccounts {
@@ -36,21 +37,23 @@ export async function deriveAccountsFromPaths(
   ethPaths: string[],
   solPaths: string[],
   passphrase = '',
+  ethCustom: boolean[] = [],
+  solCustom: boolean[] = [],
 ): Promise<WalletAccounts> {
   const seed = await mnemonicToSeed(mnemonic, passphrase);
 
-  const eth: Account[] = ethPaths.map(path => {
+  const eth: Account[] = ethPaths.map((path, i) => {
     const priv = deriveEthPrivateKey(seed, parsePath(path));
     const { address } = ethPubKeyToAddress(priv);
     const full = "0x" + address;
-    return { full, short: shortAddr(full), path };
+    return { full, short: shortAddr(full), path, custom: ethCustom[i] ?? false };
   });
 
-  const sol: Account[] = solPaths.map(path => {
+  const sol: Account[] = solPaths.map((path, i) => {
     const solPriv = deriveSolanaPrivateKey(seed, parsePath(path));
     const pubBytes = solanaPubKey(solPriv);
     const full = base58.encode(pubBytes);
-    return { full, short: shortAddr(full), path };
+    return { full, short: shortAddr(full), path, custom: solCustom[i] ?? false };
   });
 
   return { eth, sol };
