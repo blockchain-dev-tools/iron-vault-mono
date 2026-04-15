@@ -95,9 +95,6 @@ export default function AccountDetailScreen() {
               <Icon name="content_copy" size={16} color={C.primary} />
             </TouchableOpacity>
           </View>
-          <Text style={s.addrNetwork}>
-            {isEth ? t.accountDetail.ethMainnet : t.accountDetail.solMainnet}
-          </Text>
           <View style={s.addrBox}>
             <Text style={s.addrText} selectable>{acct.full || acct.short}</Text>
           </View>
@@ -146,7 +143,6 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   content: { paddingHorizontal: 20, paddingTop: 20, gap: 16 },
   addrHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   copyIconWrap: { padding: 6, backgroundColor: C.surfaceContainerLow, borderRadius: R.lg },
-  addrNetwork: { color: C.text, fontSize: 16, fontFamily: Fonts.spaceGrotesk.bold, marginBottom: 12 },
   addrBox: { backgroundColor: C.surfaceContainerLow, borderRadius: R.lg, padding: 14, borderWidth: 1, borderColor: C.borderVariant },
   addrText: { color: C.primary, fontSize: 13, fontFamily: 'monospace', lineHeight: 20 },
   qrWrap: { alignItems: 'center', paddingVertical: 20 },
