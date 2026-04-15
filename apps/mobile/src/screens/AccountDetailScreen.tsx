@@ -69,8 +69,15 @@ export default function AccountDetailScreen() {
       <TopBar
         title={`${isEth ? 'Ethereum' : 'Solana'} #${currentAcctIdx + 1}`}
         onBack={goBack}
-        bleState={bleState}
-        right={
+        right={<>
+          {bleState !== 'idle' && (
+            <View style={s.bleBadge}>
+              <Icon name="sensors" size={14} color={C.primary} />
+              <Text style={s.bleText}>
+                {bleState === 'connected' ? 'BLE Active' : 'BLE Scan'}
+              </Text>
+            </View>
+          )}
           <TouchableOpacity
             onPress={handleRemoveAccount}
             disabled={!canDelete}
@@ -78,7 +85,7 @@ export default function AccountDetailScreen() {
             activeOpacity={0.7}>
             <Icon name="delete-outline" size={20} color={canDelete ? C.error : C.textDisabled} />
           </TouchableOpacity>
-        }
+        </>}
       />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <Card accent style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}>
@@ -118,16 +125,16 @@ export default function AccountDetailScreen() {
           </View>
         )}
 
-        {bleState === 'idle' && (
-          <Text style={s.hint}>{t.accountDetail.hint}</Text>
-        )}
-        <View style={{ height: 100 }} />
+        <View style={{ height: 32 }} />
       </ScrollView>
 
       <View style={s.btnWrap}>
         <Button variant={btnVariant} icon={btnIcon} onPress={toggleBle}>
           {btnLabel}
         </Button>
+        {bleState === 'idle' && (
+          <Text style={s.hint}>{t.accountDetail.hint}</Text>
+        )}
       </View>
     </View>
   );
@@ -145,7 +152,13 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   qrWrap: { alignItems: 'center', paddingVertical: 20 },
   qrInner: { padding: 12, borderRadius: R.lg },
   addrPath: { color: C.text2, fontSize: 10, fontFamily: 'monospace', marginTop: 4 },
-  hint: { color: C.text2, fontSize: 13, textAlign: 'center', lineHeight: 18 },
-  btnWrap: { paddingHorizontal: 20, paddingBottom: 8 },
+  hint: { color: C.text2, fontSize: 12, textAlign: 'center', lineHeight: 17, marginTop: 10 },
+  btnWrap: { paddingHorizontal: 20, paddingBottom: 16, gap: 0 },
   deleteBtn: { padding: 6 },
+  bleBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 10, paddingVertical: 5,
+    backgroundColor: C.surfaceContainerLow, borderRadius: R.lg,
+  },
+  bleText: { color: C.text2, fontSize: 10, letterSpacing: 1.2, textTransform: 'uppercase', fontFamily: Fonts.spaceGrotesk.regular },
 });

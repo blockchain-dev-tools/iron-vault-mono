@@ -124,7 +124,7 @@ export const EN = {
     ethMainnet: 'Ethereum Mainnet',
     solMainnet: 'Solana Mainnet',
     activity: 'Activity',
-    hint: 'Tap below — this device will act as a Ledger hardware wallet and accept signing requests from OKX.',
+    hint: 'This device will act as a Ledger hardware wallet and accept signing requests from OKX.',
     startAccepting: 'Start Accepting',
     stop: 'Stop',
     retryBle: 'Retry',
