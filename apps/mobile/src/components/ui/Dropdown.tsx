@@ -4,6 +4,7 @@ import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import { useTheme } from '../../store/AppContext';
 import { Fonts } from '../../lib/fonts';
+import Icon from './Icon';
 
 export interface DropdownOption<T extends string> {
   value: T;
@@ -26,7 +27,7 @@ export default function Dropdown<T extends string>({
     <View>
       <TouchableOpacity style={s.trigger} onPress={() => setOpen(true)} activeOpacity={0.7}>
         <Text style={s.value}>{selected?.label ?? ''}</Text>
-        <Text style={s.chevron}>▾</Text>
+        <Icon name="expand-more" size={20} color={C.text2} />
       </TouchableOpacity>
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
@@ -43,7 +44,7 @@ export default function Dropdown<T extends string>({
                       onPress={() => { onChange(opt.value); setOpen(false); }}
                       activeOpacity={0.7}>
                       <Text style={[s.itemText, active && s.itemTextActive]}>{opt.label}</Text>
-                      {active && <Text style={s.check}>✓</Text>}
+                      {active && <Icon name="check" size={18} color={C.primary} />}
                     </TouchableOpacity>
                   );
                 })}
@@ -64,7 +65,6 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     borderWidth: 1.5, borderColor: C.borderVariant,
   },
   value: { color: C.text, fontSize: 15 },
-  chevron: { color: C.text2, fontSize: 14 },
   overlay: {
     flex: 1, backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center', alignItems: 'center',
@@ -82,5 +82,4 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   itemBorder: { borderBottomWidth: 1, borderBottomColor: C.borderVariant },
   itemText: { color: C.text, fontSize: 16 },
   itemTextActive: { color: C.primary, fontFamily: Fonts.spaceGrotesk.bold },
-  check: { color: C.primary, fontSize: 16, fontFamily: Fonts.spaceGrotesk.bold },
 });
