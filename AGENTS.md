@@ -1,57 +1,94 @@
 # AGENTS.md
 
-Guidelines for AI agents working on the iron-vault-mono codebase.
+Guidelines for AI agents working on the `iron-vault-mono` codebase.
+
+---
 
 ## Quick Orientation
 
-This is a **Turborepo monorepo** (pnpm workspaces) building a BLE hardware wallet simulator.
-The Android app (`apps/mobile`) implements the Ledger Nano X BLE/APDU protocol.
+**Iron Vault** — turns an old Android phone into a Ledger Nano X-compatible BLE hardware wallet.
+The app emulates the Ledger GATT profile + APDU protocol; host wallets (OKX, MetaMask, etc.) treat it as real hardware.
 
 ```
-apps/mobile       → React Native 0.84.1 (production app, Android only)
-apps/prototype    → Next.js 14 (design canvas + logic prototyping)
+apps/mobile       → React Native 0.84.1 + React 19  (Android, production)
+apps/prototype    → Next.js 14  (design canvas + logic test harness, port 3002)
 apps/website      → Next.js SSG (marketing site)
-packages/wallet   → Business logic (mnemonic, PIN, storage)
-packages/crypto   → Pure crypto (BIP-32/39, secp256k1, Ed25519)
-packages/apdu     → APDU protocol encode/decode
-packages/theme    → Design tokens (DARK/LIGHT)
-packages/i18n     → Localization
+
+packages/wallet   → PIN auth, mnemonic lifecycle, WalletStorage interface
+packages/crypto   → Pure crypto: BIP-32/39, secp256k1, Ed25519/SLIP-10
+packages/apdu     → APDU encode/decode + BLE framing (chunking, sequence numbers)
+packages/theme    → Design tokens — DARK / LIGHT ColorTokens
+packages/i18n     → Localization strings + useI18n() hook
 packages/eip4527  → CBOR/UR encoding (QR air-gap comms)
 packages/airgap   → Air-gap transport layer (uses eip4527)
-packages/simulator→ Web Ledger simulator
+packages/simulator→ Web Ledger simulator (integration testing)
 packages/assets   → Shared SVGs and images
 ```
+
+### Package dependency graph
+
+```
+@iron-vault/theme        ← no deps
+
+@iron-vault/crypto       ← @noble/curves, @noble/hashes, @scure/bip32, @scure/bip39
+
+@iron-vault/apdu         ← @iron-vault/crypto
+
+@iron-vault/wallet       ← @iron-vault/crypto, @noble/hashes
+
+apps/prototype           ← wallet, apdu, theme
+apps/mobile              ← wallet, apdu, theme, i18n, assets
+```
+
+---
 
 ## Conventions You Must Follow
 
 ### TypeScript
 
 - **Strict mode everywhere.** All packages have `strict: true` in tsconfig.
-- Type-check from monorepo root: `pnpm exec tsc --noEmit -p <path>/tsconfig.json`
-- No `any` unless absolutely necessary — prefer `unknown` + type narrowing.
+- Type-check: `pnpm exec tsc --noEmit -p <path>/tsconfig.json`
+- No `any` — prefer `unknown` + type narrowing.
 
 ### React Native (apps/mobile)
 
-- **Theme:** Never hardcode colors. Use `const C = useTheme()` + `makeStyles(C)` pattern.
-  ```tsx
-  const C = useTheme();
-  const s = useMemo(() => makeStyles(C), [C]);
-  // ...
-  const makeStyles = (C: ColorTokens) => StyleSheet.create({ ... });
-  ```
-- **Navigation:** Custom stack, NOT React Navigation. See `src/ble/AppContext.tsx`.
-  - `go(screen)` = push, `goBack()` = pop, `reset(screen)` = replace stack
-  - Auth transitions: always `reset()`, never `go()`
-- **Icons:** `Icon` component with hyphen-cased names. Prefix `mci:` for MaterialCommunityIcons.
-- **State updaters:** Pure computation only — no side effects inside `setState(prev => ...)`.
-- **Animations:** Use RN built-in `Animated` API. `react-native-reanimated` v4 crashes on this device.
+**Theme — never hardcode colors:**
+```tsx
+const C = useTheme();                          // returns ColorTokens (DARK or LIGHT)
+const s = useMemo(() => makeStyles(C), [C]);   // always memoize
+
+const makeStyles = (C: ColorTokens) => StyleSheet.create({ ... });
+```
+
+**Navigation — custom stack, NOT React Navigation** (`src/ble/AppContext.tsx`):
+- `go(screen)` = push, `goBack()` = pop, `reset(screen)` = replace entire stack
+- Auth success / wallet reset → **always `reset()`**, never `go()`
+- App startup → render `null` until `hasWallet()` resolves, then `reset()`
+
+**Screen flow:**
+```
+Welcome → GenerateMnemonic → VerifyMnemonic → SetPin → Vault
+Welcome → ImportMnemonic → SetPin → Vault
+PinUnlock → Vault
+Vault ↔ Settings
+Vault → AccountDetail → Transaction
+```
+
+**Icons** — `Icon` component, hyphen-cased names; prefix `mci:` for MaterialCommunityIcons.
+
+**State updaters** — pure computation only, no side effects inside `setState(prev => ...)`.
+React Strict Mode calls updaters twice; use `useEffect` to react to state changes instead.
+
+**Animations** — use RN built-in `Animated` API. `react-native-reanimated` v4 crashes on this device (`JSI: Global was not installed`).
 
 ### Package Boundaries
 
-- `packages/*` must be **platform-agnostic** (no React Native, no browser APIs).
-- `packages/crypto` is pure algorithm — no I/O, no state, no platform deps.
-- `packages/wallet` defines `WalletStorage` interface — platform-specific implementations live in apps.
-- `packages/apdu` handles APDU framing only — no BLE transport.
+- `packages/*` must be **platform-agnostic** — no React Native, no browser APIs.
+- `packages/crypto` — pure algorithms, no I/O, no state, no platform deps.
+- `packages/wallet` — defines `WalletStorage` interface; implementations live in apps:
+  - `apps/prototype` → `LocalStorageWalletStorage`
+  - `apps/mobile` → `SecureWalletStorage` (react-native-keychain)
+- `packages/apdu` — APDU framing only; no BLE transport.
 - BLE code lives exclusively in `apps/mobile/src/ble/`.
 
 ### Naming
@@ -59,73 +96,163 @@ packages/assets   → Shared SVGs and images
 - npm scope: `@iron-vault/`
 - Android bundle ID: `com.ironvault`
 - Screen names: PascalCase (`Welcome`, `Vault`, `AccountDetail`) — NOT `P01`, `P06`
-- CSS/style tokens: camelCase (`primaryBg`, `onSurface`)
+- Style tokens: camelCase (`primaryBg`, `onSurface`)
 
-### File Organization (apps/mobile)
+### File Organization (apps/mobile/src/)
 
 ```
-src/
-├── ble/              # BLE peripheral + AppContext (state + navigation)
-│   ├── BlePeripheral.ts   # JS↔Native bridge
-│   └── AppContext.tsx      # App state, navigation, theme
-├── components/       # Reusable UI components
-│   └── ui/           # Design system atoms (Icon, Button, TopBar, etc.)
-├── hooks/            # Custom hooks (useBleSession)
-├── i18n/             # Locale loader
-├── lib/              # Utility functions (chains, apdu-utils)
-├── navigation/       # Navigator.tsx (screen transitions)
-├── screens/          # One file per screen
-└── store/            # Storage adapters
+ble/              # BLE peripheral + AppContext (state + navigation)
+│   BlePeripheral.ts      # JS↔Native Kotlin bridge
+│   AppContext.tsx         # App state, navigation, theme context
+components/       # Reusable UI components
+│   ui/           # Design system atoms: Icon, Button, TopBar, …
+hooks/            # Custom hooks (useBleSession)
+i18n/             # Locale loader
+lib/              # Utilities: chains, apdu-utils
+navigation/       # Navigator.tsx (screen transitions + animations)
+screens/          # One file per screen
+store/            # Storage adapters
 ```
+
+---
+
+## Development Commands
+
+### Monorepo
+
+```bash
+pnpm install                                            # install all deps
+pnpm dev                                                # run all apps
+pnpm --filter prototype dev                             # prototype only (port 3002)
+
+# Type-check (run from monorepo root)
+pnpm exec tsc --noEmit -p apps/mobile/tsconfig.json
+pnpm exec tsc --noEmit -p apps/prototype/tsconfig.json
+pnpm exec tsc --noEmit -p packages/wallet/tsconfig.json
+
+# Unit tests
+pnpm --filter @iron-vault/<pkg> test
+```
+
+### apps/mobile — Android (Makefile, recommended)
+
+```bash
+make dev            # metro + launch app  ← daily driver
+make all            # build + install + metro + launch
+make metro          # start Metro + ADB forwarding
+make restart        # restart Metro
+make stop           # stop Metro
+make metro-log      # tail Metro log
+make metro-status   # check if Metro is running
+make adb            # ADB reverse forwarding only (after daemon restart)
+make build          # build debug APK
+make install        # install APK to device
+make app            # build + install
+make launch         # force-stop + reopen app
+```
+
+### apps/mobile — manual commands
+
+```bash
+# Build APK (Java 17 required — set JAVA_HOME)
+cd apps/mobile/android && ./gradlew assembleDebug
+
+# Metro (must run as foreground process)
+cd apps/mobile && npx react-native start --reset-cache
+
+# ADB (run after every daemon restart)
+adb reverse tcp:8081 tcp:8081
+
+# App control
+adb shell am start -n com.ironvault/.MainActivity
+adb shell am force-stop com.ironvault
+
+# UI inspection
+adb shell uiautomator dump /sdcard/ui.xml && adb pull /sdcard/ui.xml /tmp/ui.xml
+adb shell input tap X Y
+```
+
+---
 
 ## Common Pitfalls
 
 ### BLE Session Hook
-`useBleSession(activeChain, acct)` manages all APDU module singletons.
+`useBleSession(activeChain, acct)` — owns all APDU module-level singletons.
 - Pass `activeChain = null` to disable BLE without unmounting.
-- Reject callback pattern: `reject: () => resolve('6985')` — never raw `Promise.reject`.
+- Reject callback: always `reject: () => resolve('6985')` — **never** raw `Promise.reject`.
 
 ### Metro Bundler
 - Root `node_modules` MUST be in `watchFolders` (pnpm hoists everything there).
-- Metro must run as foreground process (background processes may be killed).
-- `FallbackWatcher.js` is patched for ENOENT (pnpm temp files).
+- Metro must run as **foreground** process — background processes may be killed.
+- `FallbackWatcher.js` is patched with try-catch for ENOENT (pnpm creates ephemeral temp files).
+- `resolveRequest` override forces `react`/`react-native` to resolve from `apps/mobile/node_modules`.
 
 ### Android Build
-- Java 17 required: set `JAVA_HOME` to your local JDK 17 path
-- After `adb` daemon restart: `adb reverse tcp:8081 tcp:8081`
+- Java 17 required — set `JAVA_HOME` to your local JDK 17 path.
+- After `adb` daemon restart: `adb reverse tcp:8081 tcp:8081`.
 
 ### Navigation Traps
-- `handleComplete(pin, reset)` — `reset` param shadows `useApp().reset`. Destructure as `navReset`.
-- SetPinScreen serves both "create wallet" and "change PIN" paths — check `generatedWords.length === 0`.
+- `handleComplete(pin, reset)` — the `reset` param **silently shadows** `useApp().reset`.
+  Fix: `const { reset: navReset } = useApp()`.
+- `SetPinScreen` serves both "create wallet" and "change PIN" — distinguish with `generatedWords.length === 0`.
 - Always register `BackHandler` for Android hardware back button.
 
 ### Theme Gotchas
-- `ThemeMode` is `'system' | 'light' | 'dark'` (persisted in AsyncStorage `app.theme`).
-- `useTheme()` returns `ColorTokens` (DARK or LIGHT) — not the mode string.
-- Both dark/light variants exist in `packages/theme` — never define colors inline.
+- `ThemeMode` = `'system' | 'light' | 'dark'` (persisted in AsyncStorage key `app.theme`).
+- `useTheme()` returns `ColorTokens`, **not** the mode string.
+- Never define colors inline — use `C.primary`, `C.bg`, `C.surface`, etc.
 
-## Testing
+### State Updater Side Effects
+React Strict Mode double-invokes updaters. `setTimeout`, navigation, and any I/O must go in `useEffect`, not `setState(prev => ...)`.
 
-- Unit tests: `packages/*/src/tests/` — run with `pnpm --filter <pkg> test`
-- Type-check: `pnpm exec tsc --noEmit -p <path>/tsconfig.json`
-- Manual mobile testing: `make dev` (starts Metro + launches app on device)
-- ADB UI dump: `adb shell uiautomator dump /sdcard/ui.xml && adb pull /sdcard/ui.xml /tmp/ui.xml`
+```tsx
+// ✅ correct
+useEffect(() => {
+  if (pin.length === 6) {
+    const t = setTimeout(() => onComplete(pin, resetPin), 150);
+    return () => clearTimeout(t);
+  }
+}, [pin]);
+```
 
-## Dependency Notes
+### Startup Flash
+Check `hasWallet()` before first render — render `null` until resolved, then `reset()` to the right screen.
+
+```tsx
+const [ready, setReady] = useState(false);
+useEffect(() => {
+  hasWallet(storage).then(has => {
+    navReset(has ? 'PinUnlock' : 'Welcome');
+    setReady(true);
+  });
+}, []);
+if (!ready) return null;
+```
+
+---
+
+## Key Dependencies
 
 | Dependency | Version | Note |
 |---|---|---|
 | React Native | 0.84.1 | New Architecture enabled |
-| React | 19.2.3 | (root has 18.3.1 — Metro resolver pins to mobile's copy) |
-| pnpm | 9.0.0 | `shamefully-hoist=true` in `.npmrc` |
+| React | 19.2.3 | Root has 18.3.1 — Metro resolver pins to mobile's copy |
+| pnpm | 9.0.0 | `shamefully-hoist=true` + `node-linker=hoisted` in `.npmrc` |
 | Turbo | 2.x | Build orchestration |
 | Java | 17 | Required for Gradle (openjdk-amd64) |
 
-## For Agent Orchestration
+---
 
-When splitting work across agents:
-- **Crypto/wallet logic** → can be tested in isolation, no device needed
-- **UI/screen changes** → need `make dev` to verify on device
-- **BLE changes** → require device + host app (OKX) for full E2E
-- **Package changes** → run type-check for all consumers: `pnpm exec tsc --noEmit -p apps/mobile/tsconfig.json`
-- **Theme changes** → verify both dark and light modes on device
+## Agent Orchestration
+
+When splitting work across agents, use these isolation boundaries:
+
+| Work type | Isolation | Verification |
+|---|---|---|
+| `packages/*` logic | No device needed | `pnpm exec tsc --noEmit -p packages/<pkg>/tsconfig.json` |
+| Package changes | Must check all consumers | `pnpm exec tsc --noEmit -p apps/mobile/tsconfig.json` |
+| UI / screen changes | Need device | `make dev` |
+| BLE changes | Need device + host app (OKX) | Full E2E |
+| Theme changes | Need device | Verify both dark and light modes |
+
+**After any edit:** run `tsc --noEmit` on changed package + all consumers. Type errors = not done.
