@@ -18,6 +18,14 @@ export default function PinDots({ length, error, loading }: PinDotsProps) {
     Array.from({ length: 6 }, () => new Animated.Value(0))
   ).current;
 
+  const interpolations = useRef(
+    scanAnims.map(anim => ({
+      bg:      anim.interpolate({ inputRange: [0, 1], outputRange: [C.primary, '#FFFFFF'] }),
+      scale:   anim.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1.25] }),
+      opacity: anim.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] }),
+    }))
+  ).current;
+
   useEffect(() => {
     if (!loading) {
       scanAnims.forEach(a => {
@@ -42,24 +50,14 @@ export default function PinDots({ length, error, loading }: PinDotsProps) {
 
     loops.forEach(l => l.start());
     return () => loops.forEach(l => l.stop());
-  }, [loading, scanAnims]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
 
   return (
     <View style={s.row}>
       {Array.from({ length: 6 }).map((_, i) => {
         if (loading) {
-          const bg = scanAnims[i].interpolate({
-            inputRange: [0, 1],
-            outputRange: [C.primary, '#FFFFFF'],
-          });
-          const scale = scanAnims[i].interpolate({
-            inputRange: [0, 1],
-            outputRange: [0.85, 1.25],
-          });
-          const opacity = scanAnims[i].interpolate({
-            inputRange: [0, 1],
-            outputRange: [0.2, 1],
-          });
+          const { bg, scale, opacity } = interpolations[i];
           return (
             <Animated.View
               key={i}
