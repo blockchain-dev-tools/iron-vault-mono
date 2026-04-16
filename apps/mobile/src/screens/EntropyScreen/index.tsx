@@ -9,12 +9,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { sha256 } from '@noble/hashes/sha2';
 import { randomBytes } from '@noble/hashes/utils';
 import { entropyToMnemonic } from '@iron-vault/wallet';
-import { useApp, useTheme, useLocale } from '../store/AppContext';
+import { useApp, useTheme, useLocale } from '../../store/AppContext';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
-import TopBar from '../components/ui/TopBar';
-import Button from '../components/ui/Button';
-import { Fonts } from '../lib/fonts';
+import TopBar from '../../components/ui/TopBar';
+import Button from '../../components/ui/Button';
+import { Fonts } from '../../lib/fonts';
 
 const TARGET_POINTS = 200;
 

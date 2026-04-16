@@ -1,11 +1,11 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { setupWallet } from '@iron-vault/wallet';
-import { walletStorage } from '../lib/storage';
-import { useApp, useTheme, useLocale } from '../store/AppContext';
+import { walletStorage } from '../../lib/storage';
+import { useApp, useTheme, useLocale } from '../../store/AppContext';
 import type { ColorTokens } from '@iron-vault/theme';
-import TopBar from '../components/ui/TopBar';
-import PinPad from '../components/ui/PinPad';
+import TopBar from '../../components/ui/TopBar';
+import PinPad from '../../components/ui/PinPad';
 
 export default function SetPinScreen() {
   const { reset: navReset, goBack, generatedWords, passphrase, setAccounts, setGeneratedWords, setPassphrase, mnemonicLang, setMnemonicEntropy, setMnemonicLang } = useApp();

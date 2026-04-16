@@ -1,15 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
-import { useApp, useTheme, useLocale } from '../store/AppContext';
+import { useApp, useTheme, useLocale } from '../../store/AppContext';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
-import TopBar from '../components/ui/TopBar';
-import Card from '../components/ui/Card';
-import SectionLabel from '../components/ui/SectionLabel';
-import Button from '../components/ui/Button';
-import Icon from '../components/ui/Icon';
-import AlertBanner from '../components/ui/AlertBanner';
-import { Fonts } from '../lib/fonts';
+import TopBar from '../../components/ui/TopBar';
+import Card from '../../components/ui/Card';
+import SectionLabel from '../../components/ui/SectionLabel';
+import Button from '../../components/ui/Button';
+import Icon from '../../components/ui/Icon';
+import AlertBanner from '../../components/ui/AlertBanner';
+import { Fonts } from '../../lib/fonts';
 
 export default function TransactionScreen() {
   const { pendingTx, setPendingTx, goBack } = useApp();

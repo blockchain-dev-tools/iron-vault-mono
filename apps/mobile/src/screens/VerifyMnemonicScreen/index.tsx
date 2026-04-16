@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useApp, useTheme, useLocale } from '../store/AppContext';
+import { useApp, useTheme, useLocale } from '../../store/AppContext';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
-import TopBar from '../components/ui/TopBar';
-import SectionLabel from '../components/ui/SectionLabel';
-import { Fonts } from '../lib/fonts';
+import TopBar from '../../components/ui/TopBar';
+import SectionLabel from '../../components/ui/SectionLabel';
+import { Fonts } from '../../lib/fonts';
 
 const POSITIONS = [2, 6, 10];
 function shuffle<T>(arr: T[]): T[] { return [...arr].sort(() => Math.random() - 0.5); }

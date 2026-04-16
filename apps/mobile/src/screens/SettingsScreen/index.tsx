@@ -3,16 +3,16 @@ import {
   Alert, ScrollView, StyleSheet, View,
 } from 'react-native';
 import { clearWallet } from '@iron-vault/wallet';
-import { walletStorage } from '../lib/storage';
-import { useApp, useTheme, useLocale } from '../store/AppContext';
-import type { ThemeMode, LocaleMode } from '../store/AppContext';
+import { walletStorage } from '../../lib/storage';
+import { useApp, useTheme, useLocale } from '../../store/AppContext';
+import type { ThemeMode, LocaleMode } from '../../store/AppContext';
 import type { ColorTokens } from '@iron-vault/theme';
-import Button from '../components/ui/Button';
-import SectionLabel from '../components/ui/SectionLabel';
-import Dropdown from '../components/ui/Dropdown';
-import type { DropdownOption } from '../components/ui/Dropdown';
-import SettingRow from '../components/ui/SettingRow';
-import SegmentedControl from '../components/ui/SegmentedControl';
+import Button from '../../components/ui/Button';
+import SectionLabel from '../../components/ui/SectionLabel';
+import Dropdown from '../../components/ui/Dropdown';
+import type { DropdownOption } from '../../components/ui/Dropdown';
+import SettingRow from '../../components/ui/SettingRow';
+import SegmentedControl from '../../components/ui/SegmentedControl';
 
 export default function SettingsScreen() {
   const {

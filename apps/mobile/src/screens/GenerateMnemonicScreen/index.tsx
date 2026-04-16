@@ -2,15 +2,15 @@ import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { reencodeMnemonic } from '@iron-vault/wallet';
 import type { Bip39Language } from '@iron-vault/wallet';
-import { useApp, useTheme, useLocale } from '../store/AppContext';
+import { useApp, useTheme, useLocale } from '../../store/AppContext';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
-import TopBar from '../components/ui/TopBar';
-import Button from '../components/ui/Button';
-import AlertBanner from '../components/ui/AlertBanner';
-import LangPicker from '../components/ui/LangPicker';
-import PassphraseBox from '../components/ui/PassphraseBox';
-import { Fonts } from '../lib/fonts';
+import TopBar from '../../components/ui/TopBar';
+import Button from '../../components/ui/Button';
+import AlertBanner from '../../components/ui/AlertBanner';
+import LangPicker from '../../components/ui/LangPicker';
+import PassphraseBox from '../../components/ui/PassphraseBox';
+import { Fonts } from '../../lib/fonts';
 
 export default function GenerateMnemonicScreen() {
   const { go, goBack, generatedWords, setGeneratedWords, mnemonicLang, setMnemonicLang, setPassphrase } = useApp();

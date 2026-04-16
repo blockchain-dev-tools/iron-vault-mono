@@ -1,18 +1,18 @@
 import React, { useMemo } from 'react';
 import { Alert, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import { useApp, useTheme, useLocale } from '../store/AppContext';
+import { useApp, useTheme, useLocale } from '../../store/AppContext';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
-import TopBar from '../components/ui/TopBar';
-import BleStatus from '../components/ui/BleStatus';
-import Button from '../components/ui/Button';
-import Card from '../components/ui/Card';
-import SectionLabel from '../components/ui/SectionLabel';
-import Icon from '../components/ui/Icon';
-import LogViewer from '../components/ui/LogViewer';
-import { useBleSession } from '../hooks/useBleSession';
-import { Fonts } from '../lib/fonts';
+import TopBar from '../../components/ui/TopBar';
+import BleStatus from '../../components/ui/BleStatus';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import SectionLabel from '../../components/ui/SectionLabel';
+import Icon from '../../components/ui/Icon';
+import LogViewer from '../../components/ui/LogViewer';
+import { useBleSession } from '../../hooks/useBleSession';
+import { Fonts } from '../../lib/fonts';
 
 export default function AccountDetailScreen() {
   const { goBack, accounts, currentChain, currentAcctIdx, bleState, removeAccount } = useApp();

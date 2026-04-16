@@ -2,14 +2,14 @@ import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { unlockWallet, clearWallet } from '@iron-vault/wallet';
-import { walletStorage } from '../lib/storage';
-import { useApp, useTheme, useLocale } from '../store/AppContext';
+import { walletStorage } from '../../lib/storage';
+import { useApp, useTheme, useLocale } from '../../store/AppContext';
 import type { ColorTokens } from '@iron-vault/theme';
-import PinPad from '../components/ui/PinPad';
-import PinDots from '../components/ui/PinDots';
-import BgLines from '../components/ui/BgLines';
-import IronVaultHero from '../components/ui/IronVaultHero';
-import { Fonts } from '../lib/fonts';
+import PinPad from '../../components/ui/PinPad';
+import PinDots from '../../components/ui/PinDots';
+import BgLines from '../../components/ui/BgLines';
+import IronVaultHero from '../../components/ui/IronVaultHero';
+import { Fonts } from '../../lib/fonts';
 
 const MAX_ATTEMPTS = 5;
 

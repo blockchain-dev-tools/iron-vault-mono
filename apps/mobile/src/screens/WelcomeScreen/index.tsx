@@ -1,15 +1,15 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useApp, useTheme, useLocale } from '../store/AppContext';
-import type { LocaleMode, ThemeMode } from '../store/AppContext';
+import { useApp, useTheme, useLocale } from '../../store/AppContext';
+import type { LocaleMode, ThemeMode } from '../../store/AppContext';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
-import Button from '../components/ui/Button';
-import Icon from '../components/ui/Icon';
-import BgLines from '../components/ui/BgLines';
-import IronVaultHero from '../components/ui/IronVaultHero';
-import { Fonts } from '../lib/fonts';
+import Button from '../../components/ui/Button';
+import Icon from '../../components/ui/Icon';
+import BgLines from '../../components/ui/BgLines';
+import IronVaultHero from '../../components/ui/IronVaultHero';
+import { Fonts } from '../../lib/fonts';
 
 const LOCALE_CYCLE: LocaleMode[] = ['en', 'zh', 'system'];
 const LOCALE_LABEL: Record<LocaleMode, string> = {
