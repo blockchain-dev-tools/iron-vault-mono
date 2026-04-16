@@ -161,7 +161,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const t = saved[THEME_KEY];
       if (t === 'light' || t === 'dark' || t === 'system') setThemeModeState(t);
       const l = saved[LOCALE_KEY];
-      if (l === 'en' || l === 'zh' || l === 'system') setLocaleModeState(l);
+      if (l === 'en' || l === 'zh' || l === 'ja' || l === 'ko' || l === 'system') setLocaleModeState(l);
     });
   }, []);
 

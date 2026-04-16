@@ -12,6 +12,8 @@ import Button from '../../components/ui/Button';
 import SectionLabel from '../../components/ui/SectionLabel';
 import SettingRow from '../../components/ui/SettingRow';
 import SegmentedControl from '../../components/ui/SegmentedControl';
+import Dropdown from '../../components/ui/Dropdown';
+import type { DropdownOption } from '../../components/ui/Dropdown';
 import { Fonts } from '../../lib/fonts';
 
 export default function SettingsScreen() {
@@ -31,10 +33,12 @@ export default function SettingsScreen() {
     { value: 'dark' as ThemeMode,   label: t.settings.themeDark },
   ];
 
-  const LOCALE_OPTIONS = [
-    { value: 'system' as LocaleMode, label: t.settings.langSystem },
-    { value: 'en'     as LocaleMode, label: t.settings.langEn },
-    { value: 'zh'     as LocaleMode, label: t.settings.langZh },
+  const LOCALE_OPTIONS: DropdownOption<LocaleMode>[] = [
+    { value: 'system', label: t.settings.langSystem },
+    { value: 'en',     label: t.settings.langEn },
+    { value: 'zh',     label: t.settings.langZh },
+    { value: 'ja',     label: t.settings.langJa },
+    { value: 'ko',     label: t.settings.langKo },
   ];
 
   const handleReset = () => {
@@ -69,9 +73,9 @@ export default function SettingsScreen() {
 
         {/* Language */}
         <SectionLabel>{t.settings.language}</SectionLabel>
-        <SegmentedControl<LocaleMode>
-          options={LOCALE_OPTIONS}
+        <Dropdown<LocaleMode>
           value={localeMode}
+          options={LOCALE_OPTIONS}
           onChange={setLocaleMode}
         />
 

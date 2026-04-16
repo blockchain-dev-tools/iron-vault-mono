@@ -141,6 +141,8 @@ export const EN = {
     langSystem: 'Auto',
     langEn: 'English',
     langZh: '中文',
+    langJa: '日本語',
+    langKo: '한국어',
     security: 'Security',
     changePin: 'Change PIN',
     backupSeed: 'Backup Seed Phrase',

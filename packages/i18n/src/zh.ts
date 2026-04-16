@@ -143,6 +143,8 @@ export const ZH: Translations = {
     langSystem: '跟随系统',
     langEn: 'English',
     langZh: '中文',
+    langJa: '日本語',
+    langKo: '한국어',
     security: '安全',
     changePin: '修改 PIN',
     backupSeed: '备份助记词',
