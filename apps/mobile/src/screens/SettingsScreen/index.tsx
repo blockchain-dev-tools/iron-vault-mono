@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import {
-  Alert, ScrollView, StyleSheet, View,
+  Alert, ScrollView, StyleSheet, Text, View,
 } from 'react-native';
 import { clearWallet } from '@iron-vault/wallet';
 import { walletStorage } from '../../lib/storage';
@@ -13,6 +13,7 @@ import Dropdown from '../../components/ui/Dropdown';
 import type { DropdownOption } from '../../components/ui/Dropdown';
 import SettingRow from '../../components/ui/SettingRow';
 import SegmentedControl from '../../components/ui/SegmentedControl';
+import { Fonts } from '../../lib/fonts';
 
 export default function SettingsScreen() {
   const {
@@ -55,6 +56,9 @@ export default function SettingsScreen() {
   return (
     <View style={s.root}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+
+        {/* Title */}
+        <Text style={s.title}>{t.settings.title}</Text>
 
         {/* Appearance */}
         <SectionLabel>{t.settings.appearance}</SectionLabel>
@@ -101,4 +105,5 @@ export default function SettingsScreen() {
 const makeStyles = (C: ColorTokens) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
   content: { paddingHorizontal: 20, paddingTop: 20 },
+  title: { color: C.text, fontSize: 28, fontFamily: Fonts.spaceGrotesk.bold, marginBottom: 24 },
 });
