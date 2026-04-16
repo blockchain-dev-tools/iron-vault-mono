@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Animated, StyleSheet, Text, View } from 'react-native';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
-import { useTheme } from '../../store/AppContext';
+import { useTheme, useLocale } from '../../store/AppContext';
 import { Fonts } from '../../lib/fonts';
 
 type BleState = 'idle' | 'broadcasting' | 'connected' | 'error';
@@ -21,18 +21,20 @@ const TROUBLESHOOT_TIPS = [
   '④ Restart the app if the issue persists',
 ];
 
-export default function BleStatus({ state }: { state: BleState }) {
+// BleStatus dispatches to the right variant — no hooks here, avoids conditional hook violations.
+export default function BleStatus({ state, variant = 'card' }: { state: BleState; variant?: 'card' | 'row' }) {
+  return variant === 'row' ? <BleStatusRow state={state} /> : <BleStatusCard state={state} />;
+}
+
+function BleStatusCard({ state }: { state: BleState }) {
   const C = useTheme();
   const s = useMemo(() => makeStyles(C), [C]);
 
-  // displayState lags behind state by one crossfade cycle
   const [displayState, setDisplayState] = useState<BleState>(state);
-
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const pulse    = useRef(new Animated.Value(1)).current;
   const pulseAnimRef = useRef<Animated.CompositeAnimation | null>(null);
 
-  // Pulse loop — driven by displayState so it starts/stops after the crossfade
   useEffect(() => {
     if (displayState === 'broadcasting') {
       const anim = Animated.loop(
@@ -50,7 +52,6 @@ export default function BleStatus({ state }: { state: BleState }) {
     }
   }, [displayState, pulse]);
 
-  // Crossfade when external state changes
   useEffect(() => {
     if (state === displayState) return;
     Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true })
@@ -96,6 +97,27 @@ export default function BleStatus({ state }: { state: BleState }) {
   );
 }
 
+function BleStatusRow({ state }: { state: BleState }) {
+  const C = useTheme();
+  const t = useLocale();
+  const s = useMemo(() => makeRowStyles(C), [C]);
+  const isConnected = state === 'connected';
+  const isBroadcasting = state === 'broadcasting';
+  const title = isConnected ? t.vault.bleConnected : isBroadcasting ? t.vault.bleBroadcasting : t.vault.bleStarting;
+  const sub   = isConnected ? t.vault.bleConnectedSub : isBroadcasting ? t.vault.bleBroadcastingSub : t.vault.bleStartingSub;
+  return (
+    <View style={s.row}>
+      {state === 'idle'
+        ? <ActivityIndicator size="small" color={C.primary} />
+        : <View style={[s.dot, isConnected && s.dotConnected]} />}
+      <View style={{ flex: 1 }}>
+        <Text style={s.title}>{title}</Text>
+        <Text style={s.sub}>{sub}</Text>
+      </View>
+    </View>
+  );
+}
+
 const makeStyles = (C: ColorTokens) => StyleSheet.create({
   card: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
@@ -130,4 +152,16 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   },
   tipsTitle: { color: C.text, fontSize: 12, fontFamily: Fonts.spaceGrotesk.bold, marginBottom: 8, letterSpacing: 0.5 },
   tipLine: { color: C.text2, fontSize: 12, lineHeight: 20 },
+});
+
+const makeRowStyles = (C: ColorTokens) => StyleSheet.create({
+  row: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: C.primary8, borderRadius: R.xl,
+    padding: 14, borderWidth: 1, borderColor: C.primary25, marginBottom: 14,
+  },
+  dot: { width: 12, height: 12, borderRadius: 6, backgroundColor: C.primary, flexShrink: 0 },
+  dotConnected: { backgroundColor: '#4caf50' },
+  title: { color: C.text, fontSize: 14, fontFamily: Fonts.spaceGrotesk.bold },
+  sub: { color: C.text2, fontSize: 12, marginTop: 2 },
 });
