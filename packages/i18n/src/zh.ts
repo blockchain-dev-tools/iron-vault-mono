@@ -73,6 +73,7 @@ export const ZH: Translations = {
     locked: '尝试次数过多，已锁定',
     attemptsLeft: (n: number) => `还剩 ${n} 次机会`,
     unlocking: '解锁中…',
+    verifying: '验证中…',
     forgotPin: '忘记 PIN？重置账户',
     resetTitle: '重置账户',
     resetMessage: '此操作将永久删除所有钱包数据。请确认你已备份助记词，否则资产将无法找回。',

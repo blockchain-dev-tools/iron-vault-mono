@@ -71,6 +71,7 @@ export const EN = {
     locked: 'Too many attempts — locked',
     attemptsLeft: (n: number) => `${n} attempts remaining`,
     unlocking: 'Unlocking…',
+    verifying: 'Verifying…',
     forgotPin: 'Forgot PIN? Reset Account',
     resetTitle: 'Reset Account',
     resetMessage: 'This will permanently delete all wallet data. Make sure you have your seed phrase backed up.',
