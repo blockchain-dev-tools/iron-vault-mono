@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Shield + lock body + shackle (evenOdd) — centered in 108x108, scaled from 80x92 viewBox -->
+    <!-- Translate: (108-80)/2=14 x, (108-92)/2=8 y -->
+    <group
+        android:translateX="14"
+        android:translateY="8">
+        <path
+            android:fillColor="#8FC322"
+            android:fillType="evenOdd"
+            android:pathData="M40,0 L80,18 V52 C80,72 60,88 40,92 C20,88 0,72 0,52 V18 L40,0 Z
+                M29,34 H51 Q55,34 55,39 V57 Q55,62 51,62 H29 Q25,62 25,57 V39 Q25,34 29,34 Z
+                M30,34 Q30,25 40,25 Q50,25 50,34 Z
+                M33,34 Q33,29 40,29 Q47,29 47,34 Z" />
+        <!-- Keyhole circle -->
+        <path
+            android:fillColor="#8FC322"
+            android:pathData="M44,46 A4,4,0,1,0,36,46 A4,4,0,1,0,44,46 Z" />
+        <!-- Keyhole stem -->
+        <path
+            android:fillColor="#8FC322"
+            android:pathData="M39,50 L41,50 L41,57 L39,57 Z" />
+    </group>
+</vector>
