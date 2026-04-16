@@ -133,6 +133,12 @@ export const JA: Translations = {
     stop: '停止',
     retryBle: '再試行',
   },
+  backupSeed: {
+    title: 'シードフレーズのバックアップ',
+    enterPin: 'シードフレーズを表示するにはPINを入力してください',
+    warning: 'このフレーズを秘密にしてください。アクセスした人は誰でも資産を管理できます。',
+    done: '完了',
+  },
   settings: {
     title: '設定',
     appearance: '外観',

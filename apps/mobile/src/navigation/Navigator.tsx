@@ -25,6 +25,7 @@ import PinUnlockScreen        from '../screens/PinUnlockScreen';
 import AccountDetailScreen    from '../screens/AccountDetailScreen';
 import TransactionScreen      from '../screens/TransactionScreen';
 import EntropyScreen         from '../screens/EntropyScreen';
+import BackupSeedScreen      from '../screens/BackupSeedScreen';
 
 const SCREENS = {
   Welcome:          WelcomeScreen,
@@ -38,6 +39,7 @@ const SCREENS = {
   Unlock:           PinUnlockScreen,
   AccountDetail:    AccountDetailScreen,
   Transaction:      TransactionScreen,
+  BackupSeed:       BackupSeedScreen,
 } as const;
 
 // Screens that show the persistent bottom navigation bar

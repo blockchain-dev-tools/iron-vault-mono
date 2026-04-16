@@ -131,6 +131,12 @@ export const EN = {
     stop: 'Stop',
     retryBle: 'Retry',
   },
+  backupSeed: {
+    title: 'Backup Seed Phrase',
+    enterPin: 'Enter PIN to reveal seed phrase',
+    warning: 'Keep this phrase secret. Anyone with access to it can control your funds.',
+    done: 'Done',
+  },
   settings: {
     title: 'Settings',
     appearance: 'Appearance',

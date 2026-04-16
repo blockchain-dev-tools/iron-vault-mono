@@ -133,6 +133,12 @@ export const ZH: Translations = {
     stop: '停止',
     retryBle: '重试',
   },
+  backupSeed: {
+    title: '备份助记词',
+    enterPin: '输入 PIN 以查看助记词',
+    warning: '请妥善保管助记词，任何获得它的人都可以控制你的资产。',
+    done: '完成',
+  },
   settings: {
     title: '设置',
     appearance: '外观',

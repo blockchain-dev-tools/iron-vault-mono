@@ -133,6 +133,12 @@ export const KO: Translations = {
     stop: '중지',
     retryBle: '재시도',
   },
+  backupSeed: {
+    title: '시드 문구 백업',
+    enterPin: '시드 문구를 확인하려면 PIN을 입력하세요',
+    warning: '이 문구를 비밀로 유지하세요. 접근할 수 있는 사람은 누구나 자산을 제어할 수 있습니다.',
+    done: '완료',
+  },
   settings: {
     title: '설정',
     appearance: '외관',

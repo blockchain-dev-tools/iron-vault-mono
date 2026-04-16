@@ -83,7 +83,7 @@ export default function SettingsScreen() {
         <SectionLabel>{t.settings.security}</SectionLabel>
         <View style={s.card}>
           <SettingRow label={t.settings.changePin} onPress={() => go('SetPin')} />
-          <SettingRow label={t.settings.backupSeed} onPress={() => go('GenerateMnemonic')} />
+          <SettingRow label={t.settings.backupSeed} onPress={() => go('BackupSeed')} />
           <SettingRow label={t.settings.autoLock} value={t.settings.autoLockValue} last />
         </View>
 

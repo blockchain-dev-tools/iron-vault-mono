@@ -207,6 +207,11 @@ export async function removeAccount(
   );
 }
 
+export async function revealMnemonic(s: WalletStorage, pin: string): Promise<string | null> {
+  if (!(await verifyPin(s, pin))) return null;
+  return s.getItem(MNEMONIC_KEY);
+}
+
 export async function clearWallet(s: WalletStorage): Promise<void> {
   await s.removeItem(PIN_KDF_KEY);
   await s.removeItem(PIN_HASH_KEY);

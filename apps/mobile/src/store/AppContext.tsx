@@ -25,7 +25,7 @@ const LOCALE_KEY = 'app.locale';
 
 export type ScreenName =
   | 'Welcome' | 'Entropy' | 'GenerateMnemonic' | 'VerifyMnemonic' | 'SetPin' | 'ImportMnemonic'
-  | 'Vault' | 'Settings' | 'Unlock' | 'AccountDetail' | 'Transaction';
+  | 'Vault' | 'Settings' | 'Unlock' | 'AccountDetail' | 'Transaction' | 'BackupSeed';
 
 export interface ScreenEntry {
   name: ScreenName;
