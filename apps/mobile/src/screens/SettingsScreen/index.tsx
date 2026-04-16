@@ -6,11 +6,10 @@ import { clearWallet } from '@iron-vault/wallet';
 import { walletStorage } from '../../lib/storage';
 import { useApp, useTheme, useLocale } from '../../store/AppContext';
 import type { ThemeMode, LocaleMode } from '../../store/AppContext';
+import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import Button from '../../components/ui/Button';
 import SectionLabel from '../../components/ui/SectionLabel';
-import Dropdown from '../../components/ui/Dropdown';
-import type { DropdownOption } from '../../components/ui/Dropdown';
 import SettingRow from '../../components/ui/SettingRow';
 import SegmentedControl from '../../components/ui/SegmentedControl';
 import { Fonts } from '../../lib/fonts';
@@ -32,10 +31,10 @@ export default function SettingsScreen() {
     { value: 'dark' as ThemeMode,   label: t.settings.themeDark },
   ];
 
-  const LOCALE_OPTIONS: DropdownOption<LocaleMode>[] = [
-    { value: 'system', label: t.settings.langSystem },
-    { value: 'en',     label: t.settings.langEn },
-    { value: 'zh',     label: t.settings.langZh },
+  const LOCALE_OPTIONS = [
+    { value: 'system' as LocaleMode, label: t.settings.langSystem },
+    { value: 'en'     as LocaleMode, label: t.settings.langEn },
+    { value: 'zh'     as LocaleMode, label: t.settings.langZh },
   ];
 
   const handleReset = () => {
@@ -69,32 +68,33 @@ export default function SettingsScreen() {
         />
 
         {/* Language */}
-        <View style={{ height: 20 }} />
         <SectionLabel>{t.settings.language}</SectionLabel>
-        <Dropdown<LocaleMode>
-          value={localeMode}
+        <SegmentedControl<LocaleMode>
           options={LOCALE_OPTIONS}
+          value={localeMode}
           onChange={setLocaleMode}
         />
 
         {/* Security */}
-        <View style={{ height: 20 }} />
         <SectionLabel>{t.settings.security}</SectionLabel>
-        <SettingRow label={t.settings.changePin} onPress={() => go('SetPin')} />
-        <SettingRow label={t.settings.backupSeed} onPress={() => go('GenerateMnemonic')} />
-        <SettingRow label={t.settings.autoLock} value={t.settings.autoLockValue} />
+        <View style={s.card}>
+          <SettingRow label={t.settings.changePin} onPress={() => go('SetPin')} />
+          <SettingRow label={t.settings.backupSeed} onPress={() => go('GenerateMnemonic')} />
+          <SettingRow label={t.settings.autoLock} value={t.settings.autoLockValue} last />
+        </View>
 
         {/* Bluetooth */}
-        <View style={{ height: 20 }} />
         <SectionLabel>{t.settings.bluetooth}</SectionLabel>
-        <SettingRow label={t.settings.deviceName} value={t.settings.deviceNameValue} />
+        <View style={s.card}>
+          <SettingRow label={t.settings.deviceName} value={t.settings.deviceNameValue} last />
+        </View>
 
         {/* About */}
-        <View style={{ height: 20 }} />
         <SectionLabel>{t.settings.about}</SectionLabel>
-        <SettingRow label={t.settings.version} value={t.settings.versionValue} />
+        <View style={s.card}>
+          <SettingRow label={t.settings.version} value={t.settings.versionValue} last />
+        </View>
 
-        <View style={{ height: 32 }} />
         <Button variant="danger" onPress={handleReset}>{t.settings.resetWallet}</Button>
         <View style={{ height: 40 }} />
       </ScrollView>
@@ -104,6 +104,11 @@ export default function SettingsScreen() {
 
 const makeStyles = (C: ColorTokens) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
-  content: { paddingHorizontal: 20, paddingTop: 20 },
-  title: { color: C.text, fontSize: 28, fontFamily: Fonts.spaceGrotesk.bold, marginBottom: 24 },
+  content: { paddingHorizontal: 20, paddingTop: 20, gap: 12 },
+  title: { color: C.text, fontSize: 28, fontFamily: Fonts.spaceGrotesk.bold, marginBottom: 12 },
+  card: {
+    backgroundColor: C.surfaceContainer,
+    borderRadius: R.xl,
+    overflow: 'hidden',
+  },
 });
