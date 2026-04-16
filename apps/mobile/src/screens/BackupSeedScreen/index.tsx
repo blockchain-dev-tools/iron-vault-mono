@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { Animated, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { revealMnemonic } from '@iron-vault/wallet';
+import { revealMnemonic, reencodeMnemonic } from '@iron-vault/wallet';
+import type { Bip39Language } from '@iron-vault/wallet';
 import { walletStorage } from '../../lib/storage';
 import { useApp, useTheme, useLocale } from '../../store/AppContext';
 import { R } from '@iron-vault/theme';
@@ -8,8 +9,8 @@ import type { ColorTokens } from '@iron-vault/theme';
 import TopBar from '../../components/ui/TopBar';
 import Button from '../../components/ui/Button';
 import AlertBanner from '../../components/ui/AlertBanner';
+import LangPicker from '../../components/ui/LangPicker';
 import PinPad from '../../components/ui/PinPad';
-import PinDots from '../../components/ui/PinDots';
 import PinLoadingSpinner from '../../components/ui/PinLoadingSpinner';
 import { Fonts } from '../../lib/fonts';
 
@@ -20,8 +21,17 @@ export default function BackupSeedScreen() {
   const s = useMemo(() => makeStyles(C), [C]);
 
   const [words, setWords] = useState<string[] | null>(null);
+  const [lang, setLang] = useState<Bip39Language>('en');
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const handleLangChange = (newLang: Bip39Language) => {
+    if (!words || newLang === lang) return;
+    const sep = lang === 'ja' ? '\u3000' : ' ';
+    const reencoded = reencodeMnemonic(words.join(sep), lang, newLang);
+    setWords(reencoded.split(/[\s\u3000]+/));
+    setLang(newLang);
+  };
 
   const padOpacity = useRef(new Animated.Value(1)).current;
   const dotOpacity = useRef(new Animated.Value(0)).current;
@@ -66,6 +76,7 @@ export default function BackupSeedScreen() {
         {words ? (
           /* ── Revealed: word grid ── */
           <>
+            <LangPicker value={lang} onChange={handleLangChange} />
             <View style={s.grid}>
               {words.map((w, i) => (
                 <View key={i} style={s.chip}>
