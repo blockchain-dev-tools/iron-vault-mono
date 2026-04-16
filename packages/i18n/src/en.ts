@@ -70,7 +70,6 @@ export const EN = {
     enterPin: 'Enter PIN to unlock',
     locked: 'Too many attempts — locked',
     attemptsLeft: (n: number) => `${n} attempts remaining`,
-    unlocking: 'Unlocking…',
     verifying: 'Verifying…',
     forgotPin: 'Forgot PIN? Reset Account',
     resetTitle: 'Reset Account',
