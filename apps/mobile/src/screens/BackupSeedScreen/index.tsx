@@ -1,7 +1,8 @@
 import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { Animated, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { revealMnemonic, reencodeMnemonic } from '@iron-vault/wallet';
+import { revealMnemonic, reencodeMnemonic, validateMnemonicWithWordlist } from '@iron-vault/wallet';
 import type { Bip39Language } from '@iron-vault/wallet';
+import { BIP39_LANGS } from '../../components/ui/LangPicker';
 import { walletStorage } from '../../lib/storage';
 import { useApp, useTheme, useLocale } from '../../store/AppContext';
 import { R } from '@iron-vault/theme';
@@ -13,6 +14,13 @@ import LangPicker from '../../components/ui/LangPicker';
 import PinPad from '../../components/ui/PinPad';
 import PinLoadingSpinner from '../../components/ui/PinLoadingSpinner';
 import { Fonts } from '../../lib/fonts';
+
+function detectLang(mnemonic: string): Bip39Language {
+  for (const lang of BIP39_LANGS) {
+    if (validateMnemonicWithWordlist(mnemonic, lang)) return lang;
+  }
+  return 'en';
+}
 
 export default function BackupSeedScreen() {
   const { goBack } = useApp();
@@ -49,6 +57,8 @@ export default function BackupSeedScreen() {
     try {
       const mnemonic = await revealMnemonic(walletStorage, pin);
       if (mnemonic) {
+        const detected = detectLang(mnemonic);
+        setLang(detected);
         setWords(mnemonic.split(/[\s\u3000]+/));
       } else {
         setLoading(false);
