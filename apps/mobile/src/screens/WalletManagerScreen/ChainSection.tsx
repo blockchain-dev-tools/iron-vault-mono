@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
@@ -19,6 +19,10 @@ export default function ChainSection({ label, sub, iconNode, accounts, connectLa
   const C = useTheme();
   const t = useLocale();
   const s = useMemo(() => makeStyles(C), [C]);
+  const MAX_VISIBLE = 3;
+  const [collapsed, setCollapsed] = useState(true);
+  const visible = collapsed ? accounts.slice(0, MAX_VISIBLE) : accounts;
+  const hiddenCount = accounts.length - MAX_VISIBLE;
   return (
     <View style={s.section}>
       <View style={s.header}>
@@ -36,7 +40,7 @@ export default function ChainSection({ label, sub, iconNode, accounts, connectLa
           </TouchableOpacity>
         </View>
       </View>
-      {accounts.map((a, i) => (
+      {visible.map((a, i) => (
         <TouchableOpacity key={i} style={s.acctCard} onPress={() => onAccountClick(i)} activeOpacity={0.8}>
           <View style={s.acctMeta}>
             <Text style={s.acctNum}>{accountLabel(i + 1)}</Text>
@@ -48,6 +52,14 @@ export default function ChainSection({ label, sub, iconNode, accounts, connectLa
           <Text style={s.acctAddr} numberOfLines={1} ellipsizeMode="middle">{a.full}</Text>
         </TouchableOpacity>
       ))}
+      {accounts.length > MAX_VISIBLE && (
+        <TouchableOpacity style={s.toggleRow} onPress={() => setCollapsed(c => !c)} activeOpacity={0.7}>
+          <Icon name={collapsed ? 'expand-more' : 'expand-less'} size={16} color={C.text2} />
+          <Text style={s.toggleText}>
+            {collapsed ? t.vault.showMoreAccounts(hiddenCount) : t.vault.collapseAccounts}
+          </Text>
+        </TouchableOpacity>
+      )}
       <TouchableOpacity style={s.addRow} onPress={onAddAccount} activeOpacity={0.7}>
         <Text style={s.addRowText}>+ {addLabel}</Text>
       </TouchableOpacity>
@@ -79,6 +91,8 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   acctPath: { color: C.text2, fontSize: 10, fontFamily: 'monospace' },
   customBadge: { backgroundColor: C.primary15, paddingHorizontal: 5, paddingVertical: 1, borderRadius: R.sm },
   customBadgeText: { color: C.primary, fontSize: 9, fontFamily: Fonts.spaceGrotesk.bold, letterSpacing: 0.5 },
+  toggleRow: { paddingVertical: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 },
+  toggleText: { color: C.text2, fontSize: 12, fontFamily: Fonts.spaceGrotesk.bold },
   addRow: { paddingVertical: 14, alignItems: 'center', borderRadius: R.xl, borderWidth: 1.5, borderColor: C.primary },
   addRowText: { color: C.primary, fontSize: 13, fontFamily: Fonts.spaceGrotesk.bold },
 });

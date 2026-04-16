@@ -118,6 +118,8 @@ export const ZH: Translations = {
     pathCustom: '自定义',
     addAccountCustomPath: '自定义派生路径',
     addAccountUseDefault: '使用默认',
+    showMoreAccounts: (n: number) => `还有 ${n} 个账户`,
+    collapseAccounts: '收起',
     removeAccountTitle: '删除账户',
     removeAccountMsg: (path: string) => `确认删除路径 ${path} 的账户？`,
     removeAccountConfirm: '删除',

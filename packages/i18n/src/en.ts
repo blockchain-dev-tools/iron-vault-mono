@@ -116,6 +116,8 @@ export const EN = {
     pathCustom: 'Custom',
     addAccountCustomPath: 'Custom path',
     addAccountUseDefault: 'Use default',
+    showMoreAccounts: (n: number) => `${n} more accounts`,
+    collapseAccounts: 'Collapse',
     removeAccountTitle: 'Remove Account',
     removeAccountMsg: (path: string) => `Remove account at ${path}?`,
     removeAccountConfirm: 'Remove',
