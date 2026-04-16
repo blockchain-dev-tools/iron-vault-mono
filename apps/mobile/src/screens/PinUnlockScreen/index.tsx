@@ -7,6 +7,7 @@ import { useApp, useTheme, useLocale } from '../../store/AppContext';
 import type { ColorTokens } from '@iron-vault/theme';
 import PinPad from '../../components/ui/PinPad';
 import PinDots from '../../components/ui/PinDots';
+import PinLoadingSpinner from '../../components/ui/PinLoadingSpinner';
 import BgLines from '../../components/ui/BgLines';
 import IronVaultHero from '../../components/ui/IronVaultHero';
 import { Fonts } from '../../lib/fonts';
@@ -101,7 +102,7 @@ export default function PinUnlockScreen() {
             <Animated.View
               style={[s.loadingOverlay, { opacity: dotOpacity }]}
               pointerEvents="none">
-              <PinDots length={6} loading={loading} />
+              <PinLoadingSpinner color={C.primary} />
             </Animated.View>
 
             {/* PinPad — fades out when loading */}
@@ -137,7 +138,7 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   center: { alignItems: 'center' },
   sub: { color: C.text2, fontSize: 11, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 4 },
   pinArea: { alignItems: 'center' },
-  loadingOverlay: { position: 'absolute', left: 0, right: 0, alignItems: 'center', zIndex: 1 },
+  loadingOverlay: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center', zIndex: 1 },
   warning: { color: C.error, fontSize: 12, marginTop: 8 },
   resetBtnLarge: {
     marginTop: 32, paddingVertical: 14, paddingHorizontal: 40,
