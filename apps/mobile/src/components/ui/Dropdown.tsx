@@ -27,7 +27,7 @@ export default function Dropdown<T extends string>({
     <View>
       <TouchableOpacity style={s.trigger} onPress={() => setOpen(true)} activeOpacity={0.7}>
         <Text style={s.value}>{selected?.label ?? ''}</Text>
-        <Icon name="expand-more" size={20} color={C.text2} />
+        <Icon name="chevron-right" size={20} color={C.text2} />
       </TouchableOpacity>
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
