@@ -4,25 +4,47 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Shield + lock body + shackle (evenOdd) — centered in 108x108, scaled from 80x92 viewBox -->
-    <!-- Translate: (108-80)/2=14 x, (108-92)/2=8 y -->
+    <!--
+        Shield is 80x92 in path space.
+        Scale 0.55 → 44x50.6dp, centered in 108x108:
+        translateX = (108-44)/2 = 32
+        translateY = (108-50.6)/2 = 28.7
+    -->
     <group
-        android:translateX="14"
-        android:translateY="8">
+        android:scaleX="0.55"
+        android:scaleY="0.55"
+        android:translateX="32"
+        android:translateY="28.7">
+        <!-- Shield body -->
         <path
             android:fillColor="#8FC322"
-            android:fillType="evenOdd"
-            android:pathData="M40,0 L80,18 V52 C80,72 60,88 40,92 C20,88 0,72 0,52 V18 L40,0 Z
-                M29,34 H51 Q55,34 55,39 V57 Q55,62 51,62 H29 Q25,62 25,57 V39 Q25,34 29,34 Z
-                M30,34 Q30,25 40,25 Q50,25 50,34 Z
-                M33,34 Q33,29 40,29 Q47,29 47,34 Z" />
-        <!-- Keyhole circle -->
-        <path
-            android:fillColor="#8FC322"
-            android:pathData="M44,46 A4,4,0,1,0,36,46 A4,4,0,1,0,44,46 Z" />
-        <!-- Keyhole stem -->
-        <path
-            android:fillColor="#8FC322"
-            android:pathData="M39,50 L41,50 L41,57 L39,57 Z" />
+            android:pathData="M40,0 L80,18 V52 C80,72 60,88 40,92 C20,88 0,72 0,52 V18 L40,0 Z" />
+        <!-- Lock elements scaled 1.25x from lock center (40, 48) -->
+        <group
+            android:scaleX="1.25"
+            android:scaleY="1.25"
+            android:pivotX="40"
+            android:pivotY="48">
+            <!-- Lock body (background cutout) -->
+            <path
+                android:fillColor="#FFFFFF"
+                android:pathData="M29,34 H51 Q55,34 55,39 V57 Q55,62 51,62 H29 Q25,62 25,57 V39 Q25,34 29,34 Z" />
+            <!-- Shackle outer arch (background) -->
+            <path
+                android:fillColor="#FFFFFF"
+                android:pathData="M30,34 Q30,25 40,25 Q50,25 50,34 Z" />
+            <!-- Shackle inner arch (green = arch opening) -->
+            <path
+                android:fillColor="#8FC322"
+                android:pathData="M33,34 Q33,29 40,29 Q47,29 47,34 Z" />
+            <!-- Keyhole circle -->
+            <path
+                android:fillColor="#8FC322"
+                android:pathData="M44,46 A4,4,0,1,0,36,46 A4,4,0,1,0,44,46 Z" />
+            <!-- Keyhole stem -->
+            <path
+                android:fillColor="#8FC322"
+                android:pathData="M39,50 L41,50 L41,57 L39,57 Z" />
+        </group>
     </group>
 </vector>
