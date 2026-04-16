@@ -38,6 +38,8 @@ export default function PinUnlockScreen() {
   const handleComplete = async (entered: string, reset: () => void) => {
     if (locked) return;
     setLoading(true);
+    // Yield 2 frames so React can re-render + start animations before PBKDF2 blocks the JS thread
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     try {
       const result = await unlockWallet(walletStorage, entered);
       if (result) {

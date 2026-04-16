@@ -18,9 +18,9 @@ export default function PinDots({ length, error, loading }: PinDotsProps) {
     Array.from({ length: 6 }, () => new Animated.Value(0))
   ).current;
 
+  // backgroundColor cannot use native driver — animate only opacity + scale (native-driver safe)
   const interpolations = useRef(
     scanAnims.map(anim => ({
-      bg:      anim.interpolate({ inputRange: [0, 1], outputRange: [C.primary, '#FFFFFF'] }),
       scale:   anim.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1.25] }),
       opacity: anim.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] }),
     }))
@@ -41,8 +41,8 @@ export default function PinDots({ length, error, loading }: PinDotsProps) {
       Animated.loop(
         Animated.sequence([
           Animated.delay(i * 150),
-          Animated.timing(anim, { toValue: 1, duration: 200, useNativeDriver: false }),
-          Animated.timing(anim, { toValue: 0, duration: 300, useNativeDriver: false }),
+          Animated.timing(anim, { toValue: 1, duration: 200, useNativeDriver: true }),
+          Animated.timing(anim, { toValue: 0, duration: 300, useNativeDriver: true }),
           Animated.delay(1400 - i * 150 - 500),
         ])
       )
@@ -57,15 +57,11 @@ export default function PinDots({ length, error, loading }: PinDotsProps) {
     <View style={s.row}>
       {Array.from({ length: 6 }).map((_, i) => {
         if (loading) {
-          const { bg, scale, opacity } = interpolations[i];
+          const { scale, opacity } = interpolations[i];
           return (
             <Animated.View
               key={i}
-              style={[
-                s.dot,
-                s.dotFilled,
-                { backgroundColor: bg, borderColor: bg, opacity, transform: [{ scale }] },
-              ]}
+              style={[s.dot, s.dotFilled, { opacity, transform: [{ scale }] }]}
             />
           );
         }
