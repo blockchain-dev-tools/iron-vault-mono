@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useMemo, useRef, useEffect, useState } from 'react';
+import { Animated, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { unlockWallet, clearWallet } from '@iron-vault/wallet';
 import { walletStorage } from '../../lib/storage';
@@ -23,6 +23,17 @@ export default function PinUnlockScreen() {
   const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
   const locked = attempts >= MAX_ATTEMPTS;
+
+  // Animated values for cross-fade between PinPad and loading dots
+  const padOpacity = useRef(new Animated.Value(1)).current;
+  const dotOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(padOpacity, { toValue: loading ? 0 : 1, duration: 200, useNativeDriver: true }),
+      Animated.timing(dotOpacity, { toValue: loading ? 1 : 0, duration: 200, useNativeDriver: true }),
+    ]).start();
+  }, [loading, padOpacity, dotOpacity]);
 
   const handleComplete = async (entered: string, reset: () => void) => {
     if (locked) return;
@@ -78,18 +89,26 @@ export default function PinUnlockScreen() {
         {/* Hero */}
         <IronVaultHero />
 
-        <Text style={s.sub}>{locked ? t.pinUnlock.locked : t.pinUnlock.enterPin}</Text>
+        <Text style={s.sub}>
+          {locked ? t.pinUnlock.locked : loading ? t.pinUnlock.verifying : t.pinUnlock.enterPin}
+        </Text>
 
-        {!locked && !loading && <PinPad onComplete={handleComplete} error={error} />}
-        {loading && (
-          <View style={s.loadingArea}>
-            <PinDots length={6} />
-            <View style={s.spinner}>
-              <ActivityIndicator size="small" color={C.primary} />
-              <Text style={s.spinnerText}>{t.pinUnlock.unlocking}</Text>
-            </View>
+        {!locked && (
+          <View style={s.pinArea}>
+            {/* Loading dots — fades in, absolutely overlays PinPad */}
+            <Animated.View
+              style={[s.loadingOverlay, { opacity: dotOpacity }]}
+              pointerEvents="none">
+              <PinDots length={6} loading={loading} />
+            </Animated.View>
+
+            {/* PinPad — fades out when loading */}
+            <Animated.View style={{ opacity: padOpacity }}>
+              <PinPad onComplete={handleComplete} error={error} />
+            </Animated.View>
           </View>
         )}
+
         {attempts > 0 && !locked && !loading && (
           <Text style={s.warning}>{t.pinUnlock.attemptsLeft(MAX_ATTEMPTS - attempts)}</Text>
         )}
@@ -115,9 +134,8 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.surface, paddingHorizontal: 24 },
   center: { alignItems: 'center' },
   sub: { color: C.text2, fontSize: 11, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 4 },
-  loadingArea: { alignItems: 'center' },
-  spinner: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
-  spinnerText: { color: C.text2, fontSize: 13, letterSpacing: 0.5 },
+  pinArea: { alignItems: 'center' },
+  loadingOverlay: { position: 'absolute', left: 0, right: 0, alignItems: 'center', zIndex: 1 },
   warning: { color: C.error, fontSize: 12, marginTop: 8 },
   resetBtnLarge: {
     marginTop: 32, paddingVertical: 14, paddingHorizontal: 40,
