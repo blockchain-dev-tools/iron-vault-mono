@@ -88,7 +88,7 @@ export default function AccountDetailScreen() {
         </>}
       />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        <Card accent style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}>
+        <Card accent>
           <View style={s.addrHeader}>
             <SectionLabel>{t.accountDetail.publicAddress}</SectionLabel>
             <TouchableOpacity style={s.copyIconWrap} onPress={handleCopyAddress} activeOpacity={0.7}>
@@ -140,20 +140,20 @@ export default function AccountDetailScreen() {
 const makeStyles = (C: ColorTokens) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
   scroll: { flex: 1 },
-  content: { paddingHorizontal: 20, paddingTop: 20, gap: 16 },
+  content: { paddingHorizontal: 24, paddingTop: 24, gap: 16 },
   addrHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-  copyIconWrap: { padding: 6, backgroundColor: C.surfaceContainerLow, borderRadius: R.lg },
-  addrBox: { backgroundColor: C.surfaceContainerLow, borderRadius: R.lg, padding: 14, borderWidth: 1, borderColor: C.borderVariant },
-  addrText: { color: C.primary, fontSize: 13, fontFamily: 'monospace', lineHeight: 20 },
+  copyIconWrap: { padding: 8, backgroundColor: C.surfaceContainerLow, borderRadius: R.lg },
+  addrBox: { backgroundColor: C.surfaceContainerLow, borderRadius: R.lg, padding: 12, borderWidth: 1, borderColor: C.borderVariant },
+  addrText: { color: C.primary, fontSize: 13, fontFamily: Fonts.spaceGrotesk.regular, lineHeight: 20 },
   qrWrap: { alignItems: 'center', paddingVertical: 20 },
   qrInner: { padding: 12, borderRadius: R.lg },
-  addrPath: { color: C.text2, fontSize: 10, fontFamily: 'monospace', marginTop: 4 },
+  addrPath: { color: C.text2, fontSize: 10, fontFamily: Fonts.spaceGrotesk.regular, marginTop: 4 },
   hint: { color: C.text2, fontSize: 12, textAlign: 'center', lineHeight: 17, marginTop: 10 },
-  btnWrap: { paddingHorizontal: 20, paddingBottom: 16, gap: 0 },
-  deleteBtn: { padding: 6 },
+  btnWrap: { paddingHorizontal: 24, paddingBottom: 16 },
+  deleteBtn: { padding: 8 },
   bleBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingHorizontal: 10, paddingVertical: 5,
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingHorizontal: 12, paddingVertical: 4,
     backgroundColor: C.surfaceContainerLow, borderRadius: R.lg,
   },
   bleText: { color: C.text2, fontSize: 10, letterSpacing: 1.2, textTransform: 'uppercase', fontFamily: Fonts.spaceGrotesk.regular },

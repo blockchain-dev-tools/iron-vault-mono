@@ -14,12 +14,7 @@ interface CardProps {
 export default function Card({ children, accent, onPress, style }: CardProps) {
   const C = useTheme();
   const s = useMemo(() => makeStyles(C), [C]);
-  const content = (
-    <>
-      {accent && <View style={s.accentBar} />}
-      <View style={s.inner}>{children}</View>
-    </>
-  );
+  const content = <View style={s.inner}>{children}</View>;
   if (onPress) {
     return (
       <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={[s.card, style]}>
@@ -27,7 +22,7 @@ export default function Card({ children, accent, onPress, style }: CardProps) {
       </TouchableOpacity>
     );
   }
-  return <View style={[s.card, style]}>{content}</View>;
+  return <View style={[s.card, accent && s.cardAccent, style]}>{content}</View>;
 }
 
 const makeStyles = (C: ColorTokens) => StyleSheet.create({
@@ -35,6 +30,10 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     backgroundColor: C.surfaceContainer,
     borderRadius: R.xl, overflow: 'hidden',
   },
-  accentBar: { width: 3, position: 'absolute', top: 0, bottom: 0, left: 0, backgroundColor: C.primary },
+  cardAccent: {
+    backgroundColor: C.primary12,
+    borderWidth: 1,
+    borderColor: C.primary25,
+  },
   inner: { padding: 20 },
 });
