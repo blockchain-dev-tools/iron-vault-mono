@@ -5,7 +5,6 @@ import { useApp } from '../../lib/app-context';
 import { setupWallet } from '@iron-vault/wallet';
 import TopBar from '../ui/TopBar';
 import PinPad from '../ui/PinPad';
-import SectionLabel from '../ui/SectionLabel';
 
 export default function SetPinScreen() {
   const { reset: navReset, goBack } = useNav();
@@ -56,7 +55,12 @@ export default function SetPinScreen() {
     <div className="flex flex-col min-h-full pt-16 pb-8">
       <TopBar title={isChangingPin ? 'Change PIN' : 'Set PIN'} onBack={goBack} />
       <div className="flex-1 flex flex-col items-center justify-center px-6">
-        <SectionLabel error={error}>{label}</SectionLabel>
+        <p
+          className="text-xs uppercase tracking-widest font-label mb-4 text-center"
+          style={{ color: error ? 'var(--c-error)' : 'var(--c-on-surface-variant)', letterSpacing: '0.12em' }}
+        >
+          {label}
+        </p>
         {loading ? (
           <div className="mt-8">
             <div

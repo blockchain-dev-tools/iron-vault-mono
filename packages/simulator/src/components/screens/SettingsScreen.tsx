@@ -7,16 +7,22 @@ import Button from '../ui/Button';
 import SectionLabel from '../ui/SectionLabel';
 import SegmentedControl, { type SegmentOption } from '../ui/SegmentedControl';
 import Dropdown, { type DropdownOption } from '../ui/Dropdown';
+import BottomNav from '../ui/BottomNav';
 
 interface RowProps { label: string; value?: string; onClick?: () => void; last?: boolean; }
 function Row({ label, value, onClick, last }: RowProps) {
   return (
     <div
       onClick={onClick}
-      className={`flex justify-between items-center py-4 ${last ? '' : 'border-b border-outline/20'} ${onClick ? 'cursor-pointer hover:text-primary transition-colors' : ''}`}
+      className={`flex justify-between items-center py-4 ${last ? '' : 'border-b'} ${onClick ? 'cursor-pointer' : ''}`}
+      style={{ borderColor: 'var(--c-outline-variant)' }}
     >
-      <span className="font-body text-sm text-on-surface">{label}</span>
-      <span className="font-body text-sm text-on-surface-variant">{value ?? '›'}</span>
+      <span className="font-body text-sm" style={{ color: 'var(--c-on-surface)' }}>{label}</span>
+      {(value !== undefined || onClick) && (
+        <span className="font-body text-sm" style={{ color: 'var(--c-on-surface-variant)' }}>
+          {value ?? '›'}
+        </span>
+      )}
     </div>
   );
 }
@@ -48,8 +54,8 @@ export default function SettingsScreen() {
   };
 
   return (
-    <div className="flex flex-col min-h-full" style={{ background: 'var(--c-background)' }}>
-      <div className="flex-1 px-5 pt-5 flex flex-col gap-3 overflow-y-auto pb-6">
+    <div className="flex flex-col min-h-full relative" style={{ background: 'var(--c-background)' }}>
+      <div className="flex-1 px-5 pt-5 flex flex-col gap-3 overflow-y-auto pb-24">
         <p className="font-headline font-bold text-[28px] mb-3" style={{ color: 'var(--c-on-surface)' }}>Settings</p>
 
         <SectionLabel>Appearance</SectionLabel>
@@ -67,19 +73,19 @@ export default function SettingsScreen() {
         />
 
         <SectionLabel>Security</SectionLabel>
-        <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--c-surface-container)' }}>
+        <div className="rounded-2xl overflow-hidden px-4" style={{ background: 'var(--c-surface-container)' }}>
           <Row label="Change PIN" onClick={() => go('SetPin')} />
           <Row label="Backup Seed Phrase" onClick={() => go('BackupSeed')} />
           <Row label="Auto-lock" value="5 min" last />
         </div>
 
         <SectionLabel>Bluetooth</SectionLabel>
-        <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--c-surface-container)' }}>
+        <div className="rounded-2xl overflow-hidden px-4" style={{ background: 'var(--c-surface-container)' }}>
           <Row label="Device Name" value="Nano X" last />
         </div>
 
         <SectionLabel>About</SectionLabel>
-        <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--c-surface-container)' }}>
+        <div className="rounded-2xl overflow-hidden px-4" style={{ background: 'var(--c-surface-container)' }}>
           <Row label="Version" value="0.1.0" last />
         </div>
 
@@ -87,8 +93,8 @@ export default function SettingsScreen() {
         <Button variant="danger" icon="delete_forever" onClick={handleResetWallet}>
           Reset Wallet
         </Button>
-        <div style={{ height: 40 }} />
       </div>
+      <BottomNav />
     </div>
   );
 }

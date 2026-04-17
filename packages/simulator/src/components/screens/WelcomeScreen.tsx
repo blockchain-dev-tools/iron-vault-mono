@@ -35,7 +35,7 @@ export default function WelcomeScreen() {
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div
           className="absolute top-0 left-0 w-full h-full opacity-[0.025]"
-          style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 40px, #8FC322 40px, #8FC322 41px)' }}
+          style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 40px, var(--c-primary) 40px, var(--c-primary) 41px)' }}
         />
       </div>
 

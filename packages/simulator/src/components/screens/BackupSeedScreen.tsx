@@ -76,7 +76,7 @@ export default function BackupSeedScreen() {
               ))}
             </div>
             <div className="flex-1" />
-            <Button variant="primary" icon="check" onClick={goBack}>Done</Button>
+            <Button variant="primary" onClick={goBack}>Done</Button>
           </>
         ) : loading ? (
           <div className="flex flex-col items-center mt-16 gap-4">

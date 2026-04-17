@@ -7,6 +7,7 @@ import TopBar from '../ui/TopBar';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import SectionLabel from '../ui/SectionLabel';
+import BottomNav from '../ui/BottomNav';
 
 interface Log { time: string; icon: string; msg: string; }
 
@@ -86,7 +87,7 @@ export default function AccountDetailScreen() {
     bleState === 'idle'         ? 'Start Accepting Transactions' : 'Stop';
 
   return (
-    <div className="flex flex-col min-h-full" style={{ background: 'var(--c-background)' }}>
+    <div className="flex flex-col min-h-full relative" style={{ background: 'var(--c-background)' }}>
       <TopBar
         title={`${isEth ? 'Ethereum' : 'Solana'} #${idx + 1}`}
         onBack={goBack}
@@ -103,7 +104,7 @@ export default function AccountDetailScreen() {
         }
       />
 
-      <div className="flex-1 px-6 pt-6 space-y-4 overflow-y-auto pb-4">
+      <div className="flex-1 px-6 pt-6 space-y-4 overflow-y-auto pb-24">
         <Card accent>
           <div className="flex justify-between items-center mb-3">
             <SectionLabel>Public Address</SectionLabel>
@@ -147,10 +148,9 @@ export default function AccountDetailScreen() {
           </div>
         </div>
 
-        <div style={{ height: 32 }} />
       </div>
 
-      <div className="px-6 pb-4 pt-4 flex flex-col gap-3" style={{ borderTop: '1px solid var(--c-border-variant)', background: 'var(--c-background)' }}>
+      <div className="px-6 pb-6 pt-4 flex flex-col gap-3" style={{ borderTop: '1px solid var(--c-border-variant)', background: 'var(--c-background)' }}>
         {bleState === 'error' && (
           <div className="rounded-xl p-4 border" style={{ background: 'var(--c-surface-container)', borderColor: 'var(--c-border-variant)' }}>
             <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color: 'var(--c-on-surface)' }}>Troubleshooting</p>
@@ -189,6 +189,7 @@ export default function AccountDetailScreen() {
           </div>
         )}
       </div>
+      <BottomNav />
     </div>
   );
 }

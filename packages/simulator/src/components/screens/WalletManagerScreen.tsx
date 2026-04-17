@@ -71,7 +71,7 @@ export default function WalletManagerScreen() {
       <div className="flex-1 px-5 pt-5 space-y-6 overflow-y-auto">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="font-headline text-3xl font-extrabold tracking-tight" style={{ color: 'var(--c-on-surface)' }}>Main Wallet</h2>
+            <h2 className="font-headline text-[28px] font-bold" style={{ color: 'var(--c-on-surface)' }}>Main Wallet</h2>
             <p className="text-sm font-body mt-1" style={{ color: 'var(--c-on-surface-variant)' }}>Secure master seed • HD</p>
           </div>
           <span className="font-label text-[10px] uppercase tracking-[0.2em] px-2 py-1 rounded" style={{ color: 'var(--c-primary)', background: 'var(--c-primary-container)' }}>HD</span>
@@ -196,11 +196,8 @@ function ChainSection({ name, sub, chain, accounts, onConnect, onAddAccount, onA
         <div
           key={i}
           onClick={() => onAccountClick(i)}
-          className="p-4 cursor-pointer transition-colors border-l-[3px]"
-          style={{
-            background: 'var(--c-surface-container)',
-            borderLeftColor: 'var(--c-primary)',
-          }}
+          className="p-4 rounded-xl cursor-pointer transition-colors"
+          style={{ background: 'var(--c-surface-container)' }}
         >
           <div className="flex justify-between items-center">
             <div className="space-y-1">
@@ -213,8 +210,8 @@ function ChainSection({ name, sub, chain, accounts, onConnect, onAddAccount, onA
       ))}
       <button
         onClick={onAddAccount}
-        className="w-full py-3.5 border border-dashed flex items-center justify-center gap-2 text-sm font-label font-medium uppercase tracking-wider transition-all"
-        style={{ borderColor: 'var(--c-outline)', color: 'var(--c-on-surface-variant)' }}
+        className="w-full py-3.5 rounded-xl border flex items-center justify-center gap-2 text-sm font-label font-medium uppercase tracking-wider transition-all"
+        style={{ borderColor: 'var(--c-outline)', color: 'var(--c-on-surface-variant)', background: 'transparent' }}
       >
         + Add {name} Account
       </button>
