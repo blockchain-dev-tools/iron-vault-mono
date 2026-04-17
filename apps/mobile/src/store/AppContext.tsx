@@ -56,6 +56,7 @@ interface AppCtx {
   goBack: () => void;
   reset: (name: ScreenName) => void;
   canGoBack: boolean;
+  previous: ScreenEntry | null;
   accounts: WalletAccounts;
   setAccounts: (a: WalletAccounts) => void;
   generatedWords: string[];
@@ -177,6 +178,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const current = stack[stack.length - 1];
   const canGoBack = stack.length > 1;
+  const previous = stack.length > 1 ? stack[stack.length - 2] : null;
 
   const go = useCallback((name: ScreenName, dir: NavDirection = 'forward', params?: Record<string, unknown>) => {
     setDirection(dir);
@@ -210,7 +212,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<AppCtx>(
     () => ({
-      current, direction, go, goBack, reset, canGoBack,
+      current, direction, go, goBack, reset, canGoBack, previous,
       accounts, setAccounts,
       generatedWords, setGeneratedWords,
       mnemonicEntropy, setMnemonicEntropy,
@@ -224,7 +226,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       themeMode, setThemeMode,
       localeMode, setLocaleMode,
     }),
-    [current, direction, canGoBack, accounts, generatedWords, mnemonicEntropy, mnemonicLang, passphrase,
+    [current, direction, canGoBack, previous, accounts, generatedWords, mnemonicEntropy, mnemonicLang, passphrase,
      currentChain, currentAcctIdx, bleState, pendingTx, themeMode, localeMode,
      addAccount, removeAccount],
   );
