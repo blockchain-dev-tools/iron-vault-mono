@@ -1,13 +1,25 @@
-export type BleState = 'idle' | 'broadcasting' | 'connected';
+import type { BleState } from '../../lib/app-context';
+
+export type { BleState };
 
 const CONFIG: Record<BleState, { dot: string; card: string; title: string; sub: string }> = {
-  idle:        { dot: 'bg-on-surface-variant',          card: 'bg-surface-container',                  title: 'BLE Standby',    sub: 'Tap button below to start' },
-  broadcasting:{ dot: 'bg-primary animate-pulse-glow',  card: 'bg-primary/5 border border-primary/20', title: 'Broadcasting...', sub: 'Waiting for OKX to connect' },
-  connected:   { dot: 'bg-primary',                     card: 'bg-primary/10 border border-primary/30', title: 'Connected',       sub: 'OKX (74:0C:B6...)' },
+  idle:         { dot: 'bg-on-surface-variant',          card: 'bg-surface-container',                   title: 'BLE Standby',    sub: 'Tap button below to start' },
+  broadcasting: { dot: 'bg-primary animate-pulse-glow',  card: 'bg-primary/5 border border-primary/20',  title: 'Broadcasting...', sub: 'Waiting for OKX to connect' },
+  connected:    { dot: 'bg-primary',                     card: 'bg-primary/10 border border-primary/30', title: 'Connected',       sub: 'OKX (74:0C:B6...)' },
+  error:        { dot: 'bg-error',                       card: 'bg-error/5 border border-error/20',      title: 'BLE Error',       sub: 'Could not start Bluetooth' },
+};
+
+const BLE_ICON: Record<BleState, string> = {
+  idle:         'bluetooth_disabled',
+  broadcasting: 'bluetooth_searching',
+  connected:    'bluetooth_connected',
+  error:        'bluetooth_disabled',
 };
 
 export default function BleStatus({ state }: { state: BleState }) {
   const c = CONFIG[state];
+  const isActive = state === 'broadcasting' || state === 'connected';
+  const isError  = state === 'error';
   return (
     <div className={`rounded-xl p-4 flex items-center gap-3 ${c.card}`}>
       <div className="relative flex-shrink-0">
@@ -20,8 +32,8 @@ export default function BleStatus({ state }: { state: BleState }) {
         <div className="font-headline font-bold text-sm uppercase tracking-wide">{c.title}</div>
         <div className="font-body text-xs text-on-surface-variant mt-0.5">{c.sub}</div>
       </div>
-      <span className={`material-symbols-outlined text-xl ${state !== 'idle' ? 'text-primary' : 'text-on-surface-variant'}`}>
-        {state === 'idle' ? 'bluetooth_disabled' : state === 'broadcasting' ? 'bluetooth_searching' : 'bluetooth_connected'}
+      <span className={`material-symbols-outlined text-xl ${isError ? 'text-error' : isActive ? 'text-primary' : 'text-on-surface-variant'}`}>
+        {BLE_ICON[state]}
       </span>
     </div>
   );

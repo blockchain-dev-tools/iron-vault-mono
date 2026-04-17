@@ -1,11 +1,11 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import { useNav } from '../../lib/nav';
 import { useApp } from '../../lib/app-context';
 import TopBar from '../ui/TopBar';
 import BottomNav from '../ui/BottomNav';
-import BleStatus, { type BleState } from '../ui/BleStatus';
+import BleStatus from '../ui/BleStatus';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import SectionLabel from '../ui/SectionLabel';
@@ -14,27 +14,30 @@ interface Log { time: string; icon: string; msg: string; }
 
 export default function AccountDetailScreen() {
   const { goBack, go } = useNav();
-  const { currentChain, currentAcctIdx, accounts } = useApp();
+  const { currentChain, currentAcctIdx, accounts, bleState, setBleState, removeAccount } = useApp();
   const chain = currentChain;
   const idx = currentAcctIdx;
   const acct = accounts[chain]?.[idx];
   const isEth = chain === 'eth';
-  const [ble, setBle] = useState<BleState>('idle');
+  const accts = isEth ? accounts.eth : accounts.sol;
+  const canDelete = accts.length > 1;
+
   const [log, setLog] = useState<Log[]>([]);
   const [qrDataUrl, setQrDataUrl] = useState('');
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const addLog = (icon: string, msg: string) => {
-    const t = new Date().toTimeString().slice(0, 5);
-    setLog(l => [...l, { time: t, icon, msg }]);
+    const time = new Date().toTimeString().slice(0, 5);
+    setLog(l => [...l, { time, icon, msg }]);
   };
 
   const toggle = () => {
-    if (ble === 'idle') {
-      setBle('broadcasting');
+    if (bleState === 'idle' || bleState === 'error') {
+      setBleState('broadcasting');
+      setLog([]);
       addLog('sensors', 'BLE broadcast started "Nano X"');
       timer.current = setTimeout(() => {
-        setBle('connected');
+        setBleState('connected');
         addLog('check_circle', 'Connected: OKX');
         addLog('smartphone', isEth ? 'Ethereum App detected' : 'Solana App detected');
         addLog('key', `Querying address #${idx + 1}`);
@@ -45,9 +48,16 @@ export default function AccountDetailScreen() {
       }, 2000);
     } else {
       timer.current && clearTimeout(timer.current);
-      setBle('idle');
+      setBleState('idle');
       setLog([]);
     }
+  };
+
+  const handleRemove = () => {
+    if (!acct || !canDelete) return;
+    if (!confirm(`Remove account ${acct.short}? This cannot be undone.`)) return;
+    removeAccount(chain, acct.path);
+    goBack();
   };
 
   useEffect(() => () => { timer.current && clearTimeout(timer.current); }, []);
@@ -63,7 +73,7 @@ export default function AccountDetailScreen() {
   if (!acct) {
     return (
       <div className="flex flex-col min-h-full pt-16 pb-24">
-        <TopBar title="Account" />
+        <TopBar title="Account" onBack={goBack} />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-on-surface-variant text-sm font-body">No account selected</p>
         </div>
@@ -71,11 +81,31 @@ export default function AccountDetailScreen() {
     );
   }
 
+  const btnVariant = bleState === 'idle' || bleState === 'error' ? 'primary' : 'danger';
+  const btnIcon    = bleState === 'idle' || bleState === 'error' ? 'bluetooth' : 'power_settings_new';
+  const btnLabel   =
+    bleState === 'error'        ? 'Retry BLE' :
+    bleState === 'idle'         ? 'Start Accepting Transactions' : 'Stop';
+
   return (
     <div className="flex flex-col min-h-full pt-16 pb-24">
-      <TopBar title={`${isEth ? 'Ethereum' : 'Solana'} Account ${idx + 1}`} bleState={ble} />
+      <TopBar
+        title={`${isEth ? 'Ethereum' : 'Solana'} Account ${idx + 1}`}
+        onBack={goBack}
+        bleState={bleState}
+        right={
+          canDelete && (
+            <button
+              onClick={handleRemove}
+              className="p-2 rounded-lg text-error hover:bg-error/10 active:scale-90 transition-all"
+            >
+              <span className="material-symbols-outlined text-xl">delete</span>
+            </button>
+          )
+        }
+      />
 
-      <div className="flex-1 px-6 pt-6 space-y-4">
+      <div className="flex-1 px-6 pt-6 space-y-4 overflow-y-auto pb-4">
         <Card accent>
           <div className="flex justify-between items-start mb-4">
             <div>
@@ -104,7 +134,7 @@ export default function AccountDetailScreen() {
           </div>
         </Card>
 
-        <BleStatus state={ble} />
+        <BleStatus state={bleState} />
 
         {log.length > 0 && (
           <div>
@@ -121,28 +151,29 @@ export default function AccountDetailScreen() {
           </div>
         )}
 
-        {ble === 'idle' && (
+        {bleState === 'idle' && (
           <p className="text-center text-xs text-on-surface-variant font-body">
             Tap below — this device will act as a Ledger hardware wallet and accept signing requests from OKX.
           </p>
         )}
-        {ble === 'broadcasting' && (
+        {bleState === 'broadcasting' && (
           <p className="text-center text-xs text-on-surface-variant font-body">
             In OKX, tap「Connect Hardware Wallet」→「Ledger」
           </p>
         )}
-        {ble === 'connected' && (
+        {bleState === 'connected' && (
           <p className="text-center text-xs text-on-surface-variant font-body">Waiting for signing request...</p>
+        )}
+        {bleState === 'error' && (
+          <p className="text-center text-xs font-body" style={{ color: 'var(--c-error)' }}>
+            Bluetooth error — tap Retry to try again.
+          </p>
         )}
       </div>
 
       <div className="px-6 pb-4 pt-2">
-        <Button
-          variant={ble === 'idle' ? 'primary' : 'danger'}
-          icon={ble === 'idle' ? 'input' : 'stop_circle'}
-          onClick={toggle}
-        >
-          {ble === 'idle' ? 'Start Accepting Transactions' : 'Stop'}
+        <Button variant={btnVariant} icon={btnIcon} onClick={toggle}>
+          {btnLabel}
         </Button>
       </div>
 

@@ -49,8 +49,10 @@ function SolIcon() {
 
 export default function WalletManagerScreen() {
   const { go } = useNav();
-  const { setCurrentAccount, accounts } = useApp();
-  const [sheet, setSheet] = useState<null | 'eth' | 'sol'>(null);
+  const { setCurrentAccount, accounts, addAccount, bleState, setBleState } = useApp();
+  const [connectSheet, setConnectSheet] = useState<null | 'eth' | 'sol'>(null);
+  const [addSheet, setAddSheet] = useState<null | 'eth' | 'sol'>(null);
+  const [addingAccount, setAddingAccount] = useState(false);
 
   const ethAccounts = accounts.eth ?? [];
   const solAccounts = accounts.sol ?? [];
@@ -60,8 +62,30 @@ export default function WalletManagerScreen() {
     go('AccountDetail');
   };
 
+  const openConnect = (chain: 'eth' | 'sol') => {
+    setCurrentAccount(chain, 0);
+    setConnectSheet(chain);
+    if (bleState === 'idle') setBleState('broadcasting');
+  };
+
+  const closeConnect = () => {
+    setConnectSheet(null);
+    if (bleState === 'broadcasting') setBleState('idle');
+  };
+
+  const handleAddAccount = async (chain: 'eth' | 'sol') => {
+    const list = chain === 'eth' ? ethAccounts : solAccounts;
+    const nextIdx = list.length;
+    const path = chain === 'eth'
+      ? `m/44'/60'/0'/0/${nextIdx}`
+      : `m/44'/501'/${nextIdx}'/0'`;
+    setAddingAccount(true);
+    try { await addAccount(chain, path, false); } finally { setAddingAccount(false); }
+    setAddSheet(null);
+  };
+
   return (
-    <div className="flex flex-col min-h-full pb-24">
+    <div className="flex flex-col min-h-full pb-24 relative">
       <div className="flex-1 px-5 pt-5 space-y-6 overflow-y-auto">
         {/* Hero */}
         <div className="flex items-start justify-between">
@@ -78,7 +102,8 @@ export default function WalletManagerScreen() {
           sub="ERC-20 & Layer 2s"
           icon={<EthIcon />}
           accounts={ethAccounts.map(a => ({ ...a, chain: 'eth' }))}
-          onConnect={() => setSheet('eth')}
+          onConnect={() => openConnect('eth')}
+          onAddAccount={() => setAddSheet('eth')}
           onAccountClick={(idx) => openAcct('eth', idx)}
         />
 
@@ -88,7 +113,8 @@ export default function WalletManagerScreen() {
           sub="High Performance"
           icon={<SolIcon />}
           accounts={solAccounts.map(a => ({ ...a, chain: 'sol' }))}
-          onConnect={() => setSheet('sol')}
+          onConnect={() => openConnect('sol')}
+          onAddAccount={() => setAddSheet('sol')}
           onAccountClick={(idx) => openAcct('sol', idx)}
         />
 
@@ -97,22 +123,23 @@ export default function WalletManagerScreen() {
 
       <BottomNav />
 
-      {/* Connect Sheet */}
-      {sheet && (
-        <div className="absolute inset-0 bg-background/70 flex items-end z-50" onClick={() => setSheet(null)}>
+      {connectSheet && (
+        <div className="absolute inset-0 bg-background/70 flex items-end z-50" onClick={closeConnect}>
           <div className="bg-surface rounded-t-2xl p-6 w-full border-t border-outline/30 max-h-[75%] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <h3 className="font-headline font-bold text-lg uppercase tracking-tight mb-4">Connect OKX</h3>
             <div className="flex items-center gap-3 bg-primary/5 border border-primary/20 rounded-xl p-4 mb-5">
-              <div className="w-3 h-3 rounded-full bg-primary flex-shrink-0" />
+              <div className="relative flex-shrink-0">
+                <div className="absolute inset-0 w-3 h-3 rounded-full bg-primary opacity-60" style={{ animation: 'ping 1.5s ease-in-out infinite' }} />
+                <div className="w-3 h-3 rounded-full bg-primary" />
+              </div>
               <div>
                 <div className="font-headline font-bold text-sm">Broadcasting...</div>
                 <div className="text-xs text-on-surface-variant font-body mt-0.5">Waiting for OKX to connect</div>
               </div>
             </div>
             {[
-              "In OKX, tap 「Wallet」→「Add Wallet」",
-              "Select 「Hardware Wallet」→「Ledger」",
-              ,
+              'In OKX, tap 「Wallet」→「Add Wallet」',
+              'Select 「Hardware Wallet」→「Ledger」',
               'Find device "Nano X" and tap Connect',
             ].map((step, i) => (
               <div key={i} className="flex gap-3 mb-4 text-sm font-body">
@@ -121,7 +148,26 @@ export default function WalletManagerScreen() {
               </div>
             ))}
             <div className="h-4" />
-            <Button variant="outline-danger" onClick={() => setSheet(null)}>Stop / Close</Button>
+            <Button variant="outline-danger" onClick={closeConnect}>Stop / Close</Button>
+          </div>
+        </div>
+      )}
+
+      {addSheet && (
+        <div className="absolute inset-0 bg-background/70 flex items-end z-50" onClick={() => setAddSheet(null)}>
+          <div className="bg-surface rounded-t-2xl p-6 w-full border-t border-outline/30" onClick={e => e.stopPropagation()}>
+            <h3 className="font-headline font-bold text-lg uppercase tracking-tight mb-2">
+              Add {addSheet === 'eth' ? 'Ethereum' : 'Solana'} Account
+            </h3>
+            <p className="text-xs text-on-surface-variant font-body mb-6">
+              Derives the next HD account from your master seed (index {addSheet === 'eth' ? ethAccounts.length : solAccounts.length}).
+            </p>
+            <div className="flex gap-3">
+              <Button variant="secondary" fullWidth={false} className="flex-1" onClick={() => setAddSheet(null)}>Cancel</Button>
+              <Button variant="primary" fullWidth={false} className="flex-[2]" onClick={() => handleAddAccount(addSheet)} disabled={addingAccount}>
+                {addingAccount ? 'Adding…' : 'Add Account'}
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -129,10 +175,11 @@ export default function WalletManagerScreen() {
   );
 }
 
-function ChainSection({ name, sub, icon, accounts, onConnect, onAccountClick }: {
+function ChainSection({ name, sub, icon, accounts, onConnect, onAddAccount, onAccountClick }: {
   name: string; sub: string; icon: React.ReactNode;
   accounts: AccountRow[];
   onConnect: () => void;
+  onAddAccount: () => void;
   onAccountClick: (idx: number) => void;
 }) {
   return (
@@ -170,7 +217,10 @@ function ChainSection({ name, sub, icon, accounts, onConnect, onAccountClick }: 
           </div>
         </div>
       ))}
-      <button className="w-full py-3.5 border border-dashed border-outline rounded-none text-on-surface-variant hover:border-primary/50 hover:text-primary transition-all flex items-center justify-center gap-2 group text-sm font-label font-medium uppercase tracking-wider">
+      <button
+        onClick={onAddAccount}
+        className="w-full py-3.5 border border-dashed border-outline rounded-none text-on-surface-variant hover:border-primary/50 hover:text-primary transition-all flex items-center justify-center gap-2 text-sm font-label font-medium uppercase tracking-wider"
+      >
         + Add {name} Account
       </button>
     </section>
