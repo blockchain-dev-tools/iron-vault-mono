@@ -1,7 +1,6 @@
 'use client';
 import React from 'react';
-import { NavProvider, type ScreenId } from '../lib/nav';
-import { AppProvider } from '../lib/app-context';
+import { AppProvider, useApp, type ScreenId, type ThemeMode } from '../lib/app-context';
 import PhoneFrame from './PhoneFrame';
 import WelcomeScreen from './screens/WelcomeScreen';
 import EntropyScreen from './screens/EntropyScreen';
@@ -15,20 +14,25 @@ import PinUnlockScreen from './screens/PinUnlockScreen';
 import AccountDetailScreen from './screens/AccountDetailScreen';
 import TransactionScreen from './screens/TransactionScreen';
 import BackupSeedScreen from './screens/BackupSeedScreen';
-import { useNav } from '../lib/nav';
 import type { WalletStorage } from '@iron-vault/wallet';
 
-const SCREENS = {
-  Welcome: WelcomeScreen, Entropy: EntropyScreen,
-  GenerateMnemonic: GenerateMnemonicScreen, VerifyMnemonic: VerifyMnemonicScreen,
-  SetPin: SetPinScreen, ImportMnemonic: ImportMnemonicScreen,
-  Vault: WalletManagerScreen, Settings: SettingsScreen, Unlock: PinUnlockScreen,
-  AccountDetail: AccountDetailScreen, Transaction: TransactionScreen,
+const SCREENS: Record<ScreenId, React.ComponentType> = {
+  Welcome: WelcomeScreen,
+  Entropy: EntropyScreen,
+  GenerateMnemonic: GenerateMnemonicScreen,
+  VerifyMnemonic: VerifyMnemonicScreen,
+  SetPin: SetPinScreen,
+  ImportMnemonic: ImportMnemonicScreen,
+  Vault: WalletManagerScreen,
+  Settings: SettingsScreen,
+  Unlock: PinUnlockScreen,
+  AccountDetail: AccountDetailScreen,
+  Transaction: TransactionScreen,
   BackupSeed: BackupSeedScreen,
 };
 
 function PhoneContent() {
-  const { current, direction } = useNav();
+  const { current, direction } = useApp();
   const Screen = SCREENS[current];
   const animClass =
     direction === 'forward' ? 'screen-enter-forward' :
@@ -37,7 +41,7 @@ function PhoneContent() {
 
   return (
     <div className="h-full max-w-md mx-auto relative bg-background overflow-hidden">
-      <div key={current} className={animClass + " h-full"}>
+      <div key={current} className={animClass + ' h-full'}>
         <Screen />
       </div>
     </div>
@@ -47,7 +51,8 @@ function PhoneContent() {
 interface WalletSimulatorProps {
   storage: WalletStorage;
   initialScreen?: ScreenId;
-  lightTheme?: boolean;
+  /** 'system' | 'light' | 'dark' — defaults to 'system' */
+  initialTheme?: ThemeMode;
   style?: React.CSSProperties;
   className?: string;
 }
@@ -55,17 +60,15 @@ interface WalletSimulatorProps {
 export default function WalletSimulator({
   storage,
   initialScreen = 'Welcome',
-  lightTheme = false,
+  initialTheme = 'system',
   style,
   className,
 }: WalletSimulatorProps) {
   return (
-    <AppProvider storage={storage} initialLightTheme={lightTheme}>
-      <NavProvider initialScreen={initialScreen}>
-        <PhoneFrame style={style} className={className}>
-          <PhoneContent />
-        </PhoneFrame>
-      </NavProvider>
+    <AppProvider storage={storage} initialScreen={initialScreen} initialTheme={initialTheme}>
+      <PhoneFrame style={style} className={className}>
+        <PhoneContent />
+      </PhoneFrame>
     </AppProvider>
   );
 }

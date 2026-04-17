@@ -4,8 +4,17 @@ import type { WalletAccounts, WalletStorage } from '@iron-vault/wallet';
 import { addAccount as serviceAddAccount, removeAccount as serviceRemoveAccount } from '@iron-vault/wallet';
 import type { Bip39Language } from '@iron-vault/wallet';
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type BleState = 'idle' | 'broadcasting' | 'connected' | 'error';
+export type LocaleMode = 'system' | 'en' | 'zh' | 'ja' | 'ko';
+
+export type ScreenId =
+  | 'Welcome' | 'Entropy' | 'GenerateMnemonic' | 'VerifyMnemonic' | 'SetPin' | 'ImportMnemonic'
+  | 'Vault' | 'Settings' | 'Unlock' | 'AccountDetail' | 'Transaction' | 'BackupSeed';
+
+export type NavDirection = 'forward' | 'back' | 'reset';
 
 export interface PendingTx {
   chain: 'eth' | 'sol';
@@ -23,7 +32,18 @@ export interface PendingTx {
 
 const EMPTY_ACCOUNTS: WalletAccounts = { eth: [], sol: [] };
 
+// ─── Context interface ────────────────────────────────────────────────────────
+
 interface AppCtx {
+  // Navigation (matches mobile AppContext API)
+  current: ScreenId;
+  direction: NavDirection;
+  canGoBack: boolean;
+  go: (id: ScreenId) => void;
+  goBack: () => void;
+  reset: (id: ScreenId) => void;
+
+  // Wallet
   storage: WalletStorage;
   accounts: WalletAccounts;
   setAccounts: (a: WalletAccounts) => void;
@@ -32,6 +52,8 @@ interface AppCtx {
   setCurrentAccount: (chain: 'eth' | 'sol', idx: number) => void;
   addAccount: (chain: 'eth' | 'sol', path: string, custom: boolean) => Promise<void>;
   removeAccount: (chain: 'eth' | 'sol', path: string) => Promise<void>;
+
+  // Mnemonic flow
   generatedWords: string[];
   setGeneratedWords: (w: string[]) => void;
   mnemonicEntropy: Uint8Array | null;
@@ -40,29 +62,41 @@ interface AppCtx {
   setMnemonicLang: (l: Bip39Language) => void;
   passphrase: string;
   setPassphrase: (p: string) => void;
+
+  // BLE
   bleState: BleState;
   setBleState: (s: BleState) => void;
   pendingTx: PendingTx | null;
   setPendingTx: (tx: PendingTx | null) => void;
+
+  // Appearance
   themeMode: ThemeMode;
   setThemeMode: (m: ThemeMode) => void;
-  localeMode: string;
-  setLocaleMode: (m: string) => void;
-  appLight: boolean;
-  setAppLight: (v: boolean | ((prev: boolean) => boolean)) => void;
+  localeMode: LocaleMode;
+  setLocaleMode: (m: LocaleMode) => void;
 }
 
 const Ctx = createContext<AppCtx | null>(null);
 
+// ─── Provider ─────────────────────────────────────────────────────────────────
+
 export function AppProvider({
   children,
   storage,
-  initialLightTheme = false,
+  initialScreen = 'Welcome',
+  initialTheme = 'system',
 }: {
   children: React.ReactNode;
   storage: WalletStorage;
-  initialLightTheme?: boolean;
+  initialScreen?: ScreenId;
+  initialTheme?: ThemeMode;
 }) {
+  // Nav state
+  const [history, setHistory] = useState<ScreenId[]>([]);
+  const [current, setCurrent] = useState<ScreenId>(initialScreen);
+  const [direction, setDirection] = useState<NavDirection>('reset');
+
+  // Wallet state
   const [accounts, setAccounts] = useState<WalletAccounts>(EMPTY_ACCOUNTS);
   const [currentChain, setCurrentChain] = useState<'eth' | 'sol'>('eth');
   const [currentAcctIdx, setCurrentAcctIdx] = useState(0);
@@ -70,12 +104,41 @@ export function AppProvider({
   const [mnemonicEntropy, setMnemonicEntropy] = useState<Uint8Array | null>(null);
   const [mnemonicLang, setMnemonicLang] = useState<Bip39Language>('en');
   const [passphrase, setPassphrase] = useState('');
+
+  // BLE state
   const [bleState, setBleState] = useState<BleState>('idle');
   const [pendingTx, setPendingTx] = useState<PendingTx | null>(null);
-  const [themeMode, setThemeMode] = useState<ThemeMode>('system');
-  const [localeMode, setLocaleMode] = useState('system');
-  const [appLight, setAppLight] = useState(initialLightTheme);
 
+  // Appearance state
+  const [themeMode, setThemeMode] = useState<ThemeMode>(initialTheme);
+  const [localeMode, setLocaleMode] = useState<LocaleMode>('en');
+
+  // ── Navigation ──────────────────────────────────────────────────────────────
+  const go = useCallback((id: ScreenId) => {
+    setDirection('forward');
+    setCurrent(prev => {
+      setHistory(h => [...h, prev]);
+      return id;
+    });
+  }, []);
+
+  const goBack = useCallback(() => {
+    setDirection('back');
+    setHistory(h => {
+      if (!h.length) return h;
+      const prev = h[h.length - 1];
+      setCurrent(prev);
+      return h.slice(0, -1);
+    });
+  }, []);
+
+  const reset = useCallback((id: ScreenId) => {
+    setDirection('reset');
+    setHistory([]);
+    setCurrent(id);
+  }, []);
+
+  // ── Account helpers ──────────────────────────────────────────────────────────
   const setCurrentAccount = useCallback((chain: 'eth' | 'sol', idx: number) => {
     setCurrentChain(chain);
     setCurrentAcctIdx(idx);
@@ -91,8 +154,11 @@ export function AppProvider({
     if (updated) setAccounts(updated);
   }, [storage]);
 
+  // ── Context value ────────────────────────────────────────────────────────────
   const value = useMemo<AppCtx>(
     () => ({
+      current, direction, canGoBack: history.length > 0,
+      go, goBack, reset,
       storage,
       accounts, setAccounts,
       currentChain, currentAcctIdx, setCurrentAccount,
@@ -105,15 +171,20 @@ export function AppProvider({
       pendingTx, setPendingTx,
       themeMode, setThemeMode,
       localeMode, setLocaleMode,
-      appLight, setAppLight,
     }),
-    [storage, accounts, currentChain, currentAcctIdx, generatedWords, mnemonicEntropy, mnemonicLang,
-     passphrase, bleState, pendingTx, themeMode, localeMode, appLight,
-     addAccount, removeAccount, setCurrentAccount],
+    [
+      current, direction, history,
+      storage, accounts, currentChain, currentAcctIdx,
+      generatedWords, mnemonicEntropy, mnemonicLang,
+      passphrase, bleState, pendingTx, themeMode, localeMode,
+      go, goBack, reset, addAccount, removeAccount, setCurrentAccount,
+    ],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useApp(): AppCtx {
   const c = useContext(Ctx);

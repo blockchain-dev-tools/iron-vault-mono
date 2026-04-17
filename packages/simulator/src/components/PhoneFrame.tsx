@@ -9,10 +9,11 @@ interface PhoneFrameProps {
 }
 
 export default function PhoneFrame({ children, style, className }: PhoneFrameProps) {
-  const { appLight } = useApp();
+  const { themeMode } = useApp();
+  const isLight = themeMode === 'light';
   return (
     <div
-      className={`h-full relative overflow-hidden ${appLight ? 'light-theme' : ''} ${className ?? ''}`}
+      className={`h-full relative overflow-hidden ${isLight ? 'light-theme' : ''} ${className ?? ''}`}
       style={style}
     >
       {children}

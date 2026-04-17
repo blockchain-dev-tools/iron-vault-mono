@@ -1,6 +1,6 @@
 'use client';
 import { useNav } from '../../lib/nav';
-import { useApp } from '../../lib/app-context';
+import { useApp, type LocaleMode } from '../../lib/app-context';
 import { clearWallet } from '@iron-vault/wallet';
 import TopBar from '../ui/TopBar';
 import Button from '../ui/Button';
@@ -53,7 +53,7 @@ export default function SettingsScreen() {
               {LOCALE_OPTS.map(({ id, label }) => (
                 <button
                   key={id}
-                  onClick={() => setLocaleMode(id)}
+                  onClick={() => setLocaleMode(id as LocaleMode)}
                   className="px-3 py-1 rounded-lg text-xs font-bold border transition-all"
                   style={{
                     borderColor: localeMode === id ? 'var(--c-primary)' : 'var(--c-outline-variant)',

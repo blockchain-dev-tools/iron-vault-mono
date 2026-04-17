@@ -1,25 +1,29 @@
 'use client';
-import { useState } from 'react';
-import { useNav } from '../../lib/nav';
 import { useApp } from '../../lib/app-context';
 import { EN, ZH, type LocaleMode } from '@iron-vault/i18n';
+import type { ThemeMode } from '../../lib/app-context';
 import Button from '../ui/Button';
 import ShieldLogo from '../ui/ShieldLogo';
 
 const LOCALE_CYCLE: LocaleMode[] = ['en', 'zh', 'ja', 'ko', 'system'];
 const LOCALE_LABEL: Record<LocaleMode, string> = { en: 'EN', zh: '中文', ja: '日本語', ko: '한국어', system: 'Auto' };
+const THEME_CYCLE: ThemeMode[] = ['system', 'light', 'dark'];
+const THEME_ICON: Record<ThemeMode, string> = { system: 'brightness_auto', light: 'light_mode', dark: 'dark_mode' };
 
-export default function P01() {
-  const { go } = useNav();
-  const { appLight, setAppLight } = useApp();
-  const [locale, setLocale] = useState<LocaleMode>('en');
+export default function WelcomeScreen() {
+  const { go, themeMode, setThemeMode, localeMode, setLocaleMode } = useApp();
 
   const cycleLocale = () => {
-    const idx = LOCALE_CYCLE.indexOf(locale);
-    setLocale(LOCALE_CYCLE[(idx + 1) % LOCALE_CYCLE.length]);
+    const idx = LOCALE_CYCLE.indexOf(localeMode);
+    setLocaleMode(LOCALE_CYCLE[(idx + 1) % LOCALE_CYCLE.length]);
   };
 
-  const effectiveLocale = locale === 'system' ? 'en' : locale;
+  const cycleTheme = () => {
+    const idx = THEME_CYCLE.indexOf(themeMode);
+    setThemeMode(THEME_CYCLE[(idx + 1) % THEME_CYCLE.length]);
+  };
+
+  const effectiveLocale = localeMode === 'system' ? 'en' : localeMode;
   const t = effectiveLocale === 'zh' ? ZH : EN;
 
   return (
@@ -38,12 +42,12 @@ export default function P01() {
       {/* Top controls */}
       <div className="flex items-center justify-end gap-2 z-10">
         <button
-          onClick={() => setAppLight(v => !v)}
+          onClick={cycleTheme}
           className="w-8 h-8 rounded-xl flex items-center justify-center border transition-all"
           style={{ backgroundColor: 'var(--c-surface-container)', borderColor: 'var(--c-outline-variant)' }}
         >
           <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: 18 }}>
-            {appLight ? 'light_mode' : 'dark_mode'}
+            {THEME_ICON[themeMode]}
           </span>
         </button>
         <button
@@ -51,7 +55,7 @@ export default function P01() {
           className="h-8 px-3 rounded-xl flex items-center justify-center border transition-all"
           style={{ backgroundColor: 'var(--c-surface-container)', borderColor: 'var(--c-outline-variant)' }}
         >
-          <span className="text-on-surface-variant text-xs font-bold">{LOCALE_LABEL[locale]}</span>
+          <span className="text-on-surface-variant text-xs font-bold">{LOCALE_LABEL[localeMode]}</span>
         </button>
       </div>
 
