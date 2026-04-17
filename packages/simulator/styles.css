@@ -73,13 +73,86 @@
 .light-theme .shadow-primary-sm,
 .light-theme .shadow-glow-lg { box-shadow: none !important; }
 
+/* ── Screen transition keyframes ──────────────────────────────────────────── */
+
+/* forward: new screen slides in from right */
 @keyframes screen-enter-forward {
-  from { transform: translateX(100%); opacity: 0; }
-  to   { transform: translateX(0);    opacity: 1; }
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
 }
+/* forward: outgoing screen slides out to left (parallax) */
+@keyframes screen-exit-forward {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-25%); }
+}
+
+/* back: new (previous) screen slides in from left */
 @keyframes screen-enter-back {
-  from { transform: translateX(-100%); opacity: 0; }
-  to   { transform: translateX(0);     opacity: 1; }
+  from { transform: translateX(-25%); }
+  to   { transform: translateX(0); }
 }
-.screen-enter-forward { animation: screen-enter-forward 0.25s ease-out forwards; }
-.screen-enter-back    { animation: screen-enter-back    0.25s ease-out forwards; }
+/* back: outgoing screen slides out to right */
+@keyframes screen-exit-back {
+  from { transform: translateX(0); }
+  to   { transform: translateX(100%); }
+}
+
+/* reset: simple cross-fade (no direction) */
+@keyframes screen-enter-reset {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Entering screen classes ──────────────────────────────────────────────── */
+.screen-enter-forward {
+  animation: screen-enter-forward 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+.screen-enter-back {
+  animation: screen-enter-back 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+.screen-enter-reset {
+  animation: screen-enter-reset 0.28s ease-out forwards;
+}
+
+/* ── Exiting screen classes ───────────────────────────────────────────────── */
+.screen-exit-forward {
+  animation: screen-exit-forward 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  pointer-events: none;
+}
+.screen-exit-back {
+  animation: screen-exit-back 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  pointer-events: none;
+}
+
+@keyframes btn-press {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.94); }
+  70%  { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+@keyframes key-press {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.80); }
+  70%  { transform: scale(0.90); }
+  100% { transform: scale(1); }
+}
+
+.btn-spring { animation: btn-press 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.key-spring { animation: key-press 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+@keyframes sheet-slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes sheet-slide-down {
+  from { transform: translateY(0);    opacity: 1; }
+  to   { transform: translateY(100%); opacity: 0; }
+}
+@keyframes overlay-fade-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes overlay-fade-out { from { opacity: 1; } to { opacity: 0; } }
+
+.sheet-enter   { animation: sheet-slide-up   0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
+.sheet-exit    { animation: sheet-slide-down 0.25s ease-in forwards; }
+.overlay-enter { animation: overlay-fade-in  0.25s ease forwards; }
+.overlay-exit  { animation: overlay-fade-out 0.25s ease forwards; }

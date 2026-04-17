@@ -35,11 +35,10 @@ const EMPTY_ACCOUNTS: WalletAccounts = { eth: [], sol: [] };
 // ─── Context interface ────────────────────────────────────────────────────────
 
 interface AppCtx {
-  // Navigation (matches mobile AppContext API)
   current: ScreenId;
   direction: NavDirection;
   canGoBack: boolean;
-  go: (id: ScreenId) => void;
+  go: (id: ScreenId, dir?: NavDirection) => void;
   goBack: () => void;
   reset: (id: ScreenId) => void;
 
@@ -114,8 +113,8 @@ export function AppProvider({
   const [localeMode, setLocaleMode] = useState<LocaleMode>('en');
 
   // ── Navigation ──────────────────────────────────────────────────────────────
-  const go = useCallback((id: ScreenId) => {
-    setDirection('forward');
+  const go = useCallback((id: ScreenId, dir: NavDirection = 'forward') => {
+    setDirection(dir);
     setCurrent(prev => {
       setHistory(h => [...h, prev]);
       return id;

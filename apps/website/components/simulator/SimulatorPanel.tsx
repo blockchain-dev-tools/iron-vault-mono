@@ -79,7 +79,6 @@ export default function SimulatorPanel() {
             <WalletSimulator
               storage={devtoolsStorage}
               initialScreen="Vault"
-              className="rounded-2xl overflow-hidden shadow-lg border border-outline-variant"
               style={{ width: PHONE_W, height: PHONE_H }}
             />
           </div>

@@ -17,7 +17,7 @@ export default function BottomNav() {
   const { current, go } = useNav();
   return (
     <nav
-      className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 backdrop-blur-xl border-t"
+      className="absolute bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 backdrop-blur-xl border-t"
       style={{ background: 'var(--c-background)', borderColor: 'var(--c-outline-variant)' }}
     >
       {ITEMS.map((item) => {

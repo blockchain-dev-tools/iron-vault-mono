@@ -182,6 +182,7 @@ export default function DevFrame() {
                   storage={walletStorage}
                   initialScreen={initialScreen}
                   lightTheme={appLight}
+                  showChrome={false}
                 />
               )}
             </div>
