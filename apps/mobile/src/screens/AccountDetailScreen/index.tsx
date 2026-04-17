@@ -122,7 +122,7 @@ export default function AccountDetailScreen() {
 
         <View>
           <SectionLabel>{t.accountDetail.activity}</SectionLabel>
-          <LogViewer logs={logs} emptyText={t.accountDetail.noActivity} height={140} />
+          <LogViewer logs={logs} emptyText={t.accountDetail.noActivity} height={140} style={{ backgroundColor: C.primary12, borderWidth: 1, borderColor: C.primary25 }} />
         </View>
 
         <View style={{ height: 32 }} />

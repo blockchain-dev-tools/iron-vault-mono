@@ -11,18 +11,20 @@ export default function LogViewer({
   emptyText,
   height,
   maxHeight = 140,
+  style,
 }: {
   logs: LogEntry[];
   emptyText?: string;
   height?: number;
   maxHeight?: number;
+  style?: import('react-native').ViewStyle;
 }) {
   const C = useTheme();
   const s = useMemo(() => makeStyles(C), [C]);
   const scrollRef = useRef<ScrollView>(null);
 
   return (
-    <View style={[s.box, height !== undefined ? { height } : { maxHeight }]}>
+    <View style={[s.box, height !== undefined ? { height } : { maxHeight }, style]}>
       <ScrollView
         ref={scrollRef}
         onContentSizeChange={height !== undefined ? () => scrollRef.current?.scrollToEnd({ animated: true }) : undefined}
