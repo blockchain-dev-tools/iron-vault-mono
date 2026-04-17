@@ -171,7 +171,7 @@ export default function AccountDetailScreen() {
 const makeStyles = (C: ColorTokens) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
   scroll: { flex: 1 },
-  content: { paddingHorizontal: 24, paddingTop: 24, gap: 16 },
+  content: { paddingHorizontal: 24, paddingTop: 24, paddingBottom: 180, gap: 16 },
   addrHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   copyIconWrap: { padding: 8, backgroundColor: C.surfaceContainerLow, borderRadius: R.lg },
   addrBox: { backgroundColor: C.surfaceContainerLow, borderRadius: R.lg, padding: 12, borderWidth: 1, borderColor: C.borderVariant },
@@ -185,7 +185,13 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: C.primary },
   dotConnected: { backgroundColor: '#4caf50' },
   dotPulse: { position: 'absolute', width: 8, height: 8, borderRadius: 4, backgroundColor: C.primary, opacity: 0.4 },
-  btnWrap: { paddingHorizontal: 24, paddingBottom: 16, gap: 12 },
+  btnWrap: {
+    position: 'absolute', bottom: 0, left: 0, right: 0,
+    paddingHorizontal: 24, paddingTop: 16, paddingBottom: 16, gap: 12,
+    backgroundColor: C.bg + '80',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: C.borderVariant,
+  },
   errorTips: {
     padding: 16, borderRadius: R.xl,
     backgroundColor: C.surfaceContainer,
