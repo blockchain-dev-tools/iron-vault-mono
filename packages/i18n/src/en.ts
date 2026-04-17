@@ -126,6 +126,7 @@ export const EN = {
     ethMainnet: 'Ethereum Mainnet',
     solMainnet: 'Solana Mainnet',
     activity: 'Activity',
+    noActivity: 'No activity yet',
     hint: 'This device will act as a Ledger hardware wallet and accept signing requests from connected wallets.',
     startAccepting: 'Start Accepting',
     stop: 'Stop',

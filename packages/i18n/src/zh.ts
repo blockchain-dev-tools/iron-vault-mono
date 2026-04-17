@@ -128,6 +128,7 @@ export const ZH: Translations = {
     ethMainnet: '以太坊主网',
     solMainnet: 'Solana 主网',
     activity: '活动记录',
+    noActivity: '暂无活动',
     hint: '此设备将模拟 Ledger 硬件钱包，响应来自已连接钱包的签名请求。',
     startAccepting: '接收请求',
     stop: '停止',

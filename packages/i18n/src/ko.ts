@@ -128,6 +128,7 @@ export const KO: Translations = {
     ethMainnet: 'Ethereum 메인넷',
     solMainnet: 'Solana 메인넷',
     activity: '활동',
+    noActivity: '아직 활동 없음',
     hint: '이 장치는 Ledger 하드웨어 지갑으로 작동하여 연결된 지갑의 서명 요청을 수락합니다.',
     startAccepting: '수락 시작',
     stop: '중지',

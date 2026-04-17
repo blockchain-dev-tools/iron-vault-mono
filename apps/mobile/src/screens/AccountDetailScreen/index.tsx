@@ -120,12 +120,10 @@ export default function AccountDetailScreen() {
           <Text style={s.addrPath}>{acct.path}</Text>
         </Card>
 
-        {logs.length > 0 && (
-          <View>
-            <SectionLabel>{t.accountDetail.activity}</SectionLabel>
-            <LogViewer logs={logs} maxHeight={140} />
-          </View>
-        )}
+        <View>
+          <SectionLabel>{t.accountDetail.activity}</SectionLabel>
+          <LogViewer logs={logs} emptyText={t.accountDetail.noActivity} height={140} />
+        </View>
 
         <View style={{ height: 32 }} />
       </ScrollView>

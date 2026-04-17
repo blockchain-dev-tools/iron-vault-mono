@@ -128,6 +128,7 @@ export const JA: Translations = {
     ethMainnet: 'Ethereumメインネット',
     solMainnet: 'Solanaメインネット',
     activity: 'アクティビティ',
+    noActivity: 'まだ活動がありません',
     hint: 'このデバイスはLedgerハードウェアウォレットとして動作し、接続されたウォレットからの署名リクエストを受け付けます。',
     startAccepting: '受け付け開始',
     stop: '停止',
