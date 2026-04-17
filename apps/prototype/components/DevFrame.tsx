@@ -6,6 +6,21 @@ import { useApp } from '@/lib/app-context';
 import { hasWallet } from '@iron-vault/wallet';
 import { walletStorage } from '@/lib/storage';
 
+function LiveTime() {
+  const [time, setTime] = useState(() => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  });
+  useEffect(() => {
+    const id = setInterval(() => {
+      const now = new Date();
+      setTime(now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }));
+    }, 10000);
+    return () => clearInterval(id);
+  }, []);
+  return <>{time}</>;
+}
+
 interface Preset {
   label: string;
   sub: string;
@@ -115,12 +130,8 @@ export default function DevFrame() {
             <span style={{ color: dt.textMuted }}>{frameW} × {frameH}</span>
           </div>
 
-          {/* Phone frame
-              transform: translateZ(0) creates a new containing block so that
-              position:fixed children (TopBar, BottomNav, P11 action bar) are
-              contained within the frame rather than escaping to the viewport. */}
           <div
-            className="relative border-2 overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,.8),0_0_0_1px_#111] bg-[#121212] border-[#2a2a2a]"
+            className="border-2 overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,.8),0_0_0_1px_#111] bg-[#121212] border-[#2a2a2a] flex flex-col"
             style={{
               width: frameW,
               height: frameH,
@@ -129,17 +140,43 @@ export default function DevFrame() {
               transform: 'translateZ(0)',
             }}
           >
-            {/* Notch */}
             <div
-              className="absolute top-0 left-1/2 -translate-x-1/2 z-[100] bg-[#121212]"
-              style={{ width: 126, height: 34, borderRadius: '0 0 18px 18px' }}
-            />
-            {/* Status bar time */}
-            <div className="absolute top-[10px] left-0 right-0 text-center text-[13px] font-semibold text-white z-[99] pointer-events-none">
-              9:41
+              className="relative flex-shrink-0 flex items-end justify-between px-6 pb-1 bg-black"
+              style={{ height: 54 }}
+            >
+              <span
+                className="font-label font-semibold text-white z-10 pointer-events-none"
+                style={{ fontSize: 13, letterSpacing: '-0.01em', lineHeight: 1 }}
+              >
+                <LiveTime />
+              </span>
+
+              <div
+                className="absolute left-1/2 top-0 -translate-x-1/2 bg-[#121212]"
+                style={{ width: 126, height: 34, borderRadius: '0 0 20px 20px' }}
+              />
+
+              <div className="flex items-center gap-1.5 z-10 pointer-events-none">
+                <svg width="17" height="12" viewBox="0 0 17 12" fill="white">
+                  <rect x="0"  y="6" width="3" height="6" rx="0.5" opacity="1"   />
+                  <rect x="4"  y="4" width="3" height="8" rx="0.5" opacity="1"   />
+                  <rect x="8"  y="2" width="3" height="10" rx="0.5" opacity="1"  />
+                  <rect x="12" y="0" width="3" height="12" rx="0.5" opacity="0.3"/>
+                </svg>
+                <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+                  <path d="M8 9.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z"/>
+                  <path d="M8 6.5C9.9 6.5 11.6 7.3 12.8 8.6l1.4-1.4A8 8 0 0 0 8 4.5a8 8 0 0 0-6.2 2.7l1.4 1.4C4.4 7.3 6.1 6.5 8 6.5Z"/>
+                  <path d="M8 3.5c2.8 0 5.3 1.1 7.1 3L16.5 5C14.3 2.8 11.3 1.5 8 1.5S1.7 2.8-.5 5l1.4 1.5A9.9 9.9 0 0 1 8 3.5Z" opacity="0.4"/>
+                </svg>
+                <div className="relative" style={{ width: 25, height: 12 }}>
+                  <div className="absolute inset-0 rounded-[3px] border border-white" style={{ opacity: 0.35 }} />
+                  <div className="absolute inset-[2px] rounded-[2px] bg-white" style={{ right: 6 }} />
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[2px] h-[5px] rounded-r-sm bg-white" style={{ opacity: 0.4 }} />
+                </div>
+              </div>
             </div>
-            {/* Screen content */}
-            <div className="absolute inset-0 overflow-y-auto overflow-x-hidden" style={{ scrollbarWidth: 'none' }}>
+
+            <div className="flex-1 overflow-y-auto overflow-x-hidden" style={{ scrollbarWidth: 'none' }}>
               {initialScreen && (
                 <WalletSimulator
                   storage={walletStorage}
@@ -147,6 +184,10 @@ export default function DevFrame() {
                   lightTheme={appLight}
                 />
               )}
+            </div>
+
+            <div className="flex-shrink-0 flex items-center justify-center bg-black" style={{ height: 24 }}>
+              <div className="rounded-full bg-white" style={{ width: 120, height: 4, opacity: 0.3 }} />
             </div>
           </div>
 
