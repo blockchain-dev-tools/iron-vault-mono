@@ -68,8 +68,12 @@ public class BleModule extends ReactContextBaseJavaModule {
                 emitLog("请先开启蓝牙");
                 return;
             }
-            try { btManager.getAdapter().setName(LedgerBleConstants.DEVICE_NAME); }
-            catch (Exception e) { emitLog("设置设备名失败: " + e.getMessage()); }
+            try {
+                boolean nameSet = btManager.getAdapter().setName(LedgerBleConstants.DEVICE_NAME);
+                String actualName = btManager.getAdapter().getName();
+                if (nameSet) emitLog("设备名已设置: \"" + actualName + "\"");
+                else emitLog("设备名设置失败，当前名称: \"" + actualName + "\"");
+            } catch (Exception e) { emitLog("设置设备名异常: " + e.getMessage()); }
             // Reuse existing GATT server to keep attribute handles stable for bonded devices
             if (gattServer == null) {
                 setupGattServer(btManager);
@@ -83,6 +87,12 @@ public class BleModule extends ReactContextBaseJavaModule {
         if (advertiser != null) {
             try { advertiser.stopAdvertising(advertiseCallback); } catch (Exception ignored) {}
             advertiser = null;
+        }
+        // Explicitly cancel GATT connections so bonded devices start fresh on next connect.
+        if (gattServer != null) {
+            for (BluetoothDevice device : connectedDevices.values()) {
+                try { gattServer.cancelConnection(device); } catch (Exception ignored) {}
+            }
         }
         // Keep GATT server alive — OKX caches attribute handles from bonding.
         // Closing & re-creating causes "format mismatch" and breaks reconnection.
@@ -146,8 +156,13 @@ public class BleModule extends ReactContextBaseJavaModule {
     // ── BLE Advertising ───────────────────────────────────────────────────────
 
     private void startBleAdvertising(BluetoothManager btManager) {
-        advertiser = btManager.getAdapter().getBluetoothLeAdvertiser();
-        if (advertiser == null) { emitLog("不支持 BLE 广播"); return; }
+        BluetoothLeAdvertiser adv = btManager.getAdapter().getBluetoothLeAdvertiser();
+        if (adv == null) { emitLog("不支持 BLE 广播"); return; }
+        // Stop any lingering advertiser before starting fresh.
+        if (advertiser != null) {
+            try { advertiser.stopAdvertising(advertiseCallback); } catch (Exception ignored) {}
+        }
+        advertiser = adv;
 
         AdvertiseSettings settings = new AdvertiseSettings.Builder()
             .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
