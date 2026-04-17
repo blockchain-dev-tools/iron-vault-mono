@@ -88,12 +88,6 @@ public class BleModule extends ReactContextBaseJavaModule {
             try { advertiser.stopAdvertising(advertiseCallback); } catch (Exception ignored) {}
             advertiser = null;
         }
-        // Explicitly cancel GATT connections so bonded devices start fresh on next connect.
-        if (gattServer != null) {
-            for (BluetoothDevice device : connectedDevices.values()) {
-                try { gattServer.cancelConnection(device); } catch (Exception ignored) {}
-            }
-        }
         // Keep GATT server alive — OKX caches attribute handles from bonding.
         // Closing & re-creating causes "format mismatch" and breaks reconnection.
         connectedDevices.clear();
