@@ -4,8 +4,6 @@ import QRCode from 'qrcode';
 import { useNav } from '../../lib/nav';
 import { useApp } from '../../lib/app-context';
 import TopBar from '../ui/TopBar';
-import BottomNav from '../ui/BottomNav';
-import BleStatus from '../ui/BleStatus';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import SectionLabel from '../ui/SectionLabel';
@@ -72,7 +70,7 @@ export default function AccountDetailScreen() {
 
   if (!acct) {
     return (
-      <div className="flex flex-col min-h-full pt-16 pb-24">
+      <div className="flex flex-col min-h-full" style={{ background: 'var(--c-background)' }}>
         <TopBar title="Account" onBack={goBack} />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-on-surface-variant text-sm font-body">No account selected</p>
@@ -88,39 +86,37 @@ export default function AccountDetailScreen() {
     bleState === 'idle'         ? 'Start Accepting Transactions' : 'Stop';
 
   return (
-    <div className="flex flex-col min-h-full pt-16 pb-24">
+    <div className="flex flex-col min-h-full" style={{ background: 'var(--c-background)' }}>
       <TopBar
-        title={`${isEth ? 'Ethereum' : 'Solana'} Account ${idx + 1}`}
+        title={`${isEth ? 'Ethereum' : 'Solana'} #${idx + 1}`}
         onBack={goBack}
         bleState={bleState}
         right={
-          canDelete && (
-            <button
-              onClick={handleRemove}
-              className="p-2 rounded-lg text-error hover:bg-error/10 active:scale-90 transition-all"
-            >
-              <span className="material-symbols-outlined text-xl">delete</span>
-            </button>
-          )
+          <button
+            onClick={handleRemove}
+            disabled={!canDelete}
+            className="p-2 transition-all"
+            style={{ color: canDelete ? 'var(--c-error)' : 'var(--c-on-surface-variant)', opacity: canDelete ? 1 : 0.3 }}
+          >
+            <span className="material-symbols-outlined text-xl">delete</span>
+          </button>
         }
       />
 
       <div className="flex-1 px-6 pt-6 space-y-4 overflow-y-auto pb-4">
         <Card accent>
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <SectionLabel>Public Address</SectionLabel>
-              <h3 className="font-headline font-semibold text-lg">{isEth ? 'Ethereum Mainnet' : 'Solana Mainnet'}</h3>
-            </div>
+          <div className="flex justify-between items-center mb-3">
+            <SectionLabel>Public Address</SectionLabel>
             <button
               onClick={() => navigator.clipboard?.writeText(acct.full)}
-              className="p-2 bg-surface-container-high rounded-lg text-primary hover:bg-primary hover:text-on-primary transition-all active:scale-90"
+              className="p-2 rounded-xl transition-all active:scale-90"
+              style={{ background: 'var(--c-surface-container-low)', color: 'var(--c-primary)' }}
             >
-              <span className="material-symbols-outlined">content_copy</span>
+              <span className="material-symbols-outlined text-base leading-none">content_copy</span>
             </button>
           </div>
-          <div className="bg-surface-container-low p-4 rounded-xl border border-outline/10">
-            <code className="font-mono text-primary text-sm break-all leading-relaxed tracking-wider">{acct.full}</code>
+          <div className="p-3 rounded-xl border" style={{ background: 'var(--c-surface-container-low)', borderColor: 'var(--c-border-variant)' }}>
+            <code className="font-mono text-sm break-all leading-relaxed" style={{ color: 'var(--c-primary)' }}>{acct.full || acct.short}</code>
           </div>
           {qrDataUrl && (
             <div className="flex justify-center py-5">
@@ -129,55 +125,70 @@ export default function AccountDetailScreen() {
               </div>
             </div>
           )}
-          <div className="mt-3 pt-3 border-t border-outline/20">
-            <span className="font-mono text-[10px] text-on-surface-variant">{acct.path}</span>
+          <div className="mt-3">
+            <span className="font-mono text-[10px]" style={{ color: 'var(--c-on-surface-variant)' }}>{acct.path}</span>
           </div>
         </Card>
 
-        <BleStatus state={bleState} />
-
-        {log.length > 0 && (
-          <div>
-            <SectionLabel>Activity Log</SectionLabel>
-            <div className="bg-surface-container rounded-xl p-3 max-h-40 overflow-y-auto space-y-1">
-              {log.map((l, i) => (
-                <div key={i} className="flex items-center gap-2 text-xs font-body">
-                  <span className="text-outline-variant font-mono min-w-[38px]">{l.time}</span>
-                  <span className="material-symbols-outlined text-primary text-sm">{l.icon}</span>
-                  <span className="text-on-surface-variant">{l.msg}</span>
-                </div>
-              ))}
-            </div>
+        <div>
+          <SectionLabel>Activity</SectionLabel>
+          <div className="rounded-xl p-3 space-y-1 overflow-y-auto" style={{ background: 'var(--c-surface-container)', minHeight: 60, maxHeight: 140 }}>
+            {log.length === 0 ? (
+              <p className="text-xs font-body text-center py-3" style={{ color: 'var(--c-on-surface-variant)' }}>
+                No activity yet
+              </p>
+            ) : log.map((l, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs font-body">
+                <span className="font-mono min-w-[38px]" style={{ color: 'var(--c-outline-variant)' }}>{l.time}</span>
+                <span className="material-symbols-outlined text-sm" style={{ color: 'var(--c-primary)' }}>{l.icon}</span>
+                <span style={{ color: 'var(--c-on-surface-variant)' }}>{l.msg}</span>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
 
-        {bleState === 'idle' && (
-          <p className="text-center text-xs text-on-surface-variant font-body">
-            Tap below — this device will act as a Ledger hardware wallet and accept signing requests from OKX.
-          </p>
-        )}
-        {bleState === 'broadcasting' && (
-          <p className="text-center text-xs text-on-surface-variant font-body">
-            In OKX, tap「Connect Hardware Wallet」→「Ledger」
-          </p>
-        )}
-        {bleState === 'connected' && (
-          <p className="text-center text-xs text-on-surface-variant font-body">Waiting for signing request...</p>
-        )}
-        {bleState === 'error' && (
-          <p className="text-center text-xs font-body" style={{ color: 'var(--c-error)' }}>
-            Bluetooth error — tap Retry to try again.
-          </p>
-        )}
+        <div style={{ height: 32 }} />
       </div>
 
-      <div className="px-6 pb-4 pt-2">
+      <div className="px-6 pb-4 pt-4 flex flex-col gap-3" style={{ borderTop: '1px solid var(--c-border-variant)', background: 'var(--c-background)' }}>
+        {bleState === 'error' && (
+          <div className="rounded-xl p-4 border" style={{ background: 'var(--c-surface-container)', borderColor: 'var(--c-border-variant)' }}>
+            <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color: 'var(--c-on-surface)' }}>Troubleshooting</p>
+            {[
+              'Ensure Bluetooth is enabled on this device',
+              'Keep OKX Wallet open and on the connect screen',
+              'Stay within 2 metres of the connecting device',
+              'If stuck, stop and retry the connection',
+            ].map((tip, i) => (
+              <p key={i} className="text-xs leading-5" style={{ color: 'var(--c-on-surface-variant)' }}>{tip}</p>
+            ))}
+          </div>
+        )}
         <Button variant={btnVariant} icon={btnIcon} onClick={toggle}>
           {btnLabel}
         </Button>
+        {bleState === 'idle' && (
+          <p className="text-center text-xs font-body" style={{ color: 'var(--c-on-surface-variant)' }}>
+            Tap above — this device will act as a Ledger hardware wallet
+          </p>
+        )}
+        {(bleState === 'broadcasting' || bleState === 'connected') && (
+          <div className="flex items-center justify-center gap-2">
+            <div className="relative w-3 h-3 flex items-center justify-center">
+              {bleState === 'broadcasting' && (
+                <div className="absolute inset-0 rounded-full opacity-40" style={{ background: 'var(--c-primary)', animation: 'ping 1.5s ease-in-out infinite' }} />
+              )}
+              <div
+                className="w-2 h-2 rounded-full"
+                style={{ background: bleState === 'connected' ? '#4caf50' : 'var(--c-primary)' }}
+              />
+            </div>
+            <p className="text-xs font-body" style={{ color: 'var(--c-on-surface-variant)' }}>
+              {bleState === 'broadcasting' ? 'In OKX, tap「Connect Hardware Wallet」→「Ledger」' : 'Waiting for signing request...'}
+            </p>
+          </div>
+        )}
       </div>
-
-      <BottomNav />
     </div>
   );
 }

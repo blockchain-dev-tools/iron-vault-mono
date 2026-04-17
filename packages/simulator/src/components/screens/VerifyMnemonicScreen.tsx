@@ -7,16 +7,17 @@ import SectionLabel from '../ui/SectionLabel';
 
 function shuffle<T>(arr: T[]): T[] { return [...arr].sort(() => Math.random() - .5); }
 
-const VERIFY_POSITIONS = [2, 6, 10];
+const POSITIONS = [2, 6, 10];
 
 export default function VerifyMnemonicScreen() {
   const { go } = useNav();
   const { generatedWords } = useApp();
   const words = generatedWords;
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [wrongError, setWrongError] = useState(false);
 
   const groups = useMemo(() =>
-    VERIFY_POSITIONS.map(pos => ({
+    POSITIONS.map(pos => ({
       pos,
       correct: words[pos] ?? '',
       opts: words.length > 0
@@ -25,17 +26,38 @@ export default function VerifyMnemonicScreen() {
     })), [words]);
 
   const pick = (pos: number, word: string) => {
+    if (wrongError) return;
     const next = { ...answers, [pos]: word };
     setAnswers(next);
-    if (Object.keys(next).length === 3 && VERIFY_POSITIONS.every(p => words[p] === next[p])) {
-      setTimeout(() => go('SetPin'), 400);
+    if (Object.keys(next).length === POSITIONS.length) {
+      const allCorrect = POSITIONS.every(p => words[p] === next[p]);
+      if (allCorrect) {
+        setTimeout(() => go('SetPin'), 400);
+      } else {
+        setWrongError(true);
+        setTimeout(() => {
+          setAnswers({});
+          setWrongError(false);
+        }, 1200);
+      }
     }
   };
 
   return (
     <div className="flex flex-col min-h-full pt-16 pb-8">
-      <TopBar title="Verify Phrase" />
+      <TopBar title="Verify Phrase" onBack={() => go('GenerateMnemonic')} />
       <div className="flex-1 px-6 pt-6 space-y-6">
+        {wrongError && (
+          <div
+            className="rounded-xl p-3 border flex items-center justify-center"
+            style={{ background: 'var(--c-error-container)', borderColor: 'var(--c-error)' }}
+          >
+            <p className="text-sm font-bold" style={{ color: 'var(--c-error)' }}>
+              Incorrect — please try again
+            </p>
+          </div>
+        )}
+
         {groups.map(({ pos, correct, opts }) => (
           <div key={pos}>
             <SectionLabel>Word #{pos + 1}</SectionLabel>
@@ -48,10 +70,15 @@ export default function VerifyMnemonicScreen() {
                   <button
                     key={o}
                     onClick={() => !picked && pick(pos, o)}
-                    className={`rounded-xl py-3 px-4 font-headline font-medium text-sm border transition-all active:scale-95
-                      ${isCorrect ? 'border-primary bg-primary/10 text-primary' :
-                        isWrong ? 'border-error bg-error/10 text-error' :
-                        'border-outline bg-surface-container text-on-surface hover:border-primary/50'}`}
+                    className="rounded-xl px-4 font-headline font-medium text-sm border transition-all active:scale-95"
+                    style={{
+                      paddingTop: 14,
+                      paddingBottom: 14,
+                      borderColor: isCorrect ? 'var(--c-primary)' : isWrong ? 'var(--c-error)' : 'var(--c-outline)',
+                      background: isCorrect ? 'var(--c-primary-container)' : isWrong ? 'var(--c-error-container)' : 'var(--c-surface-container)',
+                      color: isCorrect ? 'var(--c-primary)' : isWrong ? 'var(--c-error)' : 'var(--c-on-surface)',
+                      borderWidth: isCorrect || isWrong ? 2 : 1,
+                    }}
                   >
                     {o}
                   </button>
@@ -60,9 +87,11 @@ export default function VerifyMnemonicScreen() {
             </div>
           </div>
         ))}
+
         <button
           onClick={() => go('SetPin')}
-          className="w-full text-center text-xs text-on-surface-variant underline decoration-outline py-4 font-label uppercase tracking-widest"
+          className="w-full text-center text-xs py-4 font-label uppercase tracking-widest"
+          style={{ color: 'var(--c-on-surface-variant)', textDecoration: 'underline' }}
         >
           Skip verification (not recommended)
         </button>

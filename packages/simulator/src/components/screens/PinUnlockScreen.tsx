@@ -13,15 +13,19 @@ export default function PinUnlockScreen() {
   const { setAccounts, storage } = useApp();
   const [failCount, setFailCount] = useState(0);
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
   const locked = failCount >= MAX_ATTEMPTS;
 
   const handleComplete = async (pin: string, resetPad: () => void) => {
     if (locked) return;
+    setLoading(true);
+    await new Promise<void>(r => setTimeout(r, 32));
     const result = await unlockWallet(storage, pin);
     if (result) {
       setAccounts(result);
       navReset('Vault');
     } else {
+      setLoading(false);
       setError(true);
       setFailCount(c => c + 1);
       resetPad();
@@ -71,7 +75,16 @@ export default function PinUnlockScreen() {
 
       {!locked && (
         <div className="z-10 mt-6">
-          <PinPad onComplete={handleComplete} error={error} />
+          {loading ? (
+            <div className="flex flex-col items-center gap-4 py-8">
+              <div
+                className="w-10 h-10 rounded-full border-2 animate-spin"
+                style={{ borderColor: 'var(--c-primary)', borderTopColor: 'transparent' }}
+              />
+            </div>
+          ) : (
+            <PinPad onComplete={handleComplete} error={error} />
+          )}
         </div>
       )}
       {failCount > 0 && !locked && (

@@ -6,18 +6,20 @@ import { entropyToMnemonic } from '@iron-vault/wallet';
 import TopBar from '../ui/TopBar';
 import Button from '../ui/Button';
 
-const TARGET_POINTS = 100;
+const TARGET_POINTS = 200;
+
+type Dot = { x: number; y: number };
 
 export default function EntropyScreen() {
   const { go, goBack } = useNav();
   const { setGeneratedWords, setMnemonicEntropy, setMnemonicLang } = useApp();
-  const [dots, setDots] = useState(0);
+  const [dots, setDots] = useState<Dot[]>([]);
   const touchBytesRef = useRef<number[]>([]);
-  const canvasRef = useRef<HTMLDivElement>(null);
   const drawing = useRef(false);
 
-  const progress = Math.min(dots / TARGET_POINTS, 1);
+  const progress = Math.min(dots.length / TARGET_POINTS, 1);
   const isComplete = progress >= 1;
+  const pct = Math.round(progress * 100);
 
   const collectPoint = useCallback((x: number, y: number) => {
     const ts = Date.now();
@@ -29,7 +31,7 @@ export default function EntropyScreen() {
       ts & 0xff,
       (ts >> 8) & 0xff,
     );
-    setDots(d => Math.min(d + 1, TARGET_POINTS));
+    setDots(prev => prev.length < TARGET_POINTS ? [...prev, { x, y }] : prev);
   }, []);
 
   const onPointerDown = (e: React.PointerEvent) => {
@@ -61,60 +63,70 @@ export default function EntropyScreen() {
     go('GenerateMnemonic');
   }, [isComplete, go, setMnemonicEntropy, setMnemonicLang, setGeneratedWords]);
 
-  const pct = Math.round(progress * 100);
-
   return (
-    <div className="flex flex-col min-h-full pt-16 pb-8">
+    <div className="flex flex-col min-h-full" style={{ background: 'var(--c-background)' }}>
       <TopBar title="Generate Entropy" onBack={goBack} />
-      <div className="flex-1 flex flex-col items-center justify-center px-6 gap-6">
-        <div className="text-center space-y-2">
-          <h2 className="font-headline font-bold text-2xl tracking-tight" style={{ color: 'var(--c-on-surface)' }}>
-            Draw to Seed Randomness
-          </h2>
-          <p className="text-sm font-body" style={{ color: 'var(--c-on-surface-variant)', maxWidth: 280 }}>
-            Move your cursor inside the box to collect entropy for your seed phrase.
-          </p>
-        </div>
+      <div className="flex-1 flex flex-col px-6 pt-4 pb-6 gap-4">
+        <p className="text-sm font-body text-center" style={{ color: 'var(--c-on-surface-variant)' }}>
+          {isComplete
+            ? 'Entropy collected — tap Continue'
+            : 'Draw freely inside the box to seed your wallet\'s randomness'}
+        </p>
 
         <div
-          ref={canvasRef}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
-          className="w-full max-w-[280px] h-[180px] rounded-2xl border-2 select-none touch-none cursor-crosshair relative overflow-hidden"
+          className="flex-1 rounded-2xl border select-none touch-none cursor-crosshair relative overflow-hidden"
           style={{
-            borderColor: isComplete ? 'var(--c-primary)' : 'var(--c-outline)',
-            background: 'var(--c-surface-container)',
+            borderColor: isComplete ? 'var(--c-primary)' : 'var(--c-border-variant)',
+            background: 'var(--c-surface)',
+            minHeight: 160,
           }}
         >
-          {!isComplete && (
+          {dots.map((d, i) => (
             <div
-              className="absolute inset-0 flex items-center justify-center pointer-events-none"
-              style={{ opacity: dots === 0 ? 1 : Math.max(0, 1 - dots / 20) }}
-            >
-              <span className="material-symbols-outlined text-on-surface-variant text-5xl">gesture</span>
+              key={i}
+              className="absolute rounded-full pointer-events-none"
+              style={{
+                left: d.x - 3,
+                top: d.y - 3,
+                width: 6,
+                height: 6,
+                background: 'var(--c-primary)',
+                opacity: 0.3 + 0.7 * (i / Math.max(dots.length - 1, 1)),
+              }}
+            />
+          ))}
+          {dots.length === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <span className="material-symbols-outlined text-5xl" style={{ color: 'var(--c-on-surface-variant)' }}>gesture</span>
             </div>
           )}
           {isComplete && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="material-symbols-outlined text-primary text-5xl">check_circle</span>
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none"
+              style={{ background: 'var(--c-surface)cc' }}>
+              <span className="material-symbols-outlined text-5xl" style={{ color: 'var(--c-primary)' }}>check_circle</span>
             </div>
           )}
-          <div
-            className="absolute bottom-0 left-0 h-1 transition-all duration-150"
-            style={{
-              width: `${pct}%`,
-              background: 'var(--c-primary)',
-              opacity: isComplete ? 0 : 1,
-            }}
-          />
         </div>
 
-        <p className="font-label text-xs uppercase tracking-widest" style={{ color: isComplete ? 'var(--c-primary)' : 'var(--c-on-surface-variant)' }}>
-          {isComplete ? 'Entropy collected ✓' : `${pct}% — keep drawing`}
-        </p>
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--c-surface-container)' }}>
+            <div
+              className="h-full rounded-full transition-all duration-150"
+              style={{ width: `${pct}%`, background: 'var(--c-primary)' }}
+            />
+          </div>
+          <span className="text-sm font-bold w-9 text-right" style={{ color: 'var(--c-primary)' }}>{pct}%</span>
+        </div>
 
-        <Button variant="primary" icon="bolt" onClick={handleContinue} disabled={!isComplete}>
+        <Button
+          variant={isComplete ? 'primary' : 'secondary'}
+          icon="arrow_forward"
+          onClick={handleContinue}
+          disabled={!isComplete}
+        >
           Continue
         </Button>
       </div>

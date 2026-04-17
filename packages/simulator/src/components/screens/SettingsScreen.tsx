@@ -48,41 +48,38 @@ export default function SettingsScreen() {
   };
 
   return (
-    <div className="flex flex-col min-h-full pt-16 pb-8">
-      <TopBar title="Settings" onBack={() => go('Vault')} />
-      <div className="flex-1 px-6 pt-6 flex flex-col gap-6 overflow-y-auto">
-        <div className="space-y-3">
-          <SectionLabel>Appearance</SectionLabel>
-          <SegmentedControl<ThemeMode>
-            options={THEME_OPTIONS}
-            value={themeMode}
-            onChange={setThemeMode}
-          />
-        </div>
+    <div className="flex flex-col min-h-full" style={{ background: 'var(--c-background)' }}>
+      <div className="flex-1 px-5 pt-5 flex flex-col gap-3 overflow-y-auto pb-6">
+        <p className="font-headline font-bold text-[28px] mb-3" style={{ color: 'var(--c-on-surface)' }}>Settings</p>
 
-        <div className="space-y-3">
-          <SectionLabel>Language</SectionLabel>
-          <Dropdown<LocaleMode>
-            value={localeMode}
-            options={LOCALE_OPTIONS}
-            onChange={setLocaleMode}
-          />
-        </div>
+        <SectionLabel>Appearance</SectionLabel>
+        <SegmentedControl<ThemeMode>
+          options={THEME_OPTIONS}
+          value={themeMode}
+          onChange={setThemeMode}
+        />
 
-        <div>
-          <SectionLabel>Security</SectionLabel>
+        <SectionLabel>Language</SectionLabel>
+        <Dropdown<LocaleMode>
+          value={localeMode}
+          options={LOCALE_OPTIONS}
+          onChange={setLocaleMode}
+        />
+
+        <SectionLabel>Security</SectionLabel>
+        <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--c-surface-container)' }}>
           <Row label="Change PIN" onClick={() => go('SetPin')} />
           <Row label="Backup Seed Phrase" onClick={() => go('BackupSeed')} />
           <Row label="Auto-lock" value="5 min" last />
         </div>
 
-        <div>
-          <SectionLabel>Bluetooth</SectionLabel>
+        <SectionLabel>Bluetooth</SectionLabel>
+        <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--c-surface-container)' }}>
           <Row label="Device Name" value="Nano X" last />
         </div>
 
-        <div>
-          <SectionLabel>About</SectionLabel>
+        <SectionLabel>About</SectionLabel>
+        <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--c-surface-container)' }}>
           <Row label="Version" value="0.1.0" last />
         </div>
 
@@ -90,6 +87,7 @@ export default function SettingsScreen() {
         <Button variant="danger" icon="delete_forever" onClick={handleResetWallet}>
           Reset Wallet
         </Button>
+        <div style={{ height: 40 }} />
       </div>
     </div>
   );
