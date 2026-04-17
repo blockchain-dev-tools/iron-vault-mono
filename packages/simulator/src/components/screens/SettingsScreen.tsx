@@ -81,7 +81,7 @@ export default function SettingsScreen() {
 
         <SectionLabel>Bluetooth</SectionLabel>
         <div className="rounded-2xl overflow-hidden px-4" style={{ background: 'var(--c-surface-container)' }}>
-          <Row label="Device Name" value="Nano X" last />
+          <Row label="Device Name" value="IRON Vault" last />
         </div>
 
         <SectionLabel>About</SectionLabel>

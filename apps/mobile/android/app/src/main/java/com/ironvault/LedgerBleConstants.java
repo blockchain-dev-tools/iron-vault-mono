@@ -12,5 +12,5 @@ public class LedgerBleConstants {
     public static final byte TAG_MTU  = 0x08;
     public static final byte TAG_APDU = 0x05;
     public static final int  MTU_SIZE = 20;
-    public static final String DEVICE_NAME = "Nano X";
+    public static final String DEVICE_NAME = "IRON Vault";
 }

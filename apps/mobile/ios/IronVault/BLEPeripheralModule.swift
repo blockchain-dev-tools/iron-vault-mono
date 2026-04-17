@@ -104,10 +104,10 @@ class BLEPeripheralModule: RCTEventEmitter, CBPeripheralManagerDelegate {
 
   private func startAdvertising() {
     manager?.startAdvertising([
-      CBAdvertisementDataLocalNameKey: "Nano X",
+      CBAdvertisementDataLocalNameKey: "IRON Vault",
       CBAdvertisementDataServiceUUIDsKey: [kServiceUUID],
     ])
-    addLog("Advertising started as 'Nano X'")
+    addLog("Advertising started as 'IRON Vault'")
     emitStatus("advertising")
   }
 

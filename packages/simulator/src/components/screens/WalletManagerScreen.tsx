@@ -19,13 +19,13 @@ const CONNECT_STEPS: Record<'eth' | 'sol', string[]> = {
   eth: [
     'In OKX, tap 「Wallet」→「Add Wallet」',
     'Select 「Hardware Wallet」→「Ledger」',
-    'Find device "Nano X" and tap Connect',
+    'Find device "IRON Vault" and tap Connect',
     'Approve connection on this device',
   ],
   sol: [
     'In OKX, tap 「Wallet」→「Add Wallet」',
     'Select 「Hardware Wallet」→「Ledger」',
-    'Find device "Nano X" and tap Connect (Solana)',
+    'Find device "IRON Vault" and tap Connect (Solana)',
     'Approve connection on this device',
   ],
 };

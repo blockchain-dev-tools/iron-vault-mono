@@ -33,7 +33,7 @@ export default function AccountDetailScreen() {
     if (bleState === 'idle' || bleState === 'error') {
       setBleState('broadcasting');
       setLog([]);
-      addLog('sensors', 'BLE broadcast started "Nano X"');
+      addLog('sensors', 'BLE broadcast started "IRON Vault"');
       timer.current = setTimeout(() => {
         setBleState('connected');
         addLog('check_circle', 'Connected: OKX');
