@@ -6,6 +6,7 @@ import BottomNav from '../ui/BottomNav';
 import Button from '../ui/Button';
 import BleStatus from '../ui/BleStatus';
 import ChainIcon from '../ui/ChainIcon';
+import BottomSheet from '../ui/BottomSheet';
 
 interface AccountRow {
   full: string;
@@ -67,8 +68,8 @@ export default function WalletManagerScreen() {
   };
 
   return (
-    <div className="flex flex-col min-h-full pb-24 relative" style={{ background: 'var(--c-background)' }}>
-      <div className="flex-1 px-5 pt-5 space-y-6 overflow-y-auto">
+    <div className="flex flex-col h-full relative" style={{ background: 'var(--c-background)' }}>
+      <div className="flex-1 px-5 pt-5 pb-24 space-y-6 overflow-y-auto">
         <div className="flex items-start justify-between">
           <div>
             <h2 className="font-headline text-[28px] font-bold" style={{ color: 'var(--c-on-surface)' }}>Main Wallet</h2>
@@ -102,64 +103,40 @@ export default function WalletManagerScreen() {
 
       <BottomNav />
 
-      {connectSheet && (
-        <div
-          className="absolute inset-0 flex items-end z-50"
-          style={{ background: 'rgba(0,0,0,0.5)' }}
-          onClick={closeConnect}
-        >
-          <div
-            className="w-full rounded-t-2xl p-6 max-h-[80%] overflow-y-auto"
-            style={{ background: 'var(--c-surface)', borderTop: '1px solid var(--c-border-variant)' }}
-            onClick={e => e.stopPropagation()}
-          >
-            <h3 className="font-headline font-bold text-lg mb-4" style={{ color: 'var(--c-on-surface)' }}>
-              Connect OKX
-            </h3>
-            <BleStatus state={bleState} />
-            <div className="mt-4 space-y-3">
-              {CONNECT_STEPS[connectSheet].map((step, i) => (
-                <div key={i} className="flex gap-3 text-sm font-body">
-                  <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold font-label flex-shrink-0"
-                    style={{ background: 'var(--c-primary)', color: 'var(--c-on-primary)' }}
-                  >{i + 1}</div>
-                  <span style={{ color: 'var(--c-on-surface-variant)' }}>{step}</span>
-                </div>
-              ))}
+      <BottomSheet open={!!connectSheet} onClose={closeConnect}>
+        <h3 className="font-headline font-bold text-lg mb-4" style={{ color: 'var(--c-on-surface)' }}>
+          Connect OKX
+        </h3>
+        <BleStatus state={bleState} />
+        <div className="mt-4 space-y-3">
+          {connectSheet && CONNECT_STEPS[connectSheet].map((step, i) => (
+            <div key={i} className="flex gap-3 text-sm font-body">
+              <div
+                className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold font-label flex-shrink-0"
+                style={{ background: 'var(--c-primary)', color: 'var(--c-on-primary)' }}
+              >{i + 1}</div>
+              <span style={{ color: 'var(--c-on-surface-variant)' }}>{step}</span>
             </div>
-            <div className="h-4" />
-            <Button variant="outline-danger" onClick={closeConnect}>Stop / Close</Button>
-          </div>
+          ))}
         </div>
-      )}
+        <div className="h-4" />
+        <Button variant="outline-danger" onClick={closeConnect}>Stop / Close</Button>
+      </BottomSheet>
 
-      {addSheet && (
-        <div
-          className="absolute inset-0 flex items-end z-50"
-          style={{ background: 'rgba(0,0,0,0.5)' }}
-          onClick={() => setAddSheet(null)}
-        >
-          <div
-            className="w-full rounded-t-2xl p-6"
-            style={{ background: 'var(--c-surface)', borderTop: '1px solid var(--c-border-variant)' }}
-            onClick={e => e.stopPropagation()}
-          >
-            <h3 className="font-headline font-bold text-lg mb-2" style={{ color: 'var(--c-on-surface)' }}>
-              Add {addSheet === 'eth' ? 'Ethereum' : 'Solana'} Account
-            </h3>
-            <p className="text-xs font-body mb-6" style={{ color: 'var(--c-on-surface-variant)' }}>
-              Derives the next HD account from your master seed (index {addSheet === 'eth' ? ethAccounts.length : solAccounts.length}).
-            </p>
-            <div className="flex gap-3">
-              <Button variant="secondary" fullWidth={false} className="flex-1" onClick={() => setAddSheet(null)}>Cancel</Button>
-              <Button variant="primary" fullWidth={false} className="flex-[2]" onClick={() => handleAddAccount(addSheet!)} disabled={addingAccount}>
-                {addingAccount ? 'Adding…' : 'Add Account'}
-              </Button>
-            </div>
-          </div>
+      <BottomSheet open={!!addSheet} onClose={() => setAddSheet(null)}>
+        <h3 className="font-headline font-bold text-lg mb-2" style={{ color: 'var(--c-on-surface)' }}>
+          Add {addSheet === 'eth' ? 'Ethereum' : 'Solana'} Account
+        </h3>
+        <p className="text-xs font-body mb-6" style={{ color: 'var(--c-on-surface-variant)' }}>
+          Derives the next HD account from your master seed (index {addSheet === 'eth' ? ethAccounts.length : solAccounts.length}).
+        </p>
+        <div className="flex gap-3">
+          <Button variant="secondary" fullWidth={false} className="flex-1" onClick={() => setAddSheet(null)}>Cancel</Button>
+          <Button variant="primary" fullWidth={false} className="flex-[2]" onClick={() => handleAddAccount(addSheet!)} disabled={addingAccount}>
+            {addingAccount ? 'Adding…' : 'Add Account'}
+          </Button>
         </div>
-      )}
+      </BottomSheet>
     </div>
   );
 }

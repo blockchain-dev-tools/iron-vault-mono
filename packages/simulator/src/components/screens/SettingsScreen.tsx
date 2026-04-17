@@ -54,7 +54,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <div className="flex flex-col min-h-full relative" style={{ background: 'var(--c-background)' }}>
+    <div className="flex flex-col h-full relative" style={{ background: 'var(--c-background)' }}>
       <div className="flex-1 px-5 pt-5 flex flex-col gap-3 overflow-y-auto pb-24">
         <p className="font-headline font-bold text-[28px] mb-3" style={{ color: 'var(--c-on-surface)' }}>Settings</p>
 

@@ -7,7 +7,7 @@ import TopBar from '../ui/TopBar';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import SectionLabel from '../ui/SectionLabel';
-import BottomNav from '../ui/BottomNav';
+
 
 interface Log { time: string; icon: string; msg: string; }
 
@@ -87,7 +87,7 @@ export default function AccountDetailScreen() {
     bleState === 'idle'         ? 'Start Accepting Transactions' : 'Stop';
 
   return (
-    <div className="flex flex-col min-h-full relative" style={{ background: 'var(--c-background)' }}>
+    <div className="flex flex-col h-full relative" style={{ background: 'var(--c-background)' }}>
       <TopBar
         title={`${isEth ? 'Ethereum' : 'Solana'} #${idx + 1}`}
         onBack={goBack}
@@ -189,7 +189,6 @@ export default function AccountDetailScreen() {
           </div>
         )}
       </div>
-      <BottomNav />
     </div>
   );
 }
