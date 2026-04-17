@@ -99,7 +99,9 @@ export default function SettingsScreen() {
           <SettingRow label={t.settings.version} value={t.settings.versionValue} last />
         </View>
 
-        <Button variant="danger" onPress={handleReset}>{t.settings.resetWallet}</Button>
+        <View style={{ marginTop: 20 }}>
+          <Button variant="danger" onPress={handleReset}>{t.settings.resetWallet}</Button>
+        </View>
         <View style={{ height: 40 }} />
       </ScrollView>
     </View>
