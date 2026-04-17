@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import QRCode from 'qrcode';
 import { useNav } from '../../lib/nav';
 import { useApp } from '../../lib/app-context';
 import TopBar from '../ui/TopBar';
@@ -19,6 +20,7 @@ export default function P10() {
   const isEth = chain === 'eth';
   const [ble, setBle] = useState<BleState>('idle');
   const [log, setLog] = useState<Log[]>([]);
+  const [qrDataUrl, setQrDataUrl] = useState('');
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const addLog = (icon: string, msg: string) => {
@@ -48,6 +50,14 @@ export default function P10() {
   };
 
   useEffect(() => () => { timer.current && clearTimeout(timer.current); }, []);
+
+  useEffect(() => {
+    if (acct?.full) {
+      QRCode.toDataURL(acct.full, { margin: 1, color: { dark: '#000000', light: '#ffffff' }, width: 160 })
+        .then(setQrDataUrl)
+        .catch(() => {});
+    }
+  }, [acct?.full]);
 
   if (!acct) {
     return (
@@ -81,6 +91,13 @@ export default function P10() {
           <div className="bg-surface-container-low p-4 rounded-xl border border-outline/10">
             <code className="font-mono text-primary text-sm break-all leading-relaxed tracking-wider">{acct.full}</code>
           </div>
+          {qrDataUrl && (
+            <div className="flex justify-center py-5">
+              <div className="p-3 bg-white rounded-xl">
+                <img src={qrDataUrl} alt="QR Code" width={160} height={160} />
+              </div>
+            </div>
+          )}
           <div className="mt-3 pt-3 border-t border-outline/20">
             <span className="font-mono text-[10px] text-on-surface-variant">{acct.path}</span>
           </div>

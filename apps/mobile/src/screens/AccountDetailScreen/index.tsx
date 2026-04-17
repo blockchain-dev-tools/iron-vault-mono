@@ -100,12 +100,12 @@ export default function AccountDetailScreen() {
           </View>
           {hasAddress && (
             <View style={s.qrWrap}>
-              <View style={[s.qrInner, { backgroundColor: C.surfaceContainerLow }]}>
+              <View style={[s.qrInner, { backgroundColor: '#FFFFFF' }]}>
                 <QRCode
                   value={acct.full || acct.short}
                   size={160}
-                  backgroundColor={C.surfaceContainerLow}
-                  color={C.text}
+                  backgroundColor="#FFFFFF"
+                  color="#000000"
                 />
               </View>
             </View>
