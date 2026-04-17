@@ -73,7 +73,7 @@ export default function AccountDetailScreen() {
 
   const hasAddress = acct.full !== '—' && acct.full !== '';
   const btnVariant = bleState === 'idle' || bleState === 'error' ? 'primary' : 'danger';
-  const btnIcon = bleState === 'idle' || bleState === 'error' ? 'input' : 'stop_circle';
+  const btnIcon = bleState === 'idle' || bleState === 'error' ? 'bluetooth' : 'power_settings_new';
   const btnLabel =
     bleState === 'error' ? t.accountDetail.retryBle :
     bleState === 'idle'  ? t.accountDetail.startAccepting :
