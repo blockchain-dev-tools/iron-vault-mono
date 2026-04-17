@@ -1,11 +1,10 @@
-import React, { useMemo } from 'react';
-import { Alert, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { Alert, Animated, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { useApp, useTheme, useLocale } from '../../store/AppContext';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
 import TopBar from '../../components/ui/TopBar';
-import BleStatus from '../../components/ui/BleStatus';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import SectionLabel from '../../components/ui/SectionLabel';
@@ -25,6 +24,22 @@ export default function AccountDetailScreen() {
   const canDelete = accts.length > 1;
 
   const { logs, startBle, stopBle } = useBleSession(currentChain, acct);
+
+  const pulse = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (bleState === 'broadcasting') {
+      const anim = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulse, { toValue: 1.8, duration: 800, useNativeDriver: true }),
+          Animated.timing(pulse, { toValue: 1,   duration: 800, useNativeDriver: true }),
+        ]),
+      );
+      anim.start();
+      return () => { anim.stop(); pulse.setValue(1); };
+    } else {
+      pulse.setValue(1);
+    }
+  }, [bleState, pulse]);
 
   const handleRemoveAccount = () => {
     Alert.alert(
@@ -69,15 +84,7 @@ export default function AccountDetailScreen() {
       <TopBar
         title={`${isEth ? 'Ethereum' : 'Solana'} #${currentAcctIdx + 1}`}
         onBack={goBack}
-        right={<>
-          {bleState !== 'idle' && (
-            <View style={s.bleBadge}>
-              <Icon name="sensors" size={14} color={C.primary} />
-              <Text style={s.bleText}>
-                {bleState === 'connected' ? 'BLE Active' : 'BLE Scan'}
-              </Text>
-            </View>
-          )}
+        right={
           <TouchableOpacity
             onPress={handleRemoveAccount}
             disabled={!canDelete}
@@ -85,7 +92,7 @@ export default function AccountDetailScreen() {
             activeOpacity={0.7}>
             <Icon name="delete-outline" size={20} color={canDelete ? C.error : C.textDisabled} />
           </TouchableOpacity>
-        </>}
+        }
       />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <Card accent>
@@ -113,8 +120,6 @@ export default function AccountDetailScreen() {
           <Text style={s.addrPath}>{acct.path}</Text>
         </Card>
 
-        <BleStatus state={bleState} />
-
         {logs.length > 0 && (
           <View>
             <SectionLabel>{t.accountDetail.activity}</SectionLabel>
@@ -126,11 +131,39 @@ export default function AccountDetailScreen() {
       </ScrollView>
 
       <View style={s.btnWrap}>
+        {bleState === 'error' && (
+          <View style={s.errorTips}>
+            <Text style={s.errorTipsTitle}>{t.accountDetail.troubleshootingTitle}</Text>
+            {([
+              t.accountDetail.troubleshootTip1,
+              t.accountDetail.troubleshootTip2,
+              t.accountDetail.troubleshootTip3,
+              t.accountDetail.troubleshootTip4,
+            ] as string[]).map((tip, i) => (
+              <Text key={i} style={s.errorTipLine}>{tip}</Text>
+            ))}
+          </View>
+        )}
         <Button variant={btnVariant} icon={btnIcon} onPress={toggleBle}>
           {btnLabel}
         </Button>
         {bleState === 'idle' && (
           <Text style={s.hint}>{t.accountDetail.hint}</Text>
+        )}
+        {(bleState === 'broadcasting' || bleState === 'connected') && (
+          <View style={s.hintRow}>
+            <View style={s.dotWrap}>
+              {bleState === 'broadcasting' && (
+                <Animated.View style={[s.dotPulse, { transform: [{ scale: pulse }] }]} />
+              )}
+              <View style={[s.dot, bleState === 'connected' && s.dotConnected]} />
+            </View>
+            <Text style={s.hint}>
+              {bleState === 'broadcasting'
+                ? t.accountDetail.broadcasting
+                : t.accountDetail.connected}
+            </Text>
+          </View>
         )}
       </View>
     </View>
@@ -148,13 +181,19 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   qrWrap: { alignItems: 'center', paddingVertical: 20 },
   qrInner: { padding: 12, borderRadius: R.lg },
   addrPath: { color: C.text2, fontSize: 10, fontFamily: Fonts.spaceGrotesk.regular, marginTop: 4 },
-  hint: { color: C.text2, fontSize: 12, textAlign: 'center', lineHeight: 17, marginTop: 10 },
-  btnWrap: { paddingHorizontal: 24, paddingBottom: 16 },
-  deleteBtn: { padding: 8 },
-  bleBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    paddingHorizontal: 12, paddingVertical: 4,
-    backgroundColor: C.surfaceContainerLow, borderRadius: R.lg,
+  hint: { color: C.text2, fontSize: 12, textAlign: 'center', lineHeight: 17 },
+  hintRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  dotWrap: { width: 12, height: 12, alignItems: 'center', justifyContent: 'center' },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: C.primary },
+  dotConnected: { backgroundColor: '#4caf50' },
+  dotPulse: { position: 'absolute', width: 8, height: 8, borderRadius: 4, backgroundColor: C.primary, opacity: 0.4 },
+  btnWrap: { paddingHorizontal: 24, paddingBottom: 16, gap: 12 },
+  errorTips: {
+    padding: 16, borderRadius: R.xl,
+    backgroundColor: C.surfaceContainer,
+    borderWidth: 1, borderColor: C.borderVariant,
   },
-  bleText: { color: C.text2, fontSize: 10, letterSpacing: 1.2, textTransform: 'uppercase', fontFamily: Fonts.spaceGrotesk.regular },
+  errorTipsTitle: { color: C.text, fontSize: 12, fontFamily: Fonts.spaceGrotesk.bold, marginBottom: 8, letterSpacing: 0.5 },
+  errorTipLine: { color: C.text2, fontSize: 12, lineHeight: 20 },
+  deleteBtn: { padding: 8 },
 });
