@@ -8,7 +8,6 @@ import Button from '../ui/Button';
 import Card from '../ui/Card';
 import SectionLabel from '../ui/SectionLabel';
 
-
 interface Log { time: string; icon: string; msg: string; }
 
 export default function AccountDetailScreen() {

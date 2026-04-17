@@ -44,7 +44,7 @@ const SCREENS = {
 } as const;
 
 // Screens that show the persistent bottom navigation bar
-const BOTTOM_NAV_SCREENS = new Set(['Vault', 'Settings', 'AccountDetail']);
+const BOTTOM_NAV_SCREENS = new Set(['Vault', 'Settings']);
 
 const EDGE_WIDTH = 40;
 const SWIPE_VELOCITY_THRESHOLD = 0.5;
