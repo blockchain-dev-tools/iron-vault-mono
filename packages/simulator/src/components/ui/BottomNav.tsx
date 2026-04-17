@@ -10,7 +10,7 @@ interface NavItem {
 
 const ITEMS: NavItem[] = [
   { icon: 'account_balance_wallet', label: 'Wallets',  screen: 'Vault' },
-  { icon: 'history',                label: 'History',  screen: 'Vault', disabled: true },
+  { icon: 'settings',               label: 'Settings', screen: 'Settings' },
 ];
 
 export default function BottomNav() {

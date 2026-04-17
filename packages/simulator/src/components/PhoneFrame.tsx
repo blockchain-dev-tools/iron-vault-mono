@@ -13,7 +13,7 @@ export default function PhoneFrame({ children, style, className }: PhoneFramePro
   return (
     <div
       className={`h-full relative overflow-hidden ${appLight ? 'light-theme' : ''} ${className ?? ''}`}
-      style={{ transform: 'translateZ(0)', ...style }}
+      style={style}
     >
       {children}
     </div>

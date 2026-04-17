@@ -47,16 +47,16 @@ function SolIcon() {
   );
 }
 
-export default function P06() {
+export default function WalletManagerScreen() {
   const { go } = useNav();
-  const { setCurrentAcct, accounts } = useApp();
+  const { setCurrentAccount, accounts } = useApp();
   const [sheet, setSheet] = useState<null | 'eth' | 'sol'>(null);
 
-  const ethAccounts = accounts?.eth ?? [];
-  const solAccounts = accounts?.sol ?? [];
+  const ethAccounts = accounts.eth ?? [];
+  const solAccounts = accounts.sol ?? [];
 
   const openAcct = (chain: 'eth' | 'sol', idx: number) => {
-    setCurrentAcct({ chain, idx });
+    setCurrentAccount(chain, idx);
     go('AccountDetail');
   };
 

@@ -12,11 +12,12 @@ import SectionLabel from '../ui/SectionLabel';
 
 interface Log { time: string; icon: string; msg: string; }
 
-export default function P10() {
+export default function AccountDetailScreen() {
   const { goBack, go } = useNav();
-  const { currentAcct, accounts } = useApp();
-  const { chain, idx } = currentAcct;
-  const acct = accounts?.[chain]?.[idx];
+  const { currentChain, currentAcctIdx, accounts } = useApp();
+  const chain = currentChain;
+  const idx = currentAcctIdx;
+  const acct = accounts[chain]?.[idx];
   const isEth = chain === 'eth';
   const [ble, setBle] = useState<BleState>('idle');
   const [log, setLog] = useState<Log[]>([]);

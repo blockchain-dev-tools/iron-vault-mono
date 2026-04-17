@@ -9,10 +9,10 @@ function shuffle<T>(arr: T[]): T[] { return [...arr].sort(() => Math.random() - 
 
 const VERIFY_POSITIONS = [2, 6, 10];
 
-export default function P03() {
+export default function VerifyMnemonicScreen() {
   const { go } = useNav();
-  const { generatedMnemonic } = useApp();
-  const words = generatedMnemonic ?? [];
+  const { generatedWords } = useApp();
+  const words = generatedWords;
   const [answers, setAnswers] = useState<Record<number, string>>({});
 
   const groups = useMemo(() =>

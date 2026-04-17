@@ -7,9 +7,10 @@ import TopBar from '../ui/TopBar';
 import PinPad from '../ui/PinPad';
 import SectionLabel from '../ui/SectionLabel';
 
-export default function P04() {
-  const { go } = useNav();
-  const { generatedMnemonic, setAccounts, setGeneratedMnemonic, storage } = useApp();
+export default function SetPinScreen() {
+  const { reset: navReset, goBack } = useNav();
+  const { generatedWords, setAccounts, setGeneratedWords, storage, passphrase, mnemonicLang } = useApp();
+  const isChangingPin = generatedWords.length === 0;
   const [phase, setPhase] = useState<1 | 2>(1);
   const [error, setError] = useState(false);
   const firstPin = useRef('');
@@ -17,25 +18,26 @@ export default function P04() {
   const label = error
     ? 'Mismatch — try again'
     : phase === 1
-    ? 'Set a 6-digit PIN'
+    ? isChangingPin ? 'Enter new 6-digit PIN' : 'Set a 6-digit PIN'
     : 'Confirm your PIN';
 
-  const handleComplete = async (pin: string, reset: () => void) => {
+  const handleComplete = async (pin: string, resetPad: () => void) => {
     if (phase === 1) {
       firstPin.current = pin;
       setPhase(2);
       setError(false);
-      reset();
+      resetPad();
     } else {
       if (pin === firstPin.current) {
-        const mnemonic = (generatedMnemonic ?? []).join(' ');
-        const result = await setupWallet(storage, mnemonic, pin);
+        const sep = mnemonicLang === 'ja' ? '\u3000' : ' ';
+        const mnemonic = generatedWords.join(sep);
+        const result = await setupWallet(storage, mnemonic, pin, passphrase || undefined);
         setAccounts(result);
-        setGeneratedMnemonic(null);
-        go('Vault');
+        setGeneratedWords([]);
+        navReset('Vault');
       } else {
         setError(true);
-        reset();
+        resetPad();
         setTimeout(() => {
           setPhase(1);
           firstPin.current = '';
@@ -47,7 +49,7 @@ export default function P04() {
 
   return (
     <div className="flex flex-col min-h-full pt-16 pb-8">
-      <TopBar title="Set PIN" />
+      <TopBar title={isChangingPin ? 'Change PIN' : 'Set PIN'} onBack={goBack} />
       <div className="flex-1 flex flex-col items-center justify-center px-6">
         <SectionLabel error={error}>{label}</SectionLabel>
         <PinPad onComplete={handleComplete} error={error} />

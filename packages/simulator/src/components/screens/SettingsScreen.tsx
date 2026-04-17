@@ -1,5 +1,7 @@
 'use client';
 import { useNav } from '../../lib/nav';
+import { useApp } from '../../lib/app-context';
+import { clearWallet } from '@iron-vault/wallet';
 import TopBar from '../ui/TopBar';
 import Button from '../ui/Button';
 import SectionLabel from '../ui/SectionLabel';
@@ -15,8 +17,26 @@ function Row({ label, value, onClick }: RowProps) {
   );
 }
 
-export default function P08() {
-  const { go } = useNav();
+const LOCALE_OPTS = [
+  { id: 'system', label: 'Auto' },
+  { id: 'en', label: 'EN' },
+  { id: 'zh', label: '中文' },
+  { id: 'ja', label: '日本語' },
+  { id: 'ko', label: '한국어' },
+];
+
+export default function SettingsScreen() {
+  const { go, reset: navReset } = useNav();
+  const { storage, setAccounts, setGeneratedWords, localeMode, setLocaleMode } = useApp();
+
+  const handleResetWallet = async () => {
+    if (!confirm('Reset wallet? All data will be permanently deleted.')) return;
+    await clearWallet(storage);
+    setAccounts({ eth: [], sol: [] });
+    setGeneratedWords([]);
+    navReset('Welcome');
+  };
+
   return (
     <div className="flex flex-col min-h-full pt-16 pb-8">
       <TopBar title="Settings" onBack={() => go('Vault')} />
@@ -27,11 +47,30 @@ export default function P08() {
             <span className="font-body text-sm text-on-surface">Theme</span>
             <ThemeToggle showLabel />
           </div>
+          <div className="py-4 border-b border-outline/20">
+            <span className="font-body text-sm text-on-surface block mb-2">Language</span>
+            <div className="flex gap-2 flex-wrap">
+              {LOCALE_OPTS.map(({ id, label }) => (
+                <button
+                  key={id}
+                  onClick={() => setLocaleMode(id)}
+                  className="px-3 py-1 rounded-lg text-xs font-bold border transition-all"
+                  style={{
+                    borderColor: localeMode === id ? 'var(--c-primary)' : 'var(--c-outline-variant)',
+                    color: localeMode === id ? 'var(--c-primary)' : 'var(--c-on-surface-variant)',
+                    background: localeMode === id ? 'var(--c-primary-container)' : 'transparent',
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
         <div>
           <SectionLabel>Security</SectionLabel>
-          <Row label="Change PIN" onClick={() => {}} />
-          <Row label="Backup Seed Phrase" onClick={() => go('GenerateMnemonic')} />
+          <Row label="Change PIN" onClick={() => go('SetPin')} />
+          <Row label="Backup Seed Phrase" onClick={() => go('BackupSeed')} />
           <Row label="Auto-lock" value="5 min" />
         </div>
         <div>
@@ -41,10 +80,9 @@ export default function P08() {
         <div>
           <SectionLabel>About</SectionLabel>
           <Row label="Version" value="0.1.0" />
-          <Row label="Check for Updates" onClick={() => {}} />
         </div>
         <div className="flex-1" />
-        <Button variant="danger" icon="delete_forever" onClick={() => go('Welcome')}>
+        <Button variant="danger" icon="delete_forever" onClick={handleResetWallet}>
           Reset Wallet
         </Button>
       </div>

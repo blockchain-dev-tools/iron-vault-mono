@@ -9,22 +9,22 @@ import ShieldLogo from '../ui/ShieldLogo';
 const MAX_ATTEMPTS = 5;
 
 export default function PinUnlockScreen() {
-  const { go } = useNav();
+  const { reset: navReset } = useNav();
   const { setAccounts, storage } = useApp();
   const [failCount, setFailCount] = useState(0);
   const [error, setError] = useState(false);
   const locked = failCount >= MAX_ATTEMPTS;
 
-  const handleComplete = async (pin: string, reset: () => void) => {
+  const handleComplete = async (pin: string, resetPad: () => void) => {
     if (locked) return;
     const result = await unlockWallet(storage, pin);
     if (result) {
       setAccounts(result);
-      go('Vault');
+      navReset('Vault');
     } else {
       setError(true);
       setFailCount(c => c + 1);
-      reset();
+      resetPad();
       setTimeout(() => setError(false), 700);
     }
   };
@@ -33,7 +33,7 @@ export default function PinUnlockScreen() {
     if (!confirm('Reset wallet? All data will be deleted.')) return;
     await clearWallet(storage);
     setAccounts({ eth: [], sol: [] });
-    go('Welcome');
+    navReset('Welcome');
   };
 
   return (

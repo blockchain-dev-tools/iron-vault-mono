@@ -6,8 +6,8 @@ import { EN, ZH, type LocaleMode } from '@iron-vault/i18n';
 import Button from '../ui/Button';
 import ShieldLogo from '../ui/ShieldLogo';
 
-const LOCALE_CYCLE: LocaleMode[] = ['en', 'zh', 'system'];
-const LOCALE_LABEL: Record<LocaleMode, string> = { en: 'EN', zh: '中文', system: 'Auto' };
+const LOCALE_CYCLE: LocaleMode[] = ['en', 'zh', 'ja', 'ko', 'system'];
+const LOCALE_LABEL: Record<LocaleMode, string> = { en: 'EN', zh: '中文', ja: '日本語', ko: '한국어', system: 'Auto' };
 
 export default function P01() {
   const { go } = useNav();
@@ -84,7 +84,7 @@ export default function P01() {
 
       {/* Actions */}
       <div className="w-full space-y-3 mb-4 z-10">
-        <Button variant="primary" icon="arrow_forward" onClick={() => go('GenerateMnemonic')}>
+        <Button variant="primary" icon="arrow_forward" onClick={() => go('Entropy')}>
           {t.welcome.createWallet}
         </Button>
         <Button variant="secondary" icon="file_upload" onClick={() => go('ImportMnemonic')}>
