@@ -69,17 +69,15 @@ export default function WelcomeScreen() {
         </div>
 
         {/* Title block */}
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 52, fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 0.85, color: 'var(--c-on-surface)', margin: 0 }}>
-            IRON
-          </h1>
-          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 52, fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 0.85, color: 'var(--c-primary)', marginBottom: 20 }}>
-            VAULT
+            IRON<br />
+            <span style={{ color: 'var(--c-primary)' }}>VAULT</span>
           </h1>
         </div>
 
         {/* Subtitle */}
-        <p className="text-center" style={{ color: 'var(--c-on-surface-variant)', fontSize: 15, maxWidth: 240, lineHeight: 1.6, marginTop: 20 }}>
+        <p className="text-center" style={{ color: 'var(--c-on-surface-variant)', fontSize: 15, maxWidth: 240, lineHeight: 1.6, marginTop: 24 }}>
           {t.welcome.sub}
         </p>
       </div>

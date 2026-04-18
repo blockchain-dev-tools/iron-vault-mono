@@ -20,11 +20,12 @@ export default function SegmentedControl<T extends string>({
           <button
             key={opt.value}
             onClick={() => onChange(opt.value)}
-            className={`flex-1 py-3.5 rounded-xl border-[1.5px] font-headline font-bold text-sm transition-all active:scale-[0.98]
+            className={`flex-1 py-3 rounded-xl border-[1.5px] font-headline font-bold text-sm transition-all active:scale-[0.98]
               ${active
-                ? 'border-primary bg-primary/10 text-primary'
-                : 'border-transparent bg-surface-container text-on-surface hover:border-primary/40'
+                ? 'border-primary text-primary'
+                : 'border-transparent bg-surface-container text-on-surface hover:border-outline-variant'
               }`}
+            style={active ? { background: 'var(--c-primary-container)' } : undefined}
           >
             {opt.label}
           </button>

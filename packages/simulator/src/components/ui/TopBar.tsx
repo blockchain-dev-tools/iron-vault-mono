@@ -16,7 +16,7 @@ export default function TopBar({ title, onBack, hideBack, right, bleState }: Top
   const handleBack = onBack ?? goBack;
 
   return (
-    <header className="flex justify-between items-center px-6 h-16 w-full fixed z-50 bg-background/90 backdrop-blur-md border-b border-outline/30" style={{ top: 0 }}>
+    <header className="flex-shrink-0 flex justify-between items-center px-6 h-16 w-full z-10 border-b" style={{ background: 'var(--c-background)', borderColor: 'var(--c-outline-variant)' }}>
       <div className="flex items-center gap-4">
         {!hideBack && (
           <button onClick={handleBack} className="text-primary active:scale-95 transition-transform">

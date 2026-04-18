@@ -103,8 +103,8 @@ export default function AccountDetailScreen() {
         }
       />
 
-      <div className="flex-1 px-6 pt-6 space-y-4 overflow-y-auto pb-24">
-        <Card accent>
+      <div className="flex-1 px-6 pt-6 space-y-4 overflow-y-auto pb-8">
+        <Card>
           <div className="flex justify-between items-center mb-3">
             <SectionLabel>Public Address</SectionLabel>
             <button
@@ -115,7 +115,7 @@ export default function AccountDetailScreen() {
               <span className="material-symbols-outlined text-base leading-none">content_copy</span>
             </button>
           </div>
-          <div className="p-3 rounded-xl border" style={{ background: 'var(--c-surface-container-low)', borderColor: 'var(--c-border-variant)' }}>
+          <div className="p-3 rounded-xl border" style={{ background: 'var(--c-surface-container-low)', borderColor: 'var(--c-outline-variant)' }}>
             <code className="font-mono text-sm break-all leading-relaxed" style={{ color: 'var(--c-primary)' }}>{acct.full || acct.short}</code>
           </div>
           {qrDataUrl && (
@@ -149,9 +149,9 @@ export default function AccountDetailScreen() {
 
       </div>
 
-      <div className="px-6 pb-6 pt-4 flex flex-col gap-3" style={{ borderTop: '1px solid var(--c-border-variant)', background: 'var(--c-background)' }}>
+      <div className="px-6 pb-6 pt-4 flex flex-col gap-3" style={{ borderTop: '1px solid var(--c-outline-variant)', background: 'var(--c-background)' }}>
         {bleState === 'error' && (
-          <div className="rounded-xl p-4 border" style={{ background: 'var(--c-surface-container)', borderColor: 'var(--c-border-variant)' }}>
+          <div className="rounded-xl p-4 border" style={{ background: 'var(--c-surface-container)', borderColor: 'var(--c-outline-variant)' }}>
             <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color: 'var(--c-on-surface)' }}>Troubleshooting</p>
             {[
               'Ensure Bluetooth is enabled on this device',
@@ -179,7 +179,7 @@ export default function AccountDetailScreen() {
               )}
               <div
                 className="w-2 h-2 rounded-full"
-                style={{ background: bleState === 'connected' ? '#4caf50' : 'var(--c-primary)' }}
+                style={{ background: 'var(--c-primary)' }}
               />
             </div>
             <p className="text-xs font-body" style={{ color: 'var(--c-on-surface-variant)' }}>

@@ -20,7 +20,7 @@ function Row({ label, value, onClick, last }: RowProps) {
       <span className="font-body text-sm" style={{ color: 'var(--c-on-surface)' }}>{label}</span>
       {(value !== undefined || onClick) && (
         <span className="font-body text-sm" style={{ color: 'var(--c-on-surface-variant)' }}>
-          {value ?? '›'}
+          {value ?? <span className="material-symbols-outlined text-base leading-none">chevron_right</span>}
         </span>
       )}
     </div>
@@ -55,7 +55,7 @@ export default function SettingsScreen() {
 
   return (
     <div className="flex flex-col h-full relative" style={{ background: 'var(--c-background)' }}>
-      <div className="flex-1 px-5 pt-5 flex flex-col gap-3 overflow-y-auto pb-24">
+      <div className="flex-1 px-4 pt-4 flex flex-col gap-3 overflow-y-auto pb-24">
         <p className="font-headline font-bold text-[28px] mb-3" style={{ color: 'var(--c-on-surface)' }}>Settings</p>
 
         <SectionLabel>Appearance</SectionLabel>
@@ -73,19 +73,19 @@ export default function SettingsScreen() {
         />
 
         <SectionLabel>Security</SectionLabel>
-        <div className="rounded-2xl overflow-hidden px-4" style={{ background: 'var(--c-surface-container)' }}>
+        <div className="rounded-xl overflow-hidden px-4" style={{ background: 'var(--c-surface-container)' }}>
           <Row label="Change PIN" onClick={() => go('SetPin')} />
           <Row label="Backup Seed Phrase" onClick={() => go('BackupSeed')} />
           <Row label="Auto-lock" value="5 min" last />
         </div>
 
         <SectionLabel>Bluetooth</SectionLabel>
-        <div className="rounded-2xl overflow-hidden px-4" style={{ background: 'var(--c-surface-container)' }}>
+        <div className="rounded-xl overflow-hidden px-4" style={{ background: 'var(--c-surface-container)' }}>
           <Row label="Device Name" value="IRON Vault" last />
         </div>
 
         <SectionLabel>About</SectionLabel>
-        <div className="rounded-2xl overflow-hidden px-4" style={{ background: 'var(--c-surface-container)' }}>
+        <div className="rounded-xl overflow-hidden px-4" style={{ background: 'var(--c-surface-container)' }}>
           <Row label="Version" value="0.1.0" last />
         </div>
 

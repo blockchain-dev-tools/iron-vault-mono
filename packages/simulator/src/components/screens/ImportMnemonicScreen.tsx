@@ -33,9 +33,9 @@ export default function ImportMnemonicScreen() {
   };
 
   return (
-    <div className="relative flex flex-col min-h-full pt-16 pb-8">
+    <div className="flex flex-col h-full">
       <TopBar title="Import Wallet" onBack={goBack} />
-      <div className="flex-1 px-6 pt-6 flex flex-col gap-4">
+      <div className="flex-1 overflow-y-auto px-6 pt-6 pb-8 flex flex-col gap-4">
         <p className="text-sm font-body" style={{ color: 'var(--c-on-surface-variant)' }}>
           Enter your 12-word BIP-39 seed phrase, separated by spaces.
         </p>

@@ -22,9 +22,9 @@ export default function GenerateMnemonicScreen() {
   };
 
   return (
-    <div className="relative flex flex-col min-h-full pt-16 pb-8">
+    <div className="flex flex-col h-full">
       <TopBar title="Your Seed Phrase" onBack={goBack} />
-      <div className="flex-1 px-6 pt-4 flex flex-col gap-4">
+      <div className="flex-1 overflow-y-auto px-6 pt-4 pb-8 flex flex-col gap-4">
         <AlertBanner icon={<span className="material-symbols-outlined flex-shrink-0" style={{ color: 'var(--c-error)' }}>warning</span>}>
           <p className="text-xs leading-relaxed font-body" style={{ color: 'var(--c-on-surface-variant)' }}>
             <span className="font-bold" style={{ color: 'var(--c-on-surface)' }}>Write these 12 words on paper.</span>{' '}

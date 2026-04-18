@@ -2,6 +2,7 @@
 :root {
   --c-primary:               #8FC322;
   --c-on-primary:            #1d2900;
+  --c-primary-container:     #1c2a00;
   --c-background:            #000000;
   --c-surface:               #1A1A1A;
   --c-surface-container:     #1A1919;
@@ -19,6 +20,7 @@
 .light-theme {
   --c-primary:               #5f8a0e;
   --c-on-primary:            #FFFFFF;
+  --c-primary-container:     #d4e8a0;
   --c-background:            #ffffff;
   --c-surface:               #FAFDF2;
   --c-surface-container:     #E9EED8;
@@ -59,15 +61,6 @@
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--c-outline); border-radius: 2px; }
 
-.neon-glow { text-shadow: 0 0 8px rgba(143,195,34,0.4); }
-.accent-bar { position: relative; }
-.accent-bar::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 2px;
-  background: var(--c-primary);
-}
 
 .light-theme .shadow-primary,
 .light-theme .shadow-primary-sm,

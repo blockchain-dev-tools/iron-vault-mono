@@ -54,7 +54,7 @@ export default function LangPicker({ value, onChange }: Props) {
                 onClick={() => { onChange(l.id); setOpen(false); }}
                 className="w-full flex items-center justify-between py-3 border-b text-sm font-body"
                 style={{
-                  borderColor: 'var(--c-border-variant)',
+                  borderColor: 'var(--c-outline-variant)',
                   color: l.id === value ? 'var(--c-primary)' : 'var(--c-on-surface)',
                 }}
               >

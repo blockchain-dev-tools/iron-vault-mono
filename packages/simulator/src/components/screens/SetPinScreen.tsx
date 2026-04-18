@@ -52,7 +52,7 @@ export default function SetPinScreen() {
   };
 
   return (
-    <div className="flex flex-col min-h-full pt-16 pb-8">
+    <div className="flex flex-col h-full">
       <TopBar title={isChangingPin ? 'Change PIN' : 'Set PIN'} onBack={goBack} />
       <div className="flex-1 flex flex-col items-center justify-center px-6">
         <p

@@ -30,7 +30,7 @@ export default function Dropdown<T extends string>({
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(v => !v)}
-        className="w-full flex justify-between items-center px-4 py-3.5 bg-surface-container rounded-xl border-[1.5px] border-outline-variant hover:border-primary/40 transition-colors"
+        className="w-full flex justify-between items-center px-4 py-3 bg-surface-container rounded-xl border-[1.5px] border-outline-variant hover:border-primary transition-colors"
       >
         <span className="font-body text-on-surface text-sm">{selected?.label ?? ''}</span>
         <span className={`material-symbols-outlined text-on-surface-variant text-lg transition-transform ${open ? 'rotate-90' : ''}`}>chevron_right</span>
@@ -45,9 +45,10 @@ export default function Dropdown<T extends string>({
                 key={opt.value}
                 onClick={() => { onChange(opt.value); setOpen(false); }}
                 className={`w-full flex justify-between items-center px-5 py-4 text-left transition-colors
-                  ${i < options.length - 1 ? 'border-b border-outline-variant/60' : ''}
-                  ${active ? 'text-primary bg-primary/5' : 'text-on-surface hover:bg-surface-container'}
+                  ${i < options.length - 1 ? 'border-b border-outline-variant' : ''}
+                  ${active ? 'text-primary' : 'text-on-surface hover:bg-surface-container'}
                 `}
+                style={active ? { background: 'var(--c-primary-container)' } : undefined}
               >
                 <span className={`font-body text-base ${active ? 'font-bold' : ''}`}>{opt.label}</span>
                 {active && <span className="material-symbols-outlined text-primary text-lg">check</span>}

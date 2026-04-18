@@ -44,9 +44,9 @@ export default function VerifyMnemonicScreen() {
   };
 
   return (
-    <div className="flex flex-col min-h-full pt-16 pb-8">
+    <div className="flex flex-col h-full">
       <TopBar title="Verify Phrase" onBack={() => go('GenerateMnemonic')} />
-      <div className="flex-1 px-6 pt-6 space-y-6">
+      <div className="flex-1 overflow-y-auto px-6 pt-6 pb-8 space-y-6">
         {wrongError && (
           <div
             className="rounded-xl p-3 border flex items-center justify-center"
@@ -72,8 +72,8 @@ export default function VerifyMnemonicScreen() {
                     onClick={() => !picked && pick(pos, o)}
                     className="rounded-xl px-4 font-headline font-medium text-sm border transition-all active:scale-95"
                     style={{
-                      paddingTop: 14,
-                      paddingBottom: 14,
+                      paddingTop: 12,
+                      paddingBottom: 12,
                       borderColor: isCorrect ? 'var(--c-primary)' : isWrong ? 'var(--c-error)' : 'var(--c-outline)',
                       background: isCorrect ? 'var(--c-primary-container)' : isWrong ? 'var(--c-error-container)' : 'var(--c-surface-container)',
                       color: isCorrect ? 'var(--c-primary)' : isWrong ? 'var(--c-error)' : 'var(--c-on-surface)',

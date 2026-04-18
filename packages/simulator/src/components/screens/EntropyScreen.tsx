@@ -79,7 +79,7 @@ export default function EntropyScreen() {
           onPointerUp={onPointerUp}
           className="flex-1 rounded-2xl border select-none touch-none cursor-crosshair relative overflow-hidden"
           style={{
-            borderColor: isComplete ? 'var(--c-primary)' : 'var(--c-border-variant)',
+            borderColor: isComplete ? 'var(--c-primary)' : 'var(--c-outline-variant)',
             background: 'var(--c-surface)',
             minHeight: 160,
           }}
@@ -105,7 +105,7 @@ export default function EntropyScreen() {
           )}
           {isComplete && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none"
-              style={{ background: 'var(--c-surface)cc' }}>
+              style={{ background: 'var(--c-surface)', opacity: 0.9 }}>
               <span className="material-symbols-outlined text-5xl" style={{ color: 'var(--c-primary)' }}>check_circle</span>
             </div>
           )}

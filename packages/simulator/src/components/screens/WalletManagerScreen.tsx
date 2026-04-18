@@ -69,7 +69,7 @@ export default function WalletManagerScreen() {
 
   return (
     <div className="flex flex-col h-full relative" style={{ background: 'var(--c-background)' }}>
-      <div className="flex-1 px-5 pt-5 pb-24 space-y-6 overflow-y-auto">
+      <div className="flex-1 px-4 pt-4 pb-24 space-y-6 overflow-y-auto">
         <div className="flex items-start justify-between">
           <div>
             <h2 className="font-headline text-[28px] font-bold" style={{ color: 'var(--c-on-surface)' }}>Main Wallet</h2>
@@ -187,7 +187,7 @@ function ChainSection({ name, sub, chain, accounts, onConnect, onAddAccount, onA
       ))}
       <button
         onClick={onAddAccount}
-        className="w-full py-3.5 rounded-xl border flex items-center justify-center gap-2 text-sm font-label font-medium uppercase tracking-wider transition-all"
+        className="w-full py-3 rounded-xl border flex items-center justify-center gap-2 text-sm font-label font-medium uppercase tracking-wider transition-all"
         style={{ borderColor: 'var(--c-outline)', color: 'var(--c-on-surface-variant)', background: 'transparent' }}
       >
         + Add {name} Account

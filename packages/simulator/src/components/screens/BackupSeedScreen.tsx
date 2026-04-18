@@ -54,9 +54,9 @@ export default function BackupSeedScreen() {
   };
 
   return (
-    <div className="relative flex flex-col min-h-full pt-16 pb-8">
+    <div className="flex flex-col h-full">
       <TopBar title="Backup Seed Phrase" onBack={goBack} />
-      <div className="flex-1 px-6 pt-6 flex flex-col gap-4">
+      <div className="flex-1 overflow-y-auto px-6 pt-6 pb-8 flex flex-col gap-4">
         <AlertBanner icon={<span className="material-symbols-outlined flex-shrink-0" style={{ color: 'var(--c-error)' }}>warning</span>}>
           <p className="text-xs leading-relaxed font-body" style={{ color: 'var(--c-on-surface-variant)' }}>
             <span className="font-bold" style={{ color: 'var(--c-on-surface)' }}>Never share your seed phrase.</span>{' '}

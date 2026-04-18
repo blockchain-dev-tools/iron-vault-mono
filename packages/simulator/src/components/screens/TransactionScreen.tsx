@@ -44,32 +44,36 @@ export default function TransactionScreen() {
   const handleReturn = () => { setDone(false); setRawOpen(false); goBack(); };
 
   if (done) return (
-    <div className="flex flex-col min-h-full items-center justify-center px-6 text-center relative overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/10 blur-[120px] rounded-full" />
+    <div className="flex flex-col h-full items-center justify-center px-6 text-center"
+         style={{ background: 'var(--c-background)' }}>
+      <div
+        className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
+        style={{ background: 'var(--c-surface-container)', border: '2px solid var(--c-primary)' }}
+      >
+        <span className="material-symbols-outlined text-4xl" style={{ color: 'var(--c-primary)' }}>check_circle</span>
       </div>
-      <div className="w-20 h-20 rounded-full bg-primary/15 border-2 border-primary flex items-center justify-center mb-6 shadow-primary">
-        <span className="material-symbols-outlined text-primary text-4xl">check_circle</span>
-      </div>
-      <h2 className="font-headline font-bold text-3xl tracking-tighter mb-2">Signed</h2>
-      <p className="text-on-surface-variant font-body mb-8">Transaction sent back to OKX.</p>
+      <h2 className="font-headline font-bold text-3xl tracking-tighter mb-2" style={{ color: 'var(--c-on-surface)' }}>Signed</h2>
+      <p className="font-body mb-8" style={{ color: 'var(--c-on-surface-variant)' }}>Transaction sent back to OKX.</p>
       <Button variant="primary" onClick={handleReturn} icon="arrow_back">Return</Button>
     </div>
   );
 
   return (
-    <div className="flex flex-col min-h-full pt-16 pb-32">
+    <div className="flex flex-col h-full" style={{ background: 'var(--c-background)' }}>
       <TopBar title="Sign Request" hideBack />
-      <div className="flex-1 px-6 pt-6 space-y-4 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto px-6 pt-6 pb-4 space-y-4">
         <div className="flex flex-col items-center text-center mb-2">
-          <div className="w-14 h-14 bg-surface-container-high rounded-xl mb-3 flex items-center justify-center border border-outline/20 shadow-primary-sm">
-            <span className="material-symbols-outlined text-primary text-3xl filled" style={{ fontVariationSettings: "'FILL' 1" }}>shield_with_heart</span>
+          <div
+            className="w-14 h-14 rounded-xl mb-3 flex items-center justify-center"
+            style={{ background: 'var(--c-surface-container-high)', border: '1px solid var(--c-outline-variant)' }}
+          >
+            <span className="material-symbols-outlined text-3xl" style={{ color: 'var(--c-primary)', fontVariationSettings: "'FILL' 1" }}>shield_with_heart</span>
           </div>
           <SectionLabel>Origin</SectionLabel>
-          <h2 className="font-headline font-bold text-xl">From OKX Wallet</h2>
+          <h2 className="font-headline font-bold text-xl" style={{ color: 'var(--c-on-surface)' }}>From OKX Wallet</h2>
         </div>
 
-        <Card accent>
+        <Card>
           {[
             ['Network', network],
             ['Action', type],
@@ -78,9 +82,13 @@ export default function TransactionScreen() {
             ['Amount', amount],
             ['Gas', gas],
           ].map(([label, value]) => (
-            <div key={label} className="flex justify-between items-start py-3 border-b border-outline/20 last:border-none">
-              <span className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">{label}</span>
-              <span className={`font-headline font-medium text-right max-w-[55%] ${label === 'Amount' ? 'text-primary text-base' : 'text-sm'}`}>{value}</span>
+            <div key={label} className="flex justify-between items-start py-3 last:border-none"
+                 style={{ borderBottom: '1px solid var(--c-outline-variant)' }}>
+              <span className="font-label text-[10px] uppercase tracking-widest" style={{ color: 'var(--c-on-surface-variant)' }}>{label}</span>
+              <span
+                className="font-headline font-medium text-right max-w-[55%]"
+                style={{ color: label === 'Amount' ? 'var(--c-primary)' : 'var(--c-on-surface)', fontSize: label === 'Amount' ? '1rem' : '0.875rem' }}
+              >{value}</span>
             </div>
           ))}
         </Card>
@@ -88,33 +96,35 @@ export default function TransactionScreen() {
         <div>
           <button
             onClick={() => setRawOpen(r => !r)}
-            className="w-full flex items-center justify-between text-[10px] font-label uppercase tracking-widest text-on-surface-variant hover:text-on-surface py-2 transition-colors border-t border-outline/20 pt-4"
+            className="w-full flex items-center justify-between py-3 transition-colors"
+            style={{ borderTop: '1px solid var(--c-outline-variant)', paddingTop: 16, color: 'var(--c-on-surface-variant)', fontSize: 10, fontFamily: 'inherit', letterSpacing: '0.1em', textTransform: 'uppercase' }}
           >
-            <span>Raw Hex Data</span>
+            <span className="font-label">Raw Hex Data</span>
             <span className={`material-symbols-outlined text-sm transition-transform ${rawOpen ? 'rotate-180' : ''}`}>expand_more</span>
           </button>
           {rawOpen && (
-            <div className="bg-surface-container-low p-3 rounded-xl border border-outline/10 mt-2">
-              <pre className="font-mono text-[10px] leading-relaxed text-on-surface-variant break-all whitespace-pre-wrap max-h-24 overflow-y-auto">{rawHex}</pre>
+            <div className="p-3 rounded-xl mt-2" style={{ background: 'var(--c-surface-container-low)', border: '1px solid var(--c-outline-variant)' }}>
+              <pre className="font-mono text-[10px] leading-relaxed break-all whitespace-pre-wrap max-h-24 overflow-y-auto" style={{ color: 'var(--c-on-surface-variant)' }}>{rawHex}</pre>
             </div>
           )}
         </div>
 
-        <AlertBanner icon={<span className="material-symbols-outlined text-error flex-shrink-0">warning</span>}>
-          <p className="text-xs text-on-surface-variant leading-relaxed font-body">
-            <span className="font-bold text-error">Double-check recipient.</span> Signed transactions are permanent and cannot be reversed.
+        <AlertBanner icon={<span className="material-symbols-outlined flex-shrink-0" style={{ color: 'var(--c-error)' }}>warning</span>}>
+          <p className="text-xs leading-relaxed font-body" style={{ color: 'var(--c-on-surface-variant)' }}>
+            <span className="font-bold" style={{ color: 'var(--c-error)' }}>Double-check recipient.</span>{' '}
+            Signed transactions are permanent and cannot be reversed.
           </p>
         </AlertBanner>
       </div>
 
-      <div className="fixed bottom-0 left-0 w-full bg-background/90 backdrop-blur-2xl border-t border-outline/20 p-6 space-y-3">
+      <div className="flex-shrink-0 px-6 pb-6 pt-4 space-y-3" style={{ borderTop: '1px solid var(--c-outline-variant)', background: 'var(--c-background)' }}>
         <div className="flex gap-3">
           <Button variant="secondary" fullWidth={false} className="flex-1" onClick={handleReject}>Reject</Button>
           <Button variant="primary" fullWidth={false} className="flex-[2]" onClick={handleSign}>Confirm &amp; Sign</Button>
         </div>
-        <div className="flex items-center justify-center gap-2 opacity-40">
-          <span className="material-symbols-outlined text-xs">lock</span>
-          <p className="text-[9px] font-label uppercase tracking-[0.2em]">Encrypted Session Secure</p>
+        <div className="flex items-center justify-center gap-2" style={{ opacity: 0.4 }}>
+          <span className="material-symbols-outlined text-xs" style={{ color: 'var(--c-on-surface-variant)' }}>lock</span>
+          <p className="font-label text-[9px] uppercase tracking-[0.2em]" style={{ color: 'var(--c-on-surface-variant)' }}>Encrypted Session Secure</p>
         </div>
       </div>
     </div>

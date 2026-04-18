@@ -16,6 +16,7 @@ const config: Config = {
         'on-surface-variant':       'var(--c-on-surface-variant)',
         outline:                    'var(--c-outline)',
         'outline-variant':          'var(--c-outline-variant)',
+        'primary-container':         'var(--c-primary-container)',
         error:                      'var(--c-error)',
         'error-container':          'var(--c-error-container)',
       },

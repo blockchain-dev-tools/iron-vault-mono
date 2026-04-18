@@ -17,9 +17,9 @@ const STYLES: Record<Variant, string> = {
   danger:
     'bg-error-container text-on-surface',
   ghost:
-    'bg-transparent text-on-surface-variant border border-outline hover:border-primary/50 hover:text-primary',
+    'bg-transparent text-on-surface-variant border border-outline hover:border-primary hover:text-primary',
   'outline-danger':
-    'bg-transparent text-error border border-error hover:bg-error/10',
+    'bg-transparent text-error border border-error hover:bg-error-container',
 };
 
 export default function Button({
