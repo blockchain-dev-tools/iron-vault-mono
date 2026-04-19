@@ -75,6 +75,8 @@ export default function WelcomeScreen() {
         <Button variant="primary" icon="arrow_forward" onPress={handleCreate}>{t.welcome.createWallet}</Button>
         <View style={{ height: 12 }} />
         <Button variant="secondary" icon="mci:tray-arrow-down" onPress={() => go('ImportMnemonic')}>{t.welcome.importWallet}</Button>
+        <View style={{ height: 12 }} />
+        <Button variant="secondary" icon="mci:puzzle-outline" onPress={() => go('Enigma')}>{t.welcome.enigmaWallet}</Button>
       </View>
 
       {/* Security info */}

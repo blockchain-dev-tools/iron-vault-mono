@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { setupWallet } from '@iron-vault/wallet';
 import { walletStorage } from '../../lib/storage';
@@ -25,7 +25,7 @@ export default function SetPinScreen() {
     ? t.setPin.labelSet
     : t.setPin.labelConfirm;
 
-  const handleComplete = async (pin: string, reset: () => void) => {
+  const handleComplete = useCallback(async (pin: string, reset: () => void) => {
     if (phase === 1) {
       firstPin.current = pin;
       setPhase(2);
@@ -64,7 +64,8 @@ export default function SetPinScreen() {
         }, 900);
       }
     }
-  };
+  }, [phase, isChangingPin, generatedWords, mnemonicLang, passphrase, goBack, navReset,
+      setAccounts, setGeneratedWords, setPassphrase, setMnemonicEntropy, setMnemonicLang]);
 
   return (
     <View style={s.root}>

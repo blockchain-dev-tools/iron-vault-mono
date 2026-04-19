@@ -25,6 +25,7 @@ const LOCALE_KEY = 'app.locale';
 
 export type ScreenName =
   | 'Welcome' | 'Entropy' | 'GenerateMnemonic' | 'VerifyMnemonic' | 'SetPin' | 'ImportMnemonic'
+  | 'Enigma' | 'EnigmaMnemonic'
   | 'Vault' | 'Settings' | 'Unlock' | 'AccountDetail' | 'Transaction' | 'BackupSeed';
 
 export interface ScreenEntry {
@@ -107,7 +108,7 @@ const EMPTY_ACCOUNTS: WalletAccounts = { eth: [], sol: [] };
 const AUTO_LOCK_MS = 5 * 60 * 1000; // 5 minutes
 
 // Screens that require wallet lock when resuming after timeout
-const PROTECTED_SCREENS: ScreenName[] = ['Vault', 'Settings', 'AccountDetail', 'Transaction', 'GenerateMnemonic', 'VerifyMnemonic', 'SetPin'];
+const PROTECTED_SCREENS: ScreenName[] = ['Vault', 'Settings', 'AccountDetail', 'Transaction', 'GenerateMnemonic', 'VerifyMnemonic', 'SetPin', 'Enigma'];
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [stack, setStack] = useState<ScreenEntry[]>([{ name: 'Welcome' }]);

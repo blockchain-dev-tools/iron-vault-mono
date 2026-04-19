@@ -27,6 +27,8 @@ import AccountDetailScreen    from '../screens/AccountDetailScreen';
 import TransactionScreen      from '../screens/TransactionScreen';
 import EntropyScreen         from '../screens/EntropyScreen';
 import BackupSeedScreen      from '../screens/BackupSeedScreen';
+import EnigmaScreen          from '../screens/EnigmaScreen';
+import EnigmaMnemonicScreen  from '../screens/EnigmaMnemonicScreen';
 
 const SCREENS = {
   Welcome:          WelcomeScreen,
@@ -41,6 +43,8 @@ const SCREENS = {
   AccountDetail:    AccountDetailScreen,
   Transaction:      TransactionScreen,
   BackupSeed:       BackupSeedScreen,
+  Enigma:           EnigmaScreen,
+  EnigmaMnemonic:   EnigmaMnemonicScreen,
 } as const;
 
 // Screens that show the persistent bottom navigation bar

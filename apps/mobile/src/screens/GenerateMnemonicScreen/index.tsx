@@ -13,11 +13,12 @@ import PassphraseBox from '../../components/ui/PassphraseBox';
 import { Fonts } from '../../lib/fonts';
 
 export default function GenerateMnemonicScreen() {
-  const { go, goBack, generatedWords, setGeneratedWords, mnemonicLang, setMnemonicLang, setPassphrase } = useApp();
+  const { go, goBack, generatedWords, setGeneratedWords, mnemonicLang, setMnemonicLang, passphrase, setPassphrase } = useApp();
   const C = useTheme();
   const t = useLocale();
   const s = useMemo(() => makeStyles(C), [C]);
-  const [passphraseInput, setPassphraseInput] = useState('');
+  // Initialize from context so a passphrase set upstream (e.g. EnigmaScreen) is preserved
+  const [passphraseInput, setPassphraseInput] = useState(passphrase);
 
   const handleLangChange = (newLang: Bip39Language) => {
     if (newLang === mnemonicLang) return;
