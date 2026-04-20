@@ -11,6 +11,7 @@ import { AppState, useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { WalletAccounts } from '@iron-vault/wallet';
 import { addAccount as serviceAddAccount, removeAccount as serviceRemoveAccount } from '@iron-vault/wallet';
+import type { Chain } from '@iron-vault/wallet';
 import type { Bip39Language } from '@iron-vault/wallet';
 import { DARK, LIGHT } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
@@ -37,7 +38,7 @@ export type NavDirection = 'forward' | 'back' | 'reset';
 export type BleState = 'idle' | 'broadcasting' | 'connected' | 'error';
 
 export interface PendingTx {
-  chain: 'eth' | 'sol';
+  chain: Chain;
   network?: string;
   type: string;
   from: string;
@@ -68,11 +69,11 @@ interface AppCtx {
   setMnemonicLang: (l: Bip39Language) => void;
   passphrase: string;
   setPassphrase: (p: string) => void;
-  currentChain: 'eth' | 'sol';
+  currentChain: Chain;
   currentAcctIdx: number;
-  setCurrentAccount: (chain: 'eth' | 'sol', idx: number) => void;
-  addAccount: (chain: 'eth' | 'sol', path: string, custom: boolean) => Promise<void>;
-  removeAccount: (chain: 'eth' | 'sol', path: string) => Promise<void>;
+  setCurrentAccount: (chain: Chain, idx: number) => void;
+  addAccount: (chain: Chain, path: string, custom: boolean) => Promise<void>;
+  removeAccount: (chain: Chain, path: string) => Promise<void>;
   bleState: BleState;
   setBleState: (s: BleState) => void;
   pendingTx: PendingTx | null;
@@ -104,7 +105,7 @@ export function useLocale(): Translations {
   return useMemo(() => resolveTranslations(localeMode), [localeMode]);
 }
 
-const EMPTY_ACCOUNTS: WalletAccounts = { eth: [], sol: [] };
+const EMPTY_ACCOUNTS: WalletAccounts = { eth: [], sol: [], btc: [], tron: [], sui: [] };
 const AUTO_LOCK_MS = 5 * 60 * 1000; // 5 minutes
 
 // Screens that require wallet lock when resuming after timeout
@@ -118,7 +119,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [mnemonicEntropy, setMnemonicEntropy] = useState<Uint8Array | null>(null);
   const [mnemonicLang, setMnemonicLang] = useState<Bip39Language>('en');
   const [passphrase, setPassphrase] = useState('');
-  const [currentChain, setCurrentChain] = useState<'eth' | 'sol'>('eth');
+  const [currentChain, setCurrentChain] = useState<Chain>('eth');
   const [currentAcctIdx, setCurrentAcctIdx] = useState(0);
   const [bleState, setBleState] = useState<BleState>('idle');
   const [pendingTx, setPendingTx] = useState<PendingTx | null>(null);
@@ -144,7 +145,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (elapsed >= AUTO_LOCK_MS) {
             const currentScreen = stackRef.current[stackRef.current.length - 1].name;
             const hasWalletData =
-              accountsRef.current.eth.length > 0 || accountsRef.current.sol.length > 0;
+              Object.values(accountsRef.current).some(arr => arr.length > 0);
             if (hasWalletData && (PROTECTED_SCREENS as string[]).includes(currentScreen)) {
               setAccounts(EMPTY_ACCOUNTS);
               setDirection('reset');
@@ -196,17 +197,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setStack([{ name }]);
   }, []);
 
-  const setCurrentAccount = useCallback((chain: 'eth' | 'sol', idx: number) => {
+  const setCurrentAccount = useCallback((chain: Chain, idx: number) => {
     setCurrentChain(chain);
     setCurrentAcctIdx(idx);
   }, []);
 
-  const addAccount = useCallback(async (chain: 'eth' | 'sol', path: string, custom: boolean) => {
+  const addAccount = useCallback(async (chain: Chain, path: string, custom: boolean) => {
     const updated = await serviceAddAccount(walletStorage, chain, path, custom);
     if (updated) setAccounts(updated);
   }, []);
 
-  const removeAccount = useCallback(async (chain: 'eth' | 'sol', path: string) => {
+  const removeAccount = useCallback(async (chain: Chain, path: string) => {
     const updated = await serviceRemoveAccount(walletStorage, chain, path);
     if (updated) setAccounts(updated);
   }, []);

@@ -1,5 +1,6 @@
 import React from 'react';
-import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Path, Defs, LinearGradient, Stop, Circle, Rect, G } from 'react-native-svg';
+import type { Chain } from '@iron-vault/wallet';
 
 export function EthIcon({ size = 22 }: { size?: number }) {
   return (
@@ -36,6 +37,58 @@ export function SolIcon({ size = 22 }: { size?: number }) {
   );
 }
 
-export default function ChainIcon({ chain, size = 22 }: { chain: 'eth' | 'sol'; size?: number }) {
-  return chain === 'eth' ? <EthIcon size={size} /> : <SolIcon size={size} />;
+export function BtcIcon({ size = 22 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Defs>
+        <LinearGradient id="btcGrad" x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">
+          <Stop offset="0" stopColor="#F7931A" />
+          <Stop offset="1" stopColor="#E8650A" />
+        </LinearGradient>
+      </Defs>
+      <Circle cx="12" cy="12" r="10" fill="url(#btcGrad)" />
+      <Path d="M14.5 10.5C14.5 9.4 13.7 8.7 12.5 8.5V7H11.5V8.4C11.2 8.4 10.8 8.4 10.5 8.5V7H9.5V8.5C9.2 8.5 8.9 8.5 8.7 8.6L8.7 9.7C8.9 9.6 9.2 9.6 9.5 9.6V14.4C9.2 14.4 8.9 14.4 8.7 14.3L8.7 15.4C8.9 15.5 9.2 15.5 9.5 15.5V17H10.5V15.6C10.8 15.6 11.1 15.6 11.5 15.5V17H12.5V15.5C13.8 15.3 14.7 14.5 14.7 13.3C14.7 12.4 14.2 11.8 13.4 11.5C14.1 11.2 14.5 10.9 14.5 10.5ZM10.5 9.6H11.8C12.5 9.6 13 9.9 13 10.6C13 11.3 12.5 11.6 11.8 11.6H10.5V9.6ZM12 14.4H10.5V12.6H12C12.8 12.6 13.2 13 13.2 13.5C13.2 14 12.8 14.4 12 14.4Z" fill="white" />
+    </Svg>
+  );
+}
+
+export function TronIcon({ size = 22 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Defs>
+        <LinearGradient id="tronGrad" x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">
+          <Stop offset="0" stopColor="#FF4136" />
+          <Stop offset="1" stopColor="#C0160E" />
+        </LinearGradient>
+      </Defs>
+      <Circle cx="12" cy="12" r="10" fill="url(#tronGrad)" />
+      <Path d="M17 9.5L7.5 7L10 17L13.5 13L17 9.5Z" fill="white" opacity="0.9" />
+      <Path d="M10 17L13.5 13L10.8 12.2L10 17Z" fill="white" opacity="0.5" />
+    </Svg>
+  );
+}
+
+export function SuiIcon({ size = 22 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Defs>
+        <LinearGradient id="suiGrad" x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">
+          <Stop offset="0" stopColor="#6FBCF0" />
+          <Stop offset="1" stopColor="#007DC3" />
+        </LinearGradient>
+      </Defs>
+      <Circle cx="12" cy="12" r="10" fill="url(#suiGrad)" />
+      <Path d="M12 6C10.3 6 9 7.1 9 8.5C9 9.5 9.6 10.3 10.5 10.8L12 11.8L13.5 10.8C14.4 10.3 15 9.5 15 8.5C15 7.1 13.7 6 12 6Z" fill="white" />
+      <Path d="M9.5 12.5C8.6 13 8 13.9 8 15C8 16.7 9.8 18 12 18C14.2 18 16 16.7 16 15C16 13.9 15.4 13 14.5 12.5L12 14L9.5 12.5Z" fill="white" opacity="0.8" />
+    </Svg>
+  );
+}
+
+const ICONS: Record<Chain, (props: { size?: number }) => React.ReactElement> = {
+  eth: EthIcon, sol: SolIcon, btc: BtcIcon, tron: TronIcon, sui: SuiIcon,
+};
+
+export default function ChainIcon({ chain, size = 22 }: { chain: Chain; size?: number }) {
+  const IconComponent = ICONS[chain];
+  return <IconComponent size={size} />;
 }

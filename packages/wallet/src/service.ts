@@ -15,6 +15,8 @@ export {
 };
 export type { Bip39Language } from '@iron-vault/crypto';
 
+export type Chain = 'eth' | 'sol' | 'btc' | 'tron' | 'sui';
+
 // Storage keys
 const PIN_KDF_KEY       = 'wallet.pinKdf';
 const PIN_HASH_KEY      = 'wallet.pinHash';
@@ -22,11 +24,20 @@ const MNEMONIC_KEY      = 'wallet.mnemonic';
 const ACCOUNT_PATHS_KEY = 'wallet.accountPaths';
 
 interface PathEntry { path: string; custom: boolean; }
-interface AccountPaths { eth: PathEntry[]; sol: PathEntry[]; }
+interface AccountPaths {
+  eth: PathEntry[];
+  sol: PathEntry[];
+  btc: PathEntry[];
+  tron: PathEntry[];
+  sui: PathEntry[];
+}
 
 const DEFAULT_PATHS: AccountPaths = {
-  eth: [{ path: "m/44'/60'/0'/0/0", custom: false }],
-  sol: [{ path: "m/44'/501'/0'/0'", custom: false }],
+  eth:  [{ path: "m/44'/60'/0'/0/0",    custom: false }],
+  sol:  [{ path: "m/44'/501'/0'/0'",    custom: false }],
+  btc:  [{ path: "m/84'/0'/0'/0/0",     custom: false }],
+  tron: [{ path: "m/44'/195'/0'/0/0",   custom: false }],
+  sui:  [{ path: "m/44'/784'/0'/0'/0'", custom: false }],
 };
 
 // PBKDF2 parameters
@@ -58,14 +69,32 @@ async function readPaths(s: WalletStorage): Promise<AccountPaths> {
   if (!raw) return DEFAULT_PATHS;
   try {
     const parsed = JSON.parse(raw);
-    const eth = Array.isArray(parsed.eth) && parsed.eth.length > 0
-      ? migrateEntries(parsed.eth) : DEFAULT_PATHS.eth;
-    const sol = Array.isArray(parsed.sol) && parsed.sol.length > 0
-      ? migrateEntries(parsed.sol) : DEFAULT_PATHS.sol;
-    return { eth, sol };
+    const eth  = Array.isArray(parsed.eth)  && parsed.eth.length  > 0 ? migrateEntries(parsed.eth)  : DEFAULT_PATHS.eth;
+    const sol  = Array.isArray(parsed.sol)  && parsed.sol.length  > 0 ? migrateEntries(parsed.sol)  : DEFAULT_PATHS.sol;
+    const btc  = Array.isArray(parsed.btc)  && parsed.btc.length  > 0 ? migrateEntries(parsed.btc)  : DEFAULT_PATHS.btc;
+    const tron = Array.isArray(parsed.tron) && parsed.tron.length > 0 ? migrateEntries(parsed.tron) : DEFAULT_PATHS.tron;
+    const sui  = Array.isArray(parsed.sui)  && parsed.sui.length  > 0 ? migrateEntries(parsed.sui)  : DEFAULT_PATHS.sui;
+    return { eth, sol, btc, tron, sui };
   } catch {
     return DEFAULT_PATHS;
   }
+}
+
+function deriveFrom(mnemonic: string, paths: AccountPaths, passphrase = '') {
+  return deriveAccountsFromPaths(
+    mnemonic,
+    paths.eth.map(e => e.path),
+    paths.sol.map(e => e.path),
+    passphrase,
+    paths.eth.map(e => e.custom),
+    paths.sol.map(e => e.custom),
+    paths.btc.map(e => e.path),
+    paths.tron.map(e => e.path),
+    paths.sui.map(e => e.path),
+    paths.btc.map(e => e.custom),
+    paths.tron.map(e => e.custom),
+    paths.sui.map(e => e.custom),
+  );
 }
 
 export async function hasWallet(s: WalletStorage): Promise<boolean> {
@@ -84,14 +113,7 @@ export async function setupWallet(
   await s.removeItem(PIN_HASH_KEY);
   await s.setItem(MNEMONIC_KEY, mnemonic);
   await s.setItem(ACCOUNT_PATHS_KEY, JSON.stringify(DEFAULT_PATHS));
-  return deriveAccountsFromPaths(
-    mnemonic,
-    DEFAULT_PATHS.eth.map(e => e.path),
-    DEFAULT_PATHS.sol.map(e => e.path),
-    passphrase,
-    DEFAULT_PATHS.eth.map(e => e.custom),
-    DEFAULT_PATHS.sol.map(e => e.custom),
-  );
+  return deriveFrom(mnemonic, DEFAULT_PATHS, passphrase);
 }
 
 export async function unlockWallet(
@@ -102,14 +124,7 @@ export async function unlockWallet(
   const mnemonic = await s.getItem(MNEMONIC_KEY);
   if (!mnemonic) return null;
   const paths = await readPaths(s);
-  return deriveAccountsFromPaths(
-    mnemonic,
-    paths.eth.map(e => e.path),
-    paths.sol.map(e => e.path),
-    '',
-    paths.eth.map(e => e.custom),
-    paths.sol.map(e => e.custom),
-  );
+  return deriveFrom(mnemonic, paths);
 }
 
 export async function verifyPin(s: WalletStorage, pin: string): Promise<boolean> {
@@ -140,19 +155,12 @@ export async function getAccounts(s: WalletStorage): Promise<WalletAccounts | nu
   const mnemonic = await s.getItem(MNEMONIC_KEY);
   if (!mnemonic) return null;
   const paths = await readPaths(s);
-  return deriveAccountsFromPaths(
-    mnemonic,
-    paths.eth.map(e => e.path),
-    paths.sol.map(e => e.path),
-    '',
-    paths.eth.map(e => e.custom),
-    paths.sol.map(e => e.custom),
-  );
+  return deriveFrom(mnemonic, paths);
 }
 
 export async function addAccount(
   s: WalletStorage,
-  chain: 'eth' | 'sol',
+  chain: Chain,
   path: string,
   custom: boolean,
 ): Promise<WalletAccounts | null> {
@@ -160,31 +168,20 @@ export async function addAccount(
   if (!mnemonic) return null;
   const paths = await readPaths(s);
 
-  function toDeriveArgs(p: AccountPaths) {
-    return {
-      ethPaths: p.eth.map(e => e.path),
-      solPaths: p.sol.map(e => e.path),
-      ethCustom: p.eth.map(e => e.custom),
-      solCustom: p.sol.map(e => e.custom),
-    };
-  }
-
   if (paths[chain].some(e => e.path === path)) {
-    const { ethPaths, solPaths, ethCustom, solCustom } = toDeriveArgs(paths);
-    return deriveAccountsFromPaths(mnemonic, ethPaths, solPaths, '', ethCustom, solCustom);
+    return deriveFrom(mnemonic, paths);
   }
   const newPaths: AccountPaths = {
     ...paths,
     [chain]: [...paths[chain], { path, custom }],
   };
   await s.setItem(ACCOUNT_PATHS_KEY, JSON.stringify(newPaths));
-  const { ethPaths, solPaths, ethCustom, solCustom } = toDeriveArgs(newPaths);
-  return deriveAccountsFromPaths(mnemonic, ethPaths, solPaths, '', ethCustom, solCustom);
+  return deriveFrom(mnemonic, newPaths);
 }
 
 export async function removeAccount(
   s: WalletStorage,
-  chain: 'eth' | 'sol',
+  chain: Chain,
   path: string,
 ): Promise<WalletAccounts | null> {
   const mnemonic = await s.getItem(MNEMONIC_KEY);
@@ -192,19 +189,11 @@ export async function removeAccount(
   const paths = await readPaths(s);
   const filtered = paths[chain].filter(e => e.path !== path);
   if (filtered.length === paths[chain].length) {
-    return deriveAccountsFromPaths(
-      mnemonic,
-      paths.eth.map(e => e.path), paths.sol.map(e => e.path),
-      '', paths.eth.map(e => e.custom), paths.sol.map(e => e.custom),
-    );
+    return deriveFrom(mnemonic, paths);
   }
   const newPaths: AccountPaths = { ...paths, [chain]: filtered };
   await s.setItem(ACCOUNT_PATHS_KEY, JSON.stringify(newPaths));
-  return deriveAccountsFromPaths(
-    mnemonic,
-    newPaths.eth.map(e => e.path), newPaths.sol.map(e => e.path),
-    '', newPaths.eth.map(e => e.custom), newPaths.sol.map(e => e.custom),
-  );
+  return deriveFrom(mnemonic, newPaths);
 }
 
 export async function revealMnemonic(s: WalletStorage, pin: string): Promise<string | null> {

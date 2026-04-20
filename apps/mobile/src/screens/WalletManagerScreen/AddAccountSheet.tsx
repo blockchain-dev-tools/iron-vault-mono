@@ -7,20 +7,21 @@ import Button from '../../components/ui/Button';
 import Icon from '../../components/ui/Icon';
 import { Fonts } from '../../lib/fonts';
 import { computeNextDefaultPath } from './pathUtils';
+import type { Chain } from '@iron-vault/wallet';
 
 const PATH_RE = /^m(\/\d+'?)+$/;
 
 export default function AddAccountSheet({ chain, accounts, onClose, onAdd }: {
-  chain: 'eth' | 'sol';
-  accounts: { eth: { short: string; full: string; path: string; custom: boolean }[]; sol: { short: string; full: string; path: string; custom: boolean }[] };
+  chain: Chain;
+  accounts: Record<Chain, { short: string; full: string; path: string; custom: boolean }[]>;
   onClose: () => void;
-  onAdd: (chain: 'eth' | 'sol', path: string, custom: boolean) => Promise<void>;
+  onAdd: (chain: Chain, path: string, custom: boolean) => Promise<void>;
 }) {
   const C = useTheme();
   const t = useLocale();
   const s = useMemo(() => makeStyles(C), [C]);
 
-  const accts = chain === 'eth' ? accounts.eth : accounts.sol;
+  const accts = accounts[chain] ?? [];
   const computedDefault = computeNextDefaultPath(chain, accts);
   const nextNum = accts.length + 1;
 
@@ -48,7 +49,11 @@ export default function AddAccountSheet({ chain, accounts, onClose, onAdd }: {
     setInputPath(computedDefault);
   };
 
-  const chainLabel = chain === 'eth' ? t.vault.ethLabel : t.vault.solLabel;
+  const chainLabels: Record<Chain, string> = {
+    eth: t.vault.ethLabel, sol: t.vault.solLabel,
+    btc: t.vault.btcLabel, tron: t.vault.tronLabel, sui: t.vault.suiLabel,
+  };
+  const chainLabel = chainLabels[chain];
 
   return (
     <View style={s.panel}>

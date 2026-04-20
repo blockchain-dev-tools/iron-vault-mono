@@ -2,6 +2,7 @@ import { base58 } from "@scure/base";
 import { mnemonicToSeed } from "./mnemonic";
 import { deriveEthPrivateKey, deriveSolanaPrivateKey } from "./hdkey";
 import { ethPubKeyToAddress, solanaPubKey } from "./signer";
+import { p2wpkhAddress, tronAddressFromPrivKey, suiAddress, secp256k1PublicKey } from "./btc";
 
 export interface Account {
   full: string;
@@ -13,6 +14,9 @@ export interface Account {
 export interface WalletAccounts {
   eth: Account[];
   sol: Account[];
+  btc: Account[];
+  tron: Account[];
+  sui: Account[];
 }
 
 function shortAddr(addr: string): string {
@@ -39,6 +43,12 @@ export async function deriveAccountsFromPaths(
   passphrase = '',
   ethCustom: boolean[] = [],
   solCustom: boolean[] = [],
+  btcPaths: string[] = [],
+  tronPaths: string[] = [],
+  suiPaths: string[] = [],
+  btcCustom: boolean[] = [],
+  tronCustom: boolean[] = [],
+  suiCustom: boolean[] = [],
 ): Promise<WalletAccounts> {
   const seed = await mnemonicToSeed(mnemonic, passphrase);
 
@@ -56,7 +66,27 @@ export async function deriveAccountsFromPaths(
     return { full, short: shortAddr(full), path, custom: solCustom[i] ?? false };
   });
 
-  return { eth, sol };
+  const btc: Account[] = btcPaths.map((path, i) => {
+    const priv = deriveEthPrivateKey(seed, parsePath(path));
+    const compressedPub = secp256k1PublicKey(priv, true);
+    const full = p2wpkhAddress(compressedPub);
+    return { full, short: shortAddr(full), path, custom: btcCustom[i] ?? false };
+  });
+
+  const tron: Account[] = tronPaths.map((path, i) => {
+    const priv = deriveEthPrivateKey(seed, parsePath(path));
+    const { address } = tronAddressFromPrivKey(priv);
+    return { full: address, short: shortAddr(address), path, custom: tronCustom[i] ?? false };
+  });
+
+  const sui: Account[] = suiPaths.map((path, i) => {
+    const priv = deriveSolanaPrivateKey(seed, parsePath(path));
+    const pubBytes = solanaPubKey(priv);
+    const full = suiAddress(pubBytes);
+    return { full, short: shortAddr(full), path, custom: suiCustom[i] ?? false };
+  });
+
+  return { eth, sol, btc, tron, sui };
 }
 
 /** @deprecated Use deriveAccountsFromPaths for new code. Kept for backward compatibility. */

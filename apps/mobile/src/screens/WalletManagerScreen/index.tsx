@@ -7,6 +7,7 @@ import {
 import { useApp, useTheme, useLocale } from '../../store/AppContext';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
+import type { Chain } from '@iron-vault/wallet';
 import BottomSheet from '../../components/ui/BottomSheet';
 import Button from '../../components/ui/Button';
 import BleStatus from '../../components/ui/BleStatus';
@@ -22,14 +23,14 @@ export default function WalletManagerScreen() {
   const C = useTheme();
   const t = useLocale();
   const s = useMemo(() => makeStyles(C), [C]);
-  const [connectSheet, setConnectSheet] = useState<null | 'eth' | 'sol'>(null);
+  const [connectSheet, setConnectSheet] = useState<Chain | null>(null);
   const [showDetail, setShowDetail] = useState(false);
-  const [addSheet, setAddSheet] = useState<null | 'eth' | 'sol'>(null);
+  const [addSheet, setAddSheet] = useState<Chain | null>(null);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const { width: screenWidth } = useWindowDimensions();
 
   const sheetChain = connectSheet ?? currentChain;
-  const acctList = sheetChain === 'eth' ? accounts.eth : accounts.sol;
+  const acctList = accounts[sheetChain];
   const acct = acctList[currentAcctIdx] ?? acctList[0] ?? { short: '—', full: '—', path: '—' };
 
   const { logs, clearLogs, startBle, stopBle } = useBleSession(connectSheet, acct);
@@ -43,12 +44,12 @@ export default function WalletManagerScreen() {
     Animated.timing(slideAnim, { toValue: 0, duration: 220, useNativeDriver: false }).start(() => setShowDetail(false));
   };
 
-  const openAccount = (chain: 'eth' | 'sol', idx: number) => {
+  const openAccount = (chain: Chain, idx: number) => {
     setCurrentAccount(chain, idx);
     go('AccountDetail');
   };
 
-  const openConnectSheet = async (chain: 'eth' | 'sol') => {
+  const openConnectSheet = async (chain: Chain) => {
     clearLogs();
     setShowDetail(false);
     slideAnim.setValue(0);
@@ -103,6 +104,42 @@ export default function WalletManagerScreen() {
           onAddAccount={() => setAddSheet('sol')}
         />
 
+        <ChainSection
+          label={t.vault.btcLabel} sub={t.vault.btcSub}
+          iconNode={<ChainIcon chain="btc" size={22} />}
+          accounts={accounts.btc}
+          connectLabel={t.vault.connect}
+          accountLabel={t.vault.account}
+          addLabel={t.vault.addAccount}
+          onConnect={() => openConnectSheet('btc')}
+          onAccountClick={idx => openAccount('btc', idx)}
+          onAddAccount={() => setAddSheet('btc')}
+        />
+
+        <ChainSection
+          label={t.vault.tronLabel} sub={t.vault.tronSub}
+          iconNode={<ChainIcon chain="tron" size={22} />}
+          accounts={accounts.tron}
+          connectLabel={t.vault.connect}
+          accountLabel={t.vault.account}
+          addLabel={t.vault.addAccount}
+          onConnect={() => openConnectSheet('tron')}
+          onAccountClick={idx => openAccount('tron', idx)}
+          onAddAccount={() => setAddSheet('tron')}
+        />
+
+        <ChainSection
+          label={t.vault.suiLabel} sub={t.vault.suiSub}
+          iconNode={<ChainIcon chain="sui" size={22} />}
+          accounts={accounts.sui}
+          connectLabel={t.vault.connect}
+          accountLabel={t.vault.account}
+          addLabel={t.vault.addAccount}
+          onConnect={() => openConnectSheet('sui')}
+          onAccountClick={idx => openAccount('sui', idx)}
+          onAddAccount={() => setAddSheet('sui')}
+        />
+
         <View style={{ height: 100 }} />
       </ScrollView>
 
@@ -127,7 +164,7 @@ export default function WalletManagerScreen() {
               {[
                 t.vault.okxStep1,
                 t.vault.okxStep2,
-                t.vault.okxStep3(connectSheet === 'eth' ? 'Ethereum' : 'Solana'),
+                t.vault.okxStep3({ eth: 'Ethereum', sol: 'Solana', btc: 'Bitcoin', tron: 'Tron', sui: 'Sui' }[connectSheet ?? 'eth']),
                 t.vault.okxStep4,
               ].map((step, i) => (
                 <View key={i} style={s.step}>

@@ -30,8 +30,12 @@ export interface BleSessionResult {
   stopBle: () => void;
 }
 
+const CHAIN_APP_NAME: Record<string, string> = {
+  eth: 'Ethereum', sol: 'Solana', btc: 'Bitcoin', tron: 'Tron', sui: 'Sui',
+};
+
 export function useBleSession(
-  activeChain: 'eth' | 'sol' | null,
+  activeChain: 'eth' | 'sol' | 'btc' | 'tron' | 'sui' | null,
   acct: { short: string },
 ): BleSessionResult {
   const { setBleState, setPendingTx, go } = useApp();
@@ -54,19 +58,19 @@ export function useBleSession(
     if (!activeChain) return;
 
     setMnemonicProvider(() => walletStorage.getItem('wallet.mnemonic'));
-    setCurrentApp(activeChain === 'eth' ? 'Ethereum' : 'Solana');
+    setCurrentApp(CHAIN_APP_NAME[activeChain] ?? 'Ethereum');
     setLogFn(addLog);
 
     setSignRequestHandler(async (req) => {
       return new Promise<string>((resolve) => {
         setPendingTxRef.current({
           chain: req.chain,
-          type: req.decoded?.data ? 'erc20_transfer' : 'eth_transfer',
+          type: req.decoded?.data ? 'erc20_transfer' : 'transfer',
           from: acctRef.current.short,
           to: req.decoded?.to ?? '?',
           amount: req.decoded?.value ?? '?',
           gas: req.decoded?.gas ?? '?',
-          rawHex: req.rawHex,
+          rawHex: Buffer.from(req.raw).toString('hex'),
           network: chainName(req.decoded?.chainId),
           sign: req.sign,
           resolve,

@@ -2,7 +2,9 @@ import { HDKey } from '@scure/bip32';
 import { sha256 } from '@noble/hashes/sha2.js';
 import { ripemd160 } from '@noble/hashes/legacy.js';
 import { keccak_256 } from '@noble/hashes/sha3.js';
+import { blake2b } from '@noble/hashes/blake2.js';
 import { base58, bech32 } from '@scure/base';
+import { bytesToHex } from '@noble/hashes/utils.js';
 import { secp256k1 } from '@noble/curves/secp256k1';
 
 // Inlined to avoid circular dep with @iron-vault/apdu
@@ -73,6 +75,14 @@ export function p2wpkhAddress(pubKey: Uint8Array): string {
   const pubKeyHash = hash160(pubKey);
   const words = bech32.toWords(pubKeyHash);
   return bech32.encode('bc', [0, ...words]);
+}
+
+/** Sui address from Ed25519 public key: Blake2b-256(0x00 || pubkey) → "0x{hex}" */
+export function suiAddress(pubKey: Uint8Array): string {
+  const bytes = new Uint8Array(33);
+  bytes[0] = 0x00; // Ed25519 scheme flag
+  bytes.set(pubKey, 1);
+  return '0x' + bytesToHex(blake2b(bytes, { dkLen: 32 }));
 }
 
 /** Tron address from secp256k1 private key — returns T... base58check string */
