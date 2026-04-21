@@ -81,20 +81,15 @@ async function readPaths(s: WalletStorage): Promise<AccountPaths> {
 }
 
 function deriveFrom(mnemonic: string, paths: AccountPaths, passphrase = '') {
-  return deriveAccountsFromPaths(
+  return deriveAccountsFromPaths({
     mnemonic,
-    paths.eth.map(e => e.path),
-    paths.sol.map(e => e.path),
     passphrase,
-    paths.eth.map(e => e.custom),
-    paths.sol.map(e => e.custom),
-    paths.btc.map(e => e.path),
-    paths.tron.map(e => e.path),
-    paths.sui.map(e => e.path),
-    paths.btc.map(e => e.custom),
-    paths.tron.map(e => e.custom),
-    paths.sui.map(e => e.custom),
-  );
+    eth:  { paths: paths.eth.map(e => e.path),  custom: paths.eth.map(e => e.custom)  },
+    sol:  { paths: paths.sol.map(e => e.path),  custom: paths.sol.map(e => e.custom)  },
+    btc:  { paths: paths.btc.map(e => e.path),  custom: paths.btc.map(e => e.custom)  },
+    tron: { paths: paths.tron.map(e => e.path), custom: paths.tron.map(e => e.custom) },
+    sui:  { paths: paths.sui.map(e => e.path),  custom: paths.sui.map(e => e.custom)  },
+  });
 }
 
 export async function hasWallet(s: WalletStorage): Promise<boolean> {
