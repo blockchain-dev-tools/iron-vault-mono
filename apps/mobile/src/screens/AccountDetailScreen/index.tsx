@@ -18,8 +18,7 @@ export default function AccountDetailScreen() {
   const C = useTheme();
   const t = useLocale();
   const s = useMemo(() => makeStyles(C), [C]);
-  const isEth = currentChain === 'eth';
-  const accts = isEth ? accounts.eth : accounts.sol;
+  const accts = accounts[currentChain] ?? accounts.sol;
   const acct = accts[currentAcctIdx] ?? { short: '—', full: '—', path: '—', custom: false };
   const canDelete = accts.length > 1;
 
@@ -82,7 +81,7 @@ export default function AccountDetailScreen() {
   return (
     <View style={s.root}>
       <TopBar
-        title={`${isEth ? 'Ethereum' : 'Solana'} #${currentAcctIdx + 1}`}
+        title={`${{ eth: 'Ethereum', sol: 'Solana', btc: 'Bitcoin', tron: 'Tron', sui: 'Sui' }[currentChain]} #${currentAcctIdx + 1}`}
         onBack={goBack}
         right={
           <TouchableOpacity

@@ -105,7 +105,7 @@ export function useLocale(): Translations {
   return useMemo(() => resolveTranslations(localeMode), [localeMode]);
 }
 
-const EMPTY_ACCOUNTS: WalletAccounts = { eth: [], sol: [], btc: [], tron: [], sui: [] };
+export const EMPTY_ACCOUNTS: WalletAccounts = { eth: [], sol: [], btc: [], tron: [], sui: [] };
 const AUTO_LOCK_MS = 5 * 60 * 1000; // 5 minutes
 
 // Screens that require wallet lock when resuming after timeout

@@ -43,6 +43,8 @@ let _ethSignTimer: ReturnType<typeof setTimeout> | null = null;
 let _ethPersonalTimer: ReturnType<typeof setTimeout> | null = null;
 let _solTimer: ReturnType<typeof setTimeout> | null = null;
 let _btcTimer: ReturnType<typeof setTimeout> | null = null;
+let _tronTimer: ReturnType<typeof setTimeout> | null = null;
+let _suiTimer: ReturnType<typeof setTimeout> | null = null;
 
 export function ulog(msg: string): void { if (S._uiLog) S._uiLog(msg); }
 
@@ -88,8 +90,22 @@ export function startBtcSessionTimer(): void {
   if (_btcTimer) clearTimeout(_btcTimer);
   _btcTimer = setTimeout(() => { ulog('[BTC] PSBT session timed out'); clearBtcSession(); }, SIGN_TIMEOUT_MS);
 }
-export function clearTronSign(): void { S.tronSign = null; }
-export function clearSuiSign(): void  { S.suiSign = null; }
+export function clearTronSign(): void {
+  S.tronSign = null;
+  if (_tronTimer) { clearTimeout(_tronTimer); _tronTimer = null; }
+}
+export function startTronSignTimer(): void {
+  if (_tronTimer) clearTimeout(_tronTimer);
+  _tronTimer = setTimeout(() => { ulog('[TRON] sign session timed out'); clearTronSign(); }, SIGN_TIMEOUT_MS);
+}
+export function clearSuiSign(): void {
+  S.suiSign = null;
+  if (_suiTimer) { clearTimeout(_suiTimer); _suiTimer = null; }
+}
+export function startSuiSignTimer(): void {
+  if (_suiTimer) clearTimeout(_suiTimer);
+  _suiTimer = setTimeout(() => { ulog('[SUI] sign session timed out'); clearSuiSign(); }, SIGN_TIMEOUT_MS);
+}
 
 export function clearSignSessions(): void {
   clearEthSign(); clearEthPersonal(); clearSolSign();

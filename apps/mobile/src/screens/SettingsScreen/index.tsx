@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { clearWallet } from '@iron-vault/wallet';
 import { walletStorage } from '../../lib/storage';
-import { useApp, useTheme, useLocale } from '../../store/AppContext';
+import { useApp, useTheme, useLocale, EMPTY_ACCOUNTS } from '../../store/AppContext';
 import type { ThemeMode, LocaleMode } from '../../store/AppContext';
 import { R } from '@iron-vault/theme';
 import type { ColorTokens } from '@iron-vault/theme';
@@ -48,7 +48,7 @@ export default function SettingsScreen() {
         text: t.common.reset, style: 'destructive',
         onPress: async () => {
           await clearWallet(walletStorage);
-          setAccounts({ eth: [], sol: [] });
+          setAccounts(EMPTY_ACCOUNTS);
           setBleState('idle');
           navReset('Welcome');
         },

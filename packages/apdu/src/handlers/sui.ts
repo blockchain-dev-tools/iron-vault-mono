@@ -1,6 +1,6 @@
 import { deriveSolanaPrivateKey, solanaPubKey, signSolanaMessage } from '@iron-vault/crypto';
 import { parseBip32Path, bytesToHex } from '../parser';
-import { requireSeed, maybeDeferred, ulog, clearSuiSign, SIGN_TIMEOUT_MS } from './shared';
+import { requireSeed, maybeDeferred, ulog, clearSuiSign, startSuiSignTimer } from './shared';
 import * as shared from './shared';
 
 // ── Sui App handler (CLA 0x07) ────────────────────────────────────────────────
@@ -54,7 +54,7 @@ async function handleSuiSign(p1: number, data: Uint8Array): Promise<string> {
     ulog(`[SUI SIGN] path: m/${pathStr}`);
     clearSuiSign();
     shared.S.suiSign = { privKey, msg: Array.from(rest) };
-    const timer = setTimeout(() => { ulog('[SUI] sign session timed out'); clearSuiSign(); }, SIGN_TIMEOUT_MS);
+    startSuiSignTimer();
     // For single-frame sign (rest contains full message)
     return finishSuiSign();
   }

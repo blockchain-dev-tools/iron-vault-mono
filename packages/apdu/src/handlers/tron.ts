@@ -3,7 +3,7 @@ import {
   sha256Single, keccak256, signSecp256k1Compact,
 } from '@iron-vault/crypto';
 import { parseBip32Path, bytesToHex } from '../parser';
-import { requireSeed, maybeDeferred, ulog, clearTronSign, SIGN_TIMEOUT_MS } from './shared';
+import { requireSeed, maybeDeferred, ulog, clearTronSign, startTronSignTimer } from './shared';
 import * as shared from './shared';
 
 // ── Tron App handler (CLA 0x14) ───────────────────────────────────────────────
@@ -61,7 +61,7 @@ async function handleTronSignTransaction(p1: number, data: Uint8Array): Promise<
     const privKey = deriveEthPrivateKey(seed, path);
     clearTronSign();
     shared.S.tronSign = { privKey, tx: Array.from(rest) };
-    setTimeout(() => { ulog('[TRON] sign session timed out'); clearTronSign(); }, SIGN_TIMEOUT_MS);
+    startTronSignTimer();
     return finishTronSign();
   }
   if (p1 === 0x80) {

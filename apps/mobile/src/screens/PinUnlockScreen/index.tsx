@@ -3,7 +3,7 @@ import { Animated, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { unlockWallet, clearWallet } from '@iron-vault/wallet';
 import { walletStorage } from '../../lib/storage';
-import { useApp, useTheme, useLocale } from '../../store/AppContext';
+import { useApp, useTheme, useLocale, EMPTY_ACCOUNTS } from '../../store/AppContext';
 import type { ColorTokens } from '@iron-vault/theme';
 import PinPad from '../../components/ui/PinPad';
 import PinDots from '../../components/ui/PinDots';
@@ -74,7 +74,7 @@ export default function PinUnlockScreen() {
           style: 'destructive',
           onPress: async () => {
             await clearWallet(walletStorage);
-            setAccounts({ eth: [], sol: [] });
+            setAccounts(EMPTY_ACCOUNTS);
             navReset('Welcome');
           },
         },

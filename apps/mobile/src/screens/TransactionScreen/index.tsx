@@ -23,7 +23,7 @@ export default function TransactionScreen() {
   const rows = useMemo((): [string, string, boolean][] => {
     if (!pendingTx) return [];
     return [
-      [t.transaction.network, pendingTx.network ?? (pendingTx.chain === 'eth' ? t.transaction.ethereum : t.transaction.solana), false],
+      [t.transaction.network, pendingTx.network ?? ({ eth: t.transaction.ethereum, sol: t.transaction.solana, btc: 'Bitcoin', tron: 'Tron', sui: 'Sui' }[pendingTx.chain] ?? pendingTx.chain), false],
       [t.transaction.action, pendingTx.type === 'erc20_transfer' ? t.transaction.erc20Transfer : t.transaction.transfer, false],
       [t.transaction.from, pendingTx.from, false],
       [t.transaction.to, pendingTx.to, false],
