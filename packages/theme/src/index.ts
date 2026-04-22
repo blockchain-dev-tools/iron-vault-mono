@@ -45,8 +45,8 @@ export const LIGHT: ColorTokens = {
   onPrimary:           '#F3F7E6',
   bg:                  '#FFFFFF',
   surface:             '#FFFFFF',
-  surfaceContainer:    '#F2F7E8',
-  surfaceContainerLow: '#F8FBF2',
+  surfaceContainer:    '#F5F5F5',
+  surfaceContainerLow: '#FAFAFA',
   text:                '#1A2200',
   text2:               '#5A6640',
   textDisabled:        '#9AA88A',
@@ -54,10 +54,10 @@ export const LIGHT: ColorTokens = {
   borderVariant:       '#D0DDB8',
   error:               '#CF6679',
   errorContainer:      'rgba(207,102,121,0.12)',
-  primary8:            'rgba(95,138,14,0.08)',
-  primary12:           'rgba(95,138,14,0.12)',
-  primary15:           'rgba(95,138,14,0.15)',
-  primary25:           'rgba(95,138,14,0.25)',
+  primary8:            'rgba(0,0,0,0.04)',
+  primary12:           'rgba(0,0,0,0.05)',
+  primary15:           'rgba(0,0,0,0.07)',
+  primary25:           'rgba(0,0,0,0.10)',
 };
 
 // Backward-compatible default export (dark) — used by apps/prototype, packages/apdu, etc.
