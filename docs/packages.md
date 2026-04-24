@@ -49,16 +49,18 @@ The PIN is **never stored in plaintext**. `setupWallet` stores `bytesToHex(sha25
 ### WalletAccounts Type
 
 ```typescript
-// Re-exported from @iron-vault/crypto
 interface Account {
-  full: string;   // full address string
+  full:  string;  // full address string
   short: string;  // truncated: "0x1234...5678"
-  path: string;   // BIP-32 derivation path
+  path:  string;  // BIP-32 derivation path
 }
 
 interface WalletAccounts {
-  eth: Account[];  // 2 accounts: m/44'/60'/0'/0/0, .../0/1
-  sol: Account[];  // 1 account:  m/44'/501'/0'/0'
+  eth:  Account[];  // m/44'/60'/0'/0/n
+  sol:  Account[];  // m/44'/501'/0'/0'
+  btc:  Account[];  // m/84'/0'/0'/0/n
+  trx:  Account[];  // m/44'/195'/0'/0/n
+  sui:  Account[];  // m/44'/784'/0'/0'/0'
 }
 ```
 
@@ -80,14 +82,10 @@ Pure cryptographic primitives. **No platform dependencies** (no React Native, no
 ```typescript
 import { generateMnemonic, validateMnemonic, mnemonicToSeed } from '@iron-vault/crypto';
 
-// Generate a random 12-word BIP-39 mnemonic
-const phrase = generateMnemonic();        // 128-bit entropy
-const phrase24 = generateMnemonic(256);   // 256-bit entropy (24 words)
+const phrase   = generateMnemonic();      // 128-bit entropy, 12 words
+const phrase24 = generateMnemonic(256);   // 256-bit entropy, 24 words
 
-// Validate user input
-const ok = validateMnemonic(phrase);      // → boolean
-
-// Derive master seed bytes (async, applies PBKDF2)
+const ok   = validateMnemonic(phrase);    // → boolean
 const seed = await mnemonicToSeed(phrase);  // → Uint8Array (64 bytes)
 ```
 
@@ -106,16 +104,13 @@ const privKey = deriveSolanaPrivateKey(seed, [0x8000002c, 0x800001f5, 0x80000000
 ### Signing (`signer.ts`)
 
 ```typescript
-import { signEthTransaction, signSolanaMessage, ethPubKeyToAddress, solanaPubKey } from '@iron-vault/crypto';
+import { signEthTransaction, signSolanaMessage, ethPubKeyToAddress } from '@iron-vault/crypto';
 
-// Derive Ethereum address from private key
-const { address } = ethPubKeyToAddress(privKey);  // address = 40-char uppercase hex
+const { address } = ethPubKeyToAddress(privKey);  // 40-char uppercase hex
 
-// Sign Ethereum RLP-encoded transaction
 // Returns: v(1) + r(32) + s(32) + SW(2=9000)
 const response = signEthTransaction(privKey, rlpBytes);
 
-// Sign Solana message (Ed25519)
 // Returns: signature(64) + SW(2=9000)
 const response = signSolanaMessage(privKey, messageBytes);
 ```
@@ -124,9 +119,7 @@ const response = signSolanaMessage(privKey, messageBytes);
 
 ```typescript
 import { deriveWalletAccounts } from '@iron-vault/crypto';
-import type { WalletAccounts } from '@iron-vault/crypto';
 
-// Derives 2 ETH + 1 SOL account from a mnemonic phrase
 const accounts = await deriveWalletAccounts(mnemonic);
 // accounts.eth[0].full  → "0xABCDEF..."
 // accounts.eth[0].short → "0xABCD...CDEF"
@@ -143,36 +136,36 @@ APDU command parsing and response building for the Ledger BLE protocol.
 ### Handler
 
 ```typescript
-import { handleApdu, setCurrentApp, setSignRequestHandler, setLogFn } from '@iron-vault/apdu';
+import { handleApdu, setCurrentApp, setSignRequestHandler, setLogFn, setMnemonicProvider } from '@iron-vault/apdu';
 
-// Set active app context ("Ethereum" | "Solana")
+// Provide mnemonic for signing operations
+setMnemonicProvider(() => currentMnemonic);
+
+// Set active app context ("Ethereum" | "Solana" | "Bitcoin" | ...)
 setCurrentApp('Ethereum');
 
-// Register sign callback (called when SIGN_ETH_TX APDU arrives)
+// Register deferred sign callback (called when SIGN APDU arrives)
 setSignRequestHandler(async (req) => {
-  // req.chain, req.rawHex, req.decoded, req.sign
-  return req.sign();  // returns hex signature string
+  return new Promise((resolve) => {
+    setPendingTx({ ...req, resolve: (sig) => resolve(sig), reject: () => resolve('6985') });
+    go('Transaction');
+  });
 });
 
 // Process incoming APDU hex string, returns response hex
 const responseHex = await handleApdu(incomingHex);
 ```
 
-### Supported Commands (Ethereum App)
+### Supported Commands
 
-| INS | Command | Description |
-|-----|---------|-------------|
-| `0x01` | GET_VERSION | Returns firmware version |
-| `0x01` (CLA=B0) | GET_APP_AND_VERSION | Returns "Ethereum 1.10.4" |
-| `0x02` | GET_ETH_ADDRESS | Returns public key + address for path |
-| `0x04` | SIGN_ETH_TX | Signs RLP-encoded transaction |
-
-### Supported Commands (Solana App)
-
-| INS | Command | Description |
-|-----|---------|-------------|
-| `0x05` | GET_PUBKEY | Returns Ed25519 public key for path |
-| `0x06` | SIGN_MESSAGE | Signs transaction message |
+| CLA | INS | Command | Description |
+|-----|-----|---------|-------------|
+| `E0` | `01` | GET_VERSION | Returns firmware version |
+| `B0` | `01` | GET_APP_AND_VERSION | Returns current app name + version |
+| `E0` | `02` | GET_ETH_ADDRESS | Returns public key + address for BIP-32 path |
+| `E0` | `04` | SIGN_ETH_TX | Signs RLP-encoded Ethereum transaction |
+| `E0` | `05` | GET_SOL_PUBKEY | Returns Ed25519 public key for path |
+| `E0` | `06` | SIGN_SOL_MSG | Signs Solana transaction message |
 
 ---
 
@@ -181,30 +174,58 @@ const responseHex = await handleApdu(incomingHex);
 Design tokens for React Native screens.
 
 ```typescript
-import { C, R } from '@iron-vault/theme';
+import { DARK, LIGHT, C, R } from '@iron-vault/theme';
+// C = DARK (backward-compatible default)
 ```
 
-### Color Tokens (`C`)
+In React Native components:
+```tsx
+const C = useTheme();                           // returns DARK or LIGHT ColorTokens
+const s = useMemo(() => makeStyles(C), [C]);    // always memoize
+```
+
+### Color Tokens
+
+#### DARK
 
 ```
-C.bg               '#121212'  — dark background
-C.surface          '#1A1A1A'  — card/sheet surface
-C.surfaceContainer '#222222'  — elevated container
-C.surfaceContainerHigh '#2A2A2A'
-C.surfaceContainerLow  '#181818'
-C.border           '#2A2A2A'
-C.borderVariant    '#333333'
-C.primary          '#8FC322'  — lime green accent
-C.onPrimary        '#0A1200'
-C.error            '#CF6679'
-C.text             '#FFFFFF'
-C.text2            '#9AA0A6'  — secondary text
-C.textDisabled     '#555555'
+C.primary             '#8FC322'  — lime green CTA / accent
+C.onPrimary           '#0D1A00'
+C.bg                  '#0F0F0F'  — screen background
+C.surface             '#1A1A1A'  — cards, sheets
+C.surfaceContainer    '#242424'  — elevated container
+C.surfaceContainerLow '#1E1E1E'  — subtle recessed surface
+C.text                '#F0F0F0'  — primary text
+C.text2               '#9AA0A6'  — secondary text
+C.textDisabled        '#555555'
+C.border              '#2A2A2A'
+C.borderVariant       '#333333'
+C.error               '#CF6679'
+C.errorContainer      rgba(207,102,121,0.12)
+C.primary8            rgba(143,195,34,0.08)   — tinted backgrounds
+C.primary12           rgba(143,195,34,0.12)
+C.primary15           rgba(143,195,34,0.15)
+C.primary25           rgba(143,195,34,0.25)
+```
+
+#### LIGHT
+
+```
+C.primary             '#5f8a0e'
+C.onPrimary           '#F3F7E6'
+C.bg                  '#FFFFFF'
+C.surface             '#FFFFFF'
+C.surfaceContainer    '#F5F5F5'
+C.surfaceContainerLow '#FAFAFA'
+C.text                '#1A2200'
+C.text2               '#5A6640'
+C.textDisabled        '#9AA88A'
+C.border              '#C8D8A0'
+C.borderVariant       '#D0DDB8'
 ```
 
 ### Radius Tokens (`R`)
 
 ```
-R.sm   8    R.lg  16
-R.md  12    R.xl  20
+R.sm   6    R.lg  12    R.xl  18
 ```

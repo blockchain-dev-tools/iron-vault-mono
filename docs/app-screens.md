@@ -4,35 +4,44 @@ Individual screen specs live in [`docs/design/screens/`](./design/screens/).
 
 ## Screen Index
 
-| Route ID | Description | File |
-|----------|-------------|------|
-| `welcome` | Entry point — create or import wallet | [welcome.md](./design/screens/welcome/) |
-| `generate-mnemonic` | Display generated 12-word mnemonic | [generate-mnemonic.md](./design/screens/generate-mnemonic/) |
-| `verify-mnemonic` | Confirm mnemonic by selecting words | [verify-mnemonic.md](./design/screens/verify-mnemonic/) |
-| `set-pin` | Set 6-digit PIN (two-phase confirmation) | [set-pin.md](./design/screens/set-pin/) |
-| `import-mnemonic` | Import existing BIP-39 mnemonic | [import-mnemonic.md](./design/screens/import-mnemonic/) |
-| `wallet-manager` | Home — accounts by chain, connect OKX | [wallet-manager.md](./design/screens/wallet-manager/) |
-| `settings` | App config, security, BLE name, about | [settings.md](./design/screens/settings/) |
-| `pin-unlock` | Cold-start PIN gate | [pin-unlock.md](./design/screens/pin-unlock/) |
-| `account-detail` | BLE control + activity log for an account | [account-detail.md](./design/screens/account-detail/) |
-| `transaction-confirm` | Sign or reject incoming transaction | [transaction-confirm.md](./design/screens/transaction-confirm/) |
+| Screen | Purpose | Design Spec |
+|--------|---------|-------------|
+| `Welcome` | Entry point — create / import / Enigma wallet | [welcome/](./design/screens/welcome/) |
+| `Entropy` | Collect 200 touch-point randomness → SHA-256 → mnemonic | — |
+| `GenerateMnemonic` | Display 12/24-word mnemonic; BIP-39 language picker; optional passphrase | [generate-mnemonic/](./design/screens/generate-mnemonic/) |
+| `VerifyMnemonic` | Quiz words at positions 3, 7, 11 (4-choice each) | [verify-mnemonic/](./design/screens/verify-mnemonic/) |
+| `ImportMnemonic` | Free-text BIP-39 import with live word autocomplete | [import-mnemonic/](./design/screens/import-mnemonic/) |
+| `Enigma` | Deterministic wallet: riddle text + salt → 24-word mnemonic | — |
+| `EnigmaMnemonic` | Shows Enigma-derived mnemonic; skips verify quiz | — |
+| `SetPin` | Two-phase 6-digit PIN setup; doubles as Change PIN | [set-pin/](./design/screens/set-pin/) |
+| `Vault` | 5 chain sections (ETH, SOL, BTC, Tron, Sui); BLE connect sheet | [wallet-manager/](./design/screens/wallet-manager/) |
+| `AccountDetail` | Address QR, derivation path, BLE toggle, log viewer | [account-detail/](./design/screens/account-detail/) |
+| `Transaction` | Sign approval: network / action / from / to / amount / gas | [transaction-confirm/](./design/screens/transaction-confirm/) |
+| `Settings` | Appearance, language, security, BLE device name, app version | [settings/](./design/screens/settings/) |
+| `PinUnlock` | Cold-start PIN gate; max 5 attempts then lockout | [pin-unlock/](./design/screens/pin-unlock/) |
+| `BackupSeed` | PIN-gated seed reveal; language re-encoding | — |
 
 ## Navigation Flow
 
 ```
-welcome
- ├── generate-mnemonic → verify-mnemonic → set-pin → wallet-manager
- └── import-mnemonic  ──────────────────→ set-pin → wallet-manager
+Welcome
+ ├── Entropy → GenerateMnemonic → VerifyMnemonic → SetPin → Vault
+ ├── Enigma  → EnigmaMnemonic  ──────────────────→ SetPin → Vault
+ └── ImportMnemonic ───────────────────────────────SetPin → Vault
 
-wallet-manager
- ├── account-detail → transaction-confirm → account-detail
- └── settings
+[cold start with wallet] → PinUnlock → Vault
 
-[cold start with mnemonic] → pin-unlock → wallet-manager
+Vault ↔ Settings → BackupSeed
+Vault → AccountDetail → Transaction → AccountDetail
 ```
+
+**Navigation rules:**
+- Auth success → `reset('Vault')` — never `go('Vault')`
+- Reset wallet → `reset('Welcome')`
+- Back buttons → `goBack()` — never `go('Vault')`
 
 ## Component Overlays
 
-| Component | Triggered From | File |
-|-----------|---------------|------|
-| Connect OKX Sheet | `wallet-manager` | [connect-okx-sheet.md](./design/screens/connect-okx-sheet/) |
+| Component | Triggered From |
+|-----------|---------------|
+| Connect OKX Sheet | `Vault` | [connect-okx-sheet/](./design/screens/connect-okx-sheet/) |

@@ -2,7 +2,7 @@
 
 **Version:** 0.1
 **Date:** 2026-03-28
-**Status:** Draft
+**Status:** Archived — historical planning document. The implementation has since evolved significantly. See [architecture.md](../architecture.md) and [CLAUDE.md](../../CLAUDE.md) for current state.
 
 ---
 

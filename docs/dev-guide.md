@@ -4,8 +4,8 @@
 
 - Node.js >= 20.19.0 (use nvm)
 - pnpm >= 9.0.0
-- For mobile: Android Studio + JDK 17
-- For web debugger / prototype: Chrome or Edge (Web Bluetooth API required)
+- For mobile: Android Studio + JDK 17 (set `JAVA_HOME` to your local JDK 17 path)
+- For web prototype: Chrome or Edge (Web Bluetooth API required)
 
 ## Running Apps
 
@@ -16,43 +16,72 @@ pnpm install
 # Run all apps in dev mode
 pnpm dev
 
-# Run specific apps
-pnpm --filter prototype dev     # http://localhost:3002
-pnpm --filter debugger dev      # http://localhost:3001
+# Prototype only (http://localhost:3002)
+pnpm --filter prototype dev
+```
 
-# If pnpm --filter fails with "Cannot find module next", use root .bin directly:
-cd apps/prototype && node_modules/.bin/next dev -p 3002
+## Mobile (React Native) — Android
+
+**Makefile (recommended):**
+
+```bash
+make metro          # Start Metro bundler + ADB forwarding
+make restart        # Restart Metro
+make stop           # Stop Metro
+make metro-log      # Tail Metro log
+make metro-status   # Check if Metro running
+make adb            # ADB reverse forwarding only (after daemon restart)
+make build          # Build debug APK
+make install        # Install APK to device
+make app            # build + install
+make launch         # Force-stop + reopen app
+make dev            # metro + launch
+make all            # build + install + metro + launch
+```
+
+**Manual commands:**
+
+```bash
+# Build APK
+cd apps/mobile/android
+./gradlew assembleDebug
+# Output: app/build/outputs/apk/debug/app-debug.apk
+
+# Metro bundler (must run as foreground process)
+cd apps/mobile && npx react-native start --reset-cache
+
+# ADB forwarding (required after every daemon restart)
+adb reverse tcp:8081 tcp:8081
+
+# App control
+adb shell am start -n com.ironvault/.MainActivity
+adb shell am force-stop com.ironvault
 ```
 
 ## Type Checking
 
 ```bash
-# Must run from monorepo root, not app dir
+# Run from monorepo root
 pnpm exec tsc --noEmit -p apps/prototype/tsconfig.json
 pnpm exec tsc --noEmit -p apps/mobile/tsconfig.json
-```
-
-## Mobile (React Native)
-
-```bash
-pnpm --filter @iron-vault/mobile start   # Metro bundler
-pnpm --filter @iron-vault/mobile android # Run on Android device
+pnpm exec tsc --noEmit -p packages/wallet/tsconfig.json
 ```
 
 ## Package Dependency Graph
 
 ```
 @iron-vault/theme        (no deps)
-      ↑
+@iron-vault/i18n         (no deps)
+
 @iron-vault/crypto       (@noble/curves, @noble/hashes, @scure/bip32, @scure/bip39)
-      ↑
+
 @iron-vault/apdu         (→ @iron-vault/crypto)
 
 @iron-vault/wallet       (→ @iron-vault/crypto, @noble/hashes)
       ↑
 apps/prototype          (→ @iron-vault/wallet, @iron-vault/apdu, @iron-vault/theme)
 apps/mobile             (→ @iron-vault/wallet, @iron-vault/apdu, @iron-vault/theme,
-                            react-native-keychain, react-native-get-random-values)
+                            @iron-vault/i18n, react-native-keychain)
 ```
 
 ## Import Path Notes
@@ -78,14 +107,13 @@ import { sha256 } from '@noble/hashes/sha256';
 1. Add constant to `packages/apdu/src/index.ts`
 2. Add parser branch in `packages/apdu/src/parser.ts`
 3. Add handler branch in `packages/apdu/src/handler.ts`
-4. Add preset button in `apps/debugger/app/page.tsx`
-5. Add decode branch in `apps/debugger/lib/apdu-commands.ts`
 
 ## Project Conventions
 
 - TypeScript strict mode everywhere
 - `packages/crypto` must remain platform-free (no RN, no browser APIs)
 - `packages/wallet` service functions take `WalletStorage` as first argument — never import storage directly
-- Screen names: `p01`–`p11` (prototype) / `P01`–`P11` (mobile)
-- Colors and radius from `@iron-vault/theme` only — never hardcoded in mobile screens
+- Colors and radius from `@iron-vault/theme` only — never hardcoded in mobile screens (`const C = useTheme()`)
 - APDU constants in `packages/apdu` — never hardcoded in app layer
+- Metro must run as a **foreground** process (background processes may be killed)
+- `.npmrc` has `node-linker=hoisted` + `shamefully-hoist=true` — required for Gradle + Metro
