@@ -185,6 +185,16 @@ async function handleContinue(data: Uint8Array): Promise<string> {
     const privKey = session.privKey!;
     clearBtcSession();
 
+    // Validate PSBT magic bytes: 0x70 0x73 0x62 0x74 0xFF
+    if (
+      msgBytes.length < 5 ||
+      msgBytes[0] !== 0x70 || msgBytes[1] !== 0x73 ||
+      msgBytes[2] !== 0x62 || msgBytes[3] !== 0x74 || msgBytes[4] !== 0xff
+    ) {
+      ulog('[BTC PSBT] invalid magic bytes — rejecting');
+      return '6a80';
+    }
+
     const hash = sha256d(msgBytes);
     return await maybeDeferred(
       'btc', msgBytes,

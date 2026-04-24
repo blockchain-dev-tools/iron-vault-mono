@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { handleApdu, setMnemonicProvider, setCurrentApp, resetSharedState } from '../handler';
+import { handleApdu, setMnemonicProvider, setCurrentApp, resetSharedState, setSignRequestHandler } from '../handler';
 
 const TEST_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 
@@ -13,6 +13,7 @@ beforeEach(() => {
   resetSharedState();
   setMnemonicProvider(async () => TEST_MNEMONIC);
   setCurrentApp('Ethereum');
+  setSignRequestHandler(async (req) => req.sign());
 });
 
 describe('ETH App (CLA E0)', () => {

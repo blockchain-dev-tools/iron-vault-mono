@@ -1,7 +1,7 @@
-import React, { useMemo, useRef, useEffect, useState } from 'react';
+import React, { useMemo, useRef, useEffect, useState, useCallback } from 'react';
 import { Animated, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { unlockWallet, clearWallet } from '@iron-vault/wallet';
+import { unlockWallet, clearWallet, getPinAttempts, incrementPinAttempts, resetPinAttempts } from '@iron-vault/wallet';
 import { walletStorage } from '../../lib/storage';
 import { useApp, useTheme, useLocale, EMPTY_ACCOUNTS } from '../../store/AppContext';
 import type { ColorTokens } from '@iron-vault/theme';
@@ -25,6 +25,11 @@ export default function PinUnlockScreen() {
   const insets = useSafeAreaInsets();
   const locked = attempts >= MAX_ATTEMPTS;
 
+  // Load persisted attempt count on mount so it survives app restarts
+  useEffect(() => {
+    getPinAttempts(walletStorage).then(n => setAttempts(n));
+  }, []);
+
   // Animated values for cross-fade between PinPad and loading dots
   const padOpacity = useRef(new Animated.Value(1)).current;
   const dotOpacity = useRef(new Animated.Value(0)).current;
@@ -36,7 +41,7 @@ export default function PinUnlockScreen() {
     ]).start();
   }, [loading, padOpacity, dotOpacity]);
 
-  const handleComplete = async (entered: string, reset: () => void) => {
+  const handleComplete = useCallback(async (entered: string, reset: () => void) => {
     if (locked) return;
     setLoading(true);
     // Yield 2 frames so React can re-render + start animations before PBKDF2 blocks the JS thread
@@ -44,24 +49,26 @@ export default function PinUnlockScreen() {
     try {
       const result = await unlockWallet(walletStorage, entered);
       if (result) {
+        await resetPinAttempts(walletStorage);
         setAccounts(result);
         navReset('Vault');
       } else {
+        const n = await incrementPinAttempts(walletStorage);
         setLoading(false);
-        setAttempts(n => n + 1);
+        setAttempts(n);
         setError(true);
         reset();
         setTimeout(() => setError(false), 900);
       }
     } catch (e: any) {
-      console.error('[PinUnlock] error:', e?.message ?? String(e));
+      const n = await incrementPinAttempts(walletStorage);
       setLoading(false);
-      setAttempts(n => n + 1);
+      setAttempts(n);
       setError(true);
       reset();
       setTimeout(() => setError(false), 900);
     }
-  };
+  }, [locked, setAccounts, navReset]);
 
   const handleResetWallet = () => {
     Alert.alert(

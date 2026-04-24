@@ -1,4 +1,6 @@
 import { mnemonicToSeed } from '@iron-vault/crypto';
+import { sha256 } from '@noble/hashes/sha2.js';
+import { bytesToHex } from '@noble/hashes/utils.js';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -28,7 +30,7 @@ export const S = {
   _uiLog: null as ((msg: string) => void) | null,
   _mnemonicProvider: null as (() => Promise<string | null>) | null,
   _signHandler: null as ((req: SignRequestData) => Promise<string>) | null,
-  _seedCache: null as { mnemonic: string; seed: Uint8Array } | null,
+  _seedCache: null as { mnemonicHash: string; seed: Uint8Array } | null,
   ethSign: null as EthSignSession | null,
   ethPersonal: null as EthPersonalSession | null,
   solSign: null as SolSignSession | null,
@@ -52,9 +54,10 @@ export async function requireSeed(): Promise<Uint8Array> {
   if (!S._mnemonicProvider) throw new Error('No mnemonic provider set');
   const mnemonic = await S._mnemonicProvider();
   if (!mnemonic) throw new Error('No mnemonic available');
-  if (S._seedCache && S._seedCache.mnemonic === mnemonic) return S._seedCache.seed;
+  const mnemonicHash = bytesToHex(sha256(new TextEncoder().encode(mnemonic)));
+  if (S._seedCache && S._seedCache.mnemonicHash === mnemonicHash) return S._seedCache.seed;
   const seed = await mnemonicToSeed(mnemonic);
-  S._seedCache = { mnemonic, seed };
+  S._seedCache = { mnemonicHash, seed };
   return seed;
 }
 
@@ -121,11 +124,11 @@ export async function maybeDeferred(
   chain: SignRequestData['chain'], raw: Uint8Array,
   sign: () => string, extra: Partial<SignRequestData>,
 ): Promise<string> {
-  if (!S._signHandler) return sign() + '9000';
+  if (!S._signHandler) { ulog('[APDU] no sign handler — rejecting'); return '6985'; }
   try {
     const result = await S._signHandler({ chain, raw, sign, ...extra } as SignRequestData);
     return result === '6985' ? '6985' : result + '9000';
-  } catch { return sign() + '9000'; }
+  } catch (e) { ulog('[APDU] sign handler error: ' + (e as Error)?.message); return '6985'; }
 }
 
 export interface ERC20Info { ticker: string; contractAddr: string; decimals: number; chainId: number; }

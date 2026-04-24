@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { handleApdu, setMnemonicProvider, setCurrentApp, resetSharedState } from '../handler';
+import { handleApdu, setMnemonicProvider, setCurrentApp, resetSharedState, setSignRequestHandler } from '../handler';
 
 const TEST_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 
@@ -7,6 +7,7 @@ beforeEach(() => {
   resetSharedState();
   setMnemonicProvider(async () => TEST_MNEMONIC);
   setCurrentApp('Solana');
+  setSignRequestHandler(async (req) => req.sign());
 });
 
 // m/44'/501'/0'/0'/0' — count(1) + 5×4 bytes = 42 hex chars

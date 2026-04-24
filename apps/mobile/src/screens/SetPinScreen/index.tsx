@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import { setupWallet } from '@iron-vault/wallet';
+import { setupWallet, updatePin } from '@iron-vault/wallet';
 import { walletStorage } from '../../lib/storage';
 import { useApp, useTheme, useLocale } from '../../store/AppContext';
 import type { ColorTokens } from '@iron-vault/theme';
@@ -36,14 +36,13 @@ export default function SetPinScreen() {
         setLoading(true);
         await new Promise<void>(resolve => setTimeout(resolve, 32));
         try {
-          const mnemonic = isChangingPin
-            ? (await walletStorage.getItem('wallet.mnemonic')) ?? ''
-            : generatedWords.join(mnemonicLang === 'ja' ? '\u3000' : ' ');
-          const accts = await setupWallet(walletStorage, mnemonic, pin, passphrase);
-          setAccounts(accts);
           if (isChangingPin) {
+            await updatePin(walletStorage, pin);
             goBack();
           } else {
+            const mnemonic = generatedWords.join(mnemonicLang === 'ja' ? '\u3000' : ' ');
+            const accts = await setupWallet(walletStorage, mnemonic, pin, passphrase);
+            setAccounts(accts);
             setGeneratedWords([]);
             setPassphrase('');
             setMnemonicEntropy(null);

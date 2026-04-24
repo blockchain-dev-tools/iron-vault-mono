@@ -1,11 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { handleApdu, setMnemonicProvider, resetSharedState } from '../handler';
+import { handleApdu, setMnemonicProvider, resetSharedState, setSignRequestHandler } from '../handler';
 
 const TEST_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 
 beforeEach(() => {
   resetSharedState();
   setMnemonicProvider(async () => TEST_MNEMONIC);
+  setSignRequestHandler(async (req) => req.sign());
 });
 
 // BIP84 path m/84'/0'/0' — count(1) + 3×4 bytes = 26 hex chars
@@ -96,11 +97,12 @@ describe('BTC New App (CLA E1)', () => {
     });
 
     it('CONTINUE (F8 01) with final data returns signature + 9000', async () => {
-      const initPayload = BIP84_PATH + 'cafebabe';
+      // PSBT magic: 70 73 62 74 ff followed by dummy payload
+      const initPayload = BIP84_PATH + '70736274ff';
       const lc1 = (initPayload.length / 2).toString(16).padStart(2, '0');
       await handleApdu(`e1040000${lc1}${initPayload}`);
 
-      const continueData = 'deadbeef01020304';
+      const continueData = '01020304';
       const lc2 = (continueData.length / 2).toString(16).padStart(2, '0');
       const res = await handleApdu(`f8010000${lc2}${continueData}`);
       expect(res).toMatch(/9000$/);

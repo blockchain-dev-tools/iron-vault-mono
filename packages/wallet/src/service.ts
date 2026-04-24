@@ -22,6 +22,7 @@ const PIN_KDF_KEY       = 'wallet.pinKdf';
 const PIN_HASH_KEY      = 'wallet.pinHash';
 const MNEMONIC_KEY      = 'wallet.mnemonic';
 const ACCOUNT_PATHS_KEY = 'wallet.accountPaths';
+const PIN_ATTEMPTS_KEY  = 'wallet.pinAttempts';
 
 interface PathEntry { path: string; custom: boolean; }
 interface AccountPaths {
@@ -54,6 +55,39 @@ async function kdfPin(pin: string, salt: Uint8Array): Promise<Uint8Array> {
 /** @deprecated Used only for transparent migration of existing SHA-256 hashes. */
 function legacyHash(pin: string): string {
   return bytesToHex(sha256(new TextEncoder().encode(pin)));
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  const enc = new TextEncoder();
+  const ab = enc.encode(a);
+  const bb = enc.encode(b);
+  let diff = 0;
+  for (let i = 0; i < ab.length; i++) diff |= ab[i]! ^ bb[i]!;
+  return diff === 0;
+}
+
+export async function getPinAttempts(s: WalletStorage): Promise<number> {
+  const raw = await s.getItem(PIN_ATTEMPTS_KEY);
+  return raw ? parseInt(raw, 10) || 0 : 0;
+}
+
+export async function incrementPinAttempts(s: WalletStorage): Promise<number> {
+  const current = await getPinAttempts(s);
+  const next = current + 1;
+  await s.setItem(PIN_ATTEMPTS_KEY, String(next));
+  return next;
+}
+
+export async function resetPinAttempts(s: WalletStorage): Promise<void> {
+  await s.removeItem(PIN_ATTEMPTS_KEY);
+}
+
+export async function updatePin(s: WalletStorage, newPin: string): Promise<void> {
+  const salt = randomBytes(16);
+  const hash = await kdfPin(newPin, salt);
+  await s.setItem(PIN_KDF_KEY, `${bytesToHex(salt)}:${bytesToHex(hash)}`);
+  await s.removeItem(PIN_HASH_KEY);
 }
 
 function migrateEntries(arr: unknown[]): PathEntry[] {
@@ -130,12 +164,12 @@ export async function verifyPin(s: WalletStorage, pin: string): Promise<boolean>
     const salt = hexToBytes(kdfEntry.slice(0, colon));
     const storedHash = kdfEntry.slice(colon + 1);
     const computed = await kdfPin(pin, salt);
-    return bytesToHex(computed) === storedHash;
+    return timingSafeEqual(bytesToHex(computed), storedHash);
   }
 
   // Legacy SHA-256 migration path
   const legacyEntry = await s.getItem(PIN_HASH_KEY);
-  if (legacyEntry && legacyEntry === legacyHash(pin)) {
+  if (legacyEntry && timingSafeEqual(legacyEntry, legacyHash(pin))) {
     const salt = randomBytes(16);
     const hash = await kdfPin(pin, salt);
     await s.setItem(PIN_KDF_KEY, `${bytesToHex(salt)}:${bytesToHex(hash)}`);
@@ -201,4 +235,5 @@ export async function clearWallet(s: WalletStorage): Promise<void> {
   await s.removeItem(PIN_HASH_KEY);
   await s.removeItem(MNEMONIC_KEY);
   await s.removeItem(ACCOUNT_PATHS_KEY);
+  await s.removeItem(PIN_ATTEMPTS_KEY);
 }

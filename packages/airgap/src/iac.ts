@@ -25,11 +25,21 @@ export function decodeIACMessage(qr: string): IACMessage {
     throw new Error(`Invalid base58check: ${(e as Error).message}`)
   }
 
+  // Pre-inflate size guard: QR code payloads are tiny; reject oversized compressed data
+  // before allocating decompression memory (zip-bomb defence).
+  const MAX_COMPRESSED = 100 * 1024 // 100 KB
+  if (compressed.length > MAX_COMPRESSED) {
+    throw new Error('Compressed payload too large')
+  }
+
   let cbor: Uint8Array
   try {
     cbor = inflate(compressed)
   } catch (e) {
     throw new Error(`Decompression failed: ${(e as Error).message}`)
+  }
+  if (cbor.length > 1 * 1024 * 1024) {
+    throw new Error('Decompressed payload exceeds 1 MB limit')
   }
 
   let wrapper: unknown
@@ -130,6 +140,7 @@ export function assembleIACChunks(chunks: IACChunk[]): IACMessage {
   if (chunks.length === 0) throw new Error('No chunks provided')
 
   const total = chunks[0].total
+  if (total > 200) throw new Error('Too many chunks: exceeds limit of 200')
   if (chunks.length !== total) {
     throw new Error(`Expected ${total} chunks, got ${chunks.length}`)
   }
@@ -161,8 +172,16 @@ export function assembleIACChunks(chunks: IACChunk[]): IACMessage {
     offset += p.length
   }
 
+  // Pre-inflate size guard before decompressing assembled chunks
+  if (compressed.length > 100 * 1024) {
+    throw new Error('Assembled compressed payload too large')
+  }
+
   // Inflate and decode CBOR
   const cbor = inflate(compressed)
+  if (cbor.length > 1 * 1024 * 1024) {
+    throw new Error('Decompressed payload exceeds 1 MB limit')
+  }
   const wrapper = decode(Buffer.from(cbor)) as unknown[]
   if (!Array.isArray(wrapper) || wrapper.length < 2) {
     throw new Error('Invalid reassembled IAC wrapper')

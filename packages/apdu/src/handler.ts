@@ -17,7 +17,13 @@ export { getLastToken, getLastNft, getLastDomain } from './handlers/shared';
 
 // ── Public API (setters) ──────────────────────────────────────────────────────
 
+const VALID_APPS = new Set(['Ethereum', 'Solana', 'Bitcoin', 'Tron', 'Sui', 'BOLOS']);
+
 export function setCurrentApp(app: string) {
+  if (!VALID_APPS.has(app)) {
+    ulog(`[APP] setCurrentApp rejected: unknown app "${app}"`);
+    return;
+  }
   shared.S.currentApp = app;
   ulog(`[APP] switched to ${app}`);
 }
@@ -47,7 +53,15 @@ export async function handleApdu(hexApdu: string): Promise<string> {
     // ── OS layer (always checked first, regardless of currentApp) ─────────────
     // OPEN_APP — E0 D8
     if (cla === 0xe0 && ins === 0xd8) {
-      if (data.length > 0) shared.S.currentApp = new TextDecoder().decode(data);
+      if (data.length > 0) {
+        const name = new TextDecoder().decode(data);
+        const VALID_APPS = new Set(['Ethereum', 'Solana', 'Bitcoin', 'Tron', 'Sui', 'BOLOS']);
+        if (!VALID_APPS.has(name)) {
+          ulog(`[OS] OPEN_APP rejected: unknown app "${name}"`);
+          return '6a80';
+        }
+        shared.S.currentApp = name;
+      }
       ulog(`[OS] OPEN_APP → ${shared.S.currentApp}`);
       return '9000';
     }
