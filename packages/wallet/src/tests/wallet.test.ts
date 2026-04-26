@@ -57,10 +57,16 @@ describe('setupWallet + verifyPin', () => {
     expect(await s1.getItem('wallet.pinKdf')).not.toBe(await s2.getItem('wallet.pinKdf'));
   });
 
-  it('does NOT store passphrase in storage', async () => {
+  it('persists passphrase in storage so unlock re-derives correctly', async () => {
     const s = makeStorage();
     await setupWallet(s, TEST_MNEMONIC, '123456', 'secret-passphrase');
-    expect(await s.getItem('wallet.passphrase')).toBeNull();
+    expect(await s.getItem('wallet.passphrase')).toBe('secret-passphrase');
+  });
+
+  it('persists empty passphrase when none provided', async () => {
+    const s = makeStorage();
+    await setupWallet(s, TEST_MNEMONIC, '123456');
+    expect(await s.getItem('wallet.passphrase')).toBe('');
   });
 });
 
@@ -94,6 +100,32 @@ describe('legacy SHA-256 migration', () => {
     expect(await verifyPin(s, '000000')).toBe(false);
     // Legacy entry should still be present (no upgrade on wrong PIN)
     expect(await s.getItem('wallet.pinHash')).not.toBeNull();
+  });
+});
+
+describe('unlockWallet + passphrase', () => {
+  it('unlockWallet returns same addresses as setupWallet when passphrase is set', async () => {
+    const s = makeStorage();
+    const setup = await setupWallet(s, TEST_MNEMONIC, '123456', 'my-passphrase');
+    const unlock = await unlockWallet(s, '123456');
+    expect(unlock).not.toBeNull();
+    expect(unlock!.eth[0].full).toBe(setup.eth[0].full);
+    expect(unlock!.sol[0].full).toBe(setup.sol[0].full);
+  });
+
+  it('passphrase-derived address differs from no-passphrase address', async () => {
+    const s1 = makeStorage();
+    const s2 = makeStorage();
+    const withPassphrase = await setupWallet(s1, TEST_MNEMONIC, '123456', 'my-passphrase');
+    const noPassphrase  = await setupWallet(s2, TEST_MNEMONIC, '123456', '');
+    expect(withPassphrase.eth[0].full).not.toBe(noPassphrase.eth[0].full);
+  });
+
+  it('clearWallet removes persisted passphrase', async () => {
+    const s = makeStorage();
+    await setupWallet(s, TEST_MNEMONIC, '123456', 'secret');
+    await clearWallet(s);
+    expect(await s.getItem('wallet.passphrase')).toBeNull();
   });
 });
 

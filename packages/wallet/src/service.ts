@@ -21,6 +21,7 @@ export type Chain = 'eth' | 'sol' | 'btc' | 'tron' | 'sui';
 const PIN_KDF_KEY       = 'wallet.pinKdf';
 const PIN_HASH_KEY      = 'wallet.pinHash';
 const MNEMONIC_KEY      = 'wallet.mnemonic';
+const PASSPHRASE_KEY    = 'wallet.passphrase';
 const ACCOUNT_PATHS_KEY = 'wallet.accountPaths';
 const PIN_ATTEMPTS_KEY  = 'wallet.pinAttempts';
 
@@ -141,6 +142,7 @@ export async function setupWallet(
   await s.setItem(PIN_KDF_KEY, `${bytesToHex(salt)}:${bytesToHex(hash)}`);
   await s.removeItem(PIN_HASH_KEY);
   await s.setItem(MNEMONIC_KEY, mnemonic);
+  await s.setItem(PASSPHRASE_KEY, passphrase);
   await s.setItem(ACCOUNT_PATHS_KEY, JSON.stringify(DEFAULT_PATHS));
   return deriveFrom(mnemonic, DEFAULT_PATHS, passphrase);
 }
@@ -153,7 +155,8 @@ export async function unlockWallet(
   const mnemonic = await s.getItem(MNEMONIC_KEY);
   if (!mnemonic) return null;
   const paths = await readPaths(s);
-  return deriveFrom(mnemonic, paths);
+  const passphrase = (await s.getItem(PASSPHRASE_KEY)) ?? '';
+  return deriveFrom(mnemonic, paths, passphrase);
 }
 
 export async function verifyPin(s: WalletStorage, pin: string): Promise<boolean> {
@@ -184,7 +187,8 @@ export async function getAccounts(s: WalletStorage): Promise<WalletAccounts | nu
   const mnemonic = await s.getItem(MNEMONIC_KEY);
   if (!mnemonic) return null;
   const paths = await readPaths(s);
-  return deriveFrom(mnemonic, paths);
+  const passphrase = (await s.getItem(PASSPHRASE_KEY)) ?? '';
+  return deriveFrom(mnemonic, paths, passphrase);
 }
 
 export async function addAccount(
@@ -196,16 +200,17 @@ export async function addAccount(
   const mnemonic = await s.getItem(MNEMONIC_KEY);
   if (!mnemonic) return null;
   const paths = await readPaths(s);
+  const passphrase = (await s.getItem(PASSPHRASE_KEY)) ?? '';
 
   if (paths[chain].some(e => e.path === path)) {
-    return deriveFrom(mnemonic, paths);
+    return deriveFrom(mnemonic, paths, passphrase);
   }
   const newPaths: AccountPaths = {
     ...paths,
     [chain]: [...paths[chain], { path, custom }],
   };
   await s.setItem(ACCOUNT_PATHS_KEY, JSON.stringify(newPaths));
-  return deriveFrom(mnemonic, newPaths);
+  return deriveFrom(mnemonic, newPaths, passphrase);
 }
 
 export async function removeAccount(
@@ -216,13 +221,14 @@ export async function removeAccount(
   const mnemonic = await s.getItem(MNEMONIC_KEY);
   if (!mnemonic) return null;
   const paths = await readPaths(s);
+  const passphrase = (await s.getItem(PASSPHRASE_KEY)) ?? '';
   const filtered = paths[chain].filter(e => e.path !== path);
   if (filtered.length === paths[chain].length) {
-    return deriveFrom(mnemonic, paths);
+    return deriveFrom(mnemonic, paths, passphrase);
   }
   const newPaths: AccountPaths = { ...paths, [chain]: filtered };
   await s.setItem(ACCOUNT_PATHS_KEY, JSON.stringify(newPaths));
-  return deriveFrom(mnemonic, newPaths);
+  return deriveFrom(mnemonic, newPaths, passphrase);
 }
 
 export async function revealMnemonic(s: WalletStorage, pin: string): Promise<string | null> {
@@ -234,6 +240,7 @@ export async function clearWallet(s: WalletStorage): Promise<void> {
   await s.removeItem(PIN_KDF_KEY);
   await s.removeItem(PIN_HASH_KEY);
   await s.removeItem(MNEMONIC_KEY);
+  await s.removeItem(PASSPHRASE_KEY);
   await s.removeItem(ACCOUNT_PATHS_KEY);
   await s.removeItem(PIN_ATTEMPTS_KEY);
 }
