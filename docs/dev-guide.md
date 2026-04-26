@@ -117,3 +117,45 @@ import { sha256 } from '@noble/hashes/sha256';
 - APDU constants in `packages/apdu` — never hardcoded in app layer
 - Metro must run as a **foreground** process (background processes may be killed)
 - `.npmrc` has `node-linker=hoisted` + `shamefully-hoist=true` — required for Gradle + Metro
+
+## Release Build (Android)
+
+### Signing setup
+
+The release keystore file (`release.keystore`) and its credentials are **never committed to git**.
+
+**Local development** — create `apps/mobile/android/keystore.properties` (gitignored):
+
+```properties
+STORE_PASSWORD=your-store-password
+KEY_ALIAS=your-key-alias
+KEY_PASSWORD=your-key-password
+```
+
+See `apps/mobile/android/keystore.properties.example` for the template.
+
+**CI/CD** — set environment variables instead:
+
+```
+KEYSTORE_STORE_PASSWORD
+KEYSTORE_KEY_ALIAS
+KEYSTORE_KEY_PASSWORD
+```
+
+The `release.keystore` file itself must be provisioned separately (e.g. downloaded from a secrets manager or CI secret file) into `apps/mobile/android/app/` before building.
+
+### Building a release APK
+
+```bash
+cd apps/mobile/android
+./gradlew assembleRelease
+# Output: app/build/outputs/apk/release/app-release.apk
+```
+
+### Building a release AAB (Play Store)
+
+```bash
+cd apps/mobile/android
+./gradlew bundleRelease
+# Output: app/build/outputs/bundle/release/app-release.aab
+```

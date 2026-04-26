@@ -6,5 +6,6 @@ build/
 *.aar
 *.so
 local.properties
+keystore.properties
 .cxx/
 *.keystore
