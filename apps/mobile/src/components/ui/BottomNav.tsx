@@ -51,7 +51,7 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     backgroundColor: C.surface, borderTopWidth: 1, borderTopColor: C.border,
   },
   item: { flex: 1, alignItems: 'center', gap: 3, paddingVertical: 2, borderRadius: 12 },
-  itemActive: { backgroundColor: C.primary12 },
+  itemActive: {},
   label: { color: C.textDisabled, fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', fontFamily: Fonts.spaceGrotesk.semiBold },
   labelActive: { color: C.primary },
 });
