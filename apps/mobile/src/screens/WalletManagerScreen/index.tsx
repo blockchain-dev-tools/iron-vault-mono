@@ -82,7 +82,7 @@ export default function WalletManagerScreen() {
 
         <ChainSection
           label={t.vault.ethLabel} sub={t.vault.ethSub}
-          iconNode={<ChainIcon chain="eth" size={22} />}
+          iconNode={<ChainIcon chain="eth" size={40} />}
           accounts={accounts.eth}
           connectLabel={t.vault.connect}
           accountLabel={t.vault.account}
@@ -94,7 +94,7 @@ export default function WalletManagerScreen() {
 
         <ChainSection
           label={t.vault.solLabel} sub={t.vault.solSub}
-          iconNode={<ChainIcon chain="sol" size={22} />}
+          iconNode={<ChainIcon chain="sol" size={40} />}
           accounts={accounts.sol}
           connectLabel={t.vault.connect}
           accountLabel={t.vault.account}
@@ -106,7 +106,7 @@ export default function WalletManagerScreen() {
 
         <ChainSection
           label={t.vault.btcLabel} sub={t.vault.btcSub}
-          iconNode={<ChainIcon chain="btc" size={22} />}
+          iconNode={<ChainIcon chain="btc" size={40} />}
           accounts={accounts.btc}
           connectLabel={t.vault.connect}
           accountLabel={t.vault.account}
@@ -118,7 +118,7 @@ export default function WalletManagerScreen() {
 
         <ChainSection
           label={t.vault.tronLabel} sub={t.vault.tronSub}
-          iconNode={<ChainIcon chain="tron" size={22} />}
+          iconNode={<ChainIcon chain="tron" size={40} />}
           accounts={accounts.tron}
           connectLabel={t.vault.connect}
           accountLabel={t.vault.account}
@@ -130,7 +130,7 @@ export default function WalletManagerScreen() {
 
         <ChainSection
           label={t.vault.suiLabel} sub={t.vault.suiSub}
-          iconNode={<ChainIcon chain="sui" size={22} />}
+          iconNode={<ChainIcon chain="sui" size={40} />}
           accounts={accounts.sui}
           connectLabel={t.vault.connect}
           accountLabel={t.vault.account}

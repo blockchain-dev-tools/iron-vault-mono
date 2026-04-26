@@ -71,7 +71,7 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   section: { gap: 10 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   chainLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  chainIconWrap: { width: 40, height: 40, borderRadius: 20, backgroundColor: C.surfaceContainer, alignItems: 'center', justifyContent: 'center' },
+  chainIconWrap: { width: 40, height: 40, borderRadius: 20, overflow: 'hidden' },
   chainLabel: { color: C.text, fontSize: 20, fontFamily: Fonts.spaceGrotesk.bold },
   chainSub: { color: C.text2, fontSize: 12, fontFamily: 'monospace' },
   btnRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
