@@ -128,7 +128,7 @@ function deriveFrom(mnemonic: string, paths: AccountPaths, passphrase = '') {
 }
 
 export async function hasWallet(s: WalletStorage): Promise<boolean> {
-  return (await s.getItem(MNEMONIC_KEY)) !== null;
+  return (await s.getItem(PIN_KDF_KEY)) !== null;
 }
 
 export async function setupWallet(
