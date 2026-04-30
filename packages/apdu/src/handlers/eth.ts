@@ -1,5 +1,5 @@
 import {
-  deriveEthPrivateKey, ethPubKeyToAddress,
+  deriveEthPrivateKey, ethPubKeyToAddress, tronAddressFromPrivKey,
   signEthTransaction, signEthPersonalMessage, signEthEip712,
 } from '@iron-vault/crypto';
 import { parseBip32Path, rlpTotalLength, bytesToHex } from '../parser';
@@ -124,8 +124,24 @@ async function handleGetEthAddress(p2: number, data: Uint8Array): Promise<string
   const { path } = parseBip32Path(data);
   const seed = await requireSeed();
   const privKey = deriveEthPrivateKey(seed, path);
-  const { pubKey, address } = ethPubKeyToAddress(privKey);
 
+  // Tron coin type = 195 (hardened: 0x800000C3). OKX sends E0 02 with Tron paths;
+  // respond with Tron base58 address instead of Ethereum hex.
+  const isTronPath = path.length >= 2 && path[1] === (0x80000000 | 195);
+  if (isTronPath) {
+    const { uncompressedPubKey, address } = tronAddressFromPrivKey(privKey);
+    const addrBytes = new TextEncoder().encode(address);
+    const resp = new Uint8Array(1 + 65 + 1 + addrBytes.length + 2);
+    let i = 0;
+    resp[i++] = 0x41;
+    resp.set(uncompressedPubKey, i); i += 65;
+    resp[i++] = addrBytes.length;
+    resp.set(addrBytes, i); i += addrBytes.length;
+    resp[i++] = 0x90; resp[i] = 0x00;
+    return bytesToHex(resp);
+  }
+
+  const { pubKey, address } = ethPubKeyToAddress(privKey);
   const addrBytes = new TextEncoder().encode(address);
   const chainCode = new Uint8Array(32); // zeroed (simplified)
   const extraLen = withChainCode ? 32 : 0;

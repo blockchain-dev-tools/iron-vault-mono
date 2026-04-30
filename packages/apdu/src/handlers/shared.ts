@@ -29,6 +29,7 @@ export const S = {
   currentApp: 'Ethereum' as string,
   _uiLog: null as ((msg: string) => void) | null,
   _mnemonicProvider: null as (() => Promise<string | null>) | null,
+  _passphrase: '' as string,
   _signHandler: null as ((req: SignRequestData) => Promise<string>) | null,
   _seedCache: null as { mnemonicHash: string; seed: Uint8Array } | null,
   ethSign: null as EthSignSession | null,
@@ -54,9 +55,10 @@ export async function requireSeed(): Promise<Uint8Array> {
   if (!S._mnemonicProvider) throw new Error('No mnemonic provider set');
   const mnemonic = await S._mnemonicProvider();
   if (!mnemonic) throw new Error('No mnemonic available');
-  const mnemonicHash = bytesToHex(sha256(new TextEncoder().encode(mnemonic)));
+  const cacheKey = mnemonic + '\0' + S._passphrase;
+  const mnemonicHash = bytesToHex(sha256(new TextEncoder().encode(cacheKey)));
   if (S._seedCache && S._seedCache.mnemonicHash === mnemonicHash) return S._seedCache.seed;
-  const seed = await mnemonicToSeed(mnemonic);
+  const seed = await mnemonicToSeed(mnemonic, S._passphrase);
   S._seedCache = { mnemonicHash, seed };
   return seed;
 }
@@ -116,7 +118,7 @@ export function clearSignSessions(): void {
 }
 export function resetSharedState(): void {
   S.currentApp = 'Ethereum'; S._uiLog = null; S._mnemonicProvider = null;
-  S._signHandler = null; S._seedCache = null;
+  S._passphrase = ''; S._signHandler = null; S._seedCache = null;
   clearSignSessions();
 }
 

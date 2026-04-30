@@ -42,6 +42,11 @@ export function setSignRequestHandler(fn: ((req: SignRequestData) => Promise<str
   shared.S._signHandler = fn;
 }
 
+export function setPassphrase(passphrase: string) {
+  shared.S._passphrase = passphrase;
+  shared.S._seedCache = null; // invalidate cache when passphrase changes
+}
+
 export type { SignRequestData } from './handlers/shared';
 
 // ── Main APDU dispatcher ──────────────────────────────────────────────────────
@@ -74,6 +79,10 @@ export async function handleApdu(hexApdu: string): Promise<string> {
     // GET_VERSION (E0 01) + GET_APP_AND_VERSION (B0 01) + GET_DEVICE_INFO (E0 E2)
     const osResult = await handleOs(cla, ins, p1, p2, data);
     if (osResult !== null) return osResult;
+
+    // B0 A7 — sent by newer Ledger SDKs (1inch/connect-kit) after getAppAndVersion.
+    // Unknown purpose; returning 9000 lets the SDK proceed past the polling loop.
+    if (cla === 0xb0 && ins === 0xa7) return '9000';
 
     // ── App-specific routing ──────────────────────────────────────────────────
     // BTC New App (CLA E1 or F8 for CONTINUE)

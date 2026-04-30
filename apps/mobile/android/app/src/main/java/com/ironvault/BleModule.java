@@ -179,8 +179,8 @@ public class BleModule extends ReactContextBaseJavaModule {
         if (value == null || value.length == 0) return;
         emitLog("← RX: " + hex(value));
         if (value[0] == LedgerBleConstants.TAG_MTU) {
-            byte[] resp = {0x08, 0x00, 0x00, 0x00, 0x00, (byte) mtu};
-            sendNotification(device, resp);
+            byte[] resp = {0x08, 0x00, 0x00, 0x00, 0x02, (byte)((mtu >> 8) & 0xFF), (byte)(mtu & 0xFF)};
+            new Handler(Looper.getMainLooper()).post(() -> sendNotification(device, resp));
             emitLog("→ MTU 响应: " + mtu);
         } else if (value[0] == LedgerBleConstants.TAG_APDU) {
             handleApduChunk(device, value);
@@ -244,7 +244,8 @@ public class BleModule extends ReactContextBaseJavaModule {
     private void sendNotification(BluetoothDevice device, byte[] data) {
         if (gattServer == null || notifyChar == null) return;
         notifyChar.setValue(data);
-        gattServer.notifyCharacteristicChanged(device, notifyChar, false);
+        boolean ok = gattServer.notifyCharacteristicChanged(device, notifyChar, false);
+        if (!ok) emitLog("⚠ notifyCharacteristicChanged 返回 false");
     }
 
     // ── GATT Callbacks ────────────────────────────────────────────────────────
@@ -269,6 +270,16 @@ public class BleModule extends ReactContextBaseJavaModule {
         public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId,
             BluetoothGattCharacteristic c, boolean prep, boolean needResp, int offset, byte[] value) {
             if (needResp) gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
+            // Re-track device in case notifyDevice was cleared by stop/restart
+            // while this device's GATT connection was still alive.
+            if (!connectedDevices.containsKey(device.getAddress())) {
+                connectedDevices.put(device.getAddress(), device);
+                emitLog("重新追踪设备: " + device.getAddress());
+            }
+            if (notifyDevice == null) {
+                notifyDevice = device;
+                emitLog("通知目标已恢复: " + device.getAddress());
+            }
             handleWrite(device, value);
         }
 
@@ -290,6 +301,12 @@ public class BleModule extends ReactContextBaseJavaModule {
         public void onMtuChanged(BluetoothDevice device, int mtu) {
             BleModule.this.mtu = mtu - 3;
             emitLog("ATT MTU → 帧大小: " + BleModule.this.mtu);
+        }
+
+        @Override
+        public void onNotificationSent(BluetoothDevice device, int status) {
+            if (status == BluetoothGatt.GATT_SUCCESS) emitLog("✓ 通知已送达: " + device.getAddress());
+            else emitLog("✗ 通知发送失败 status=" + status + " device=" + device.getAddress());
         }
     };
 

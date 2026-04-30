@@ -105,18 +105,6 @@ export default function WalletManagerScreen() {
         />
 
         <ChainSection
-          label={t.vault.btcLabel} sub={t.vault.btcSub}
-          iconNode={<ChainIcon chain="btc" size={40} />}
-          accounts={accounts.btc}
-          connectLabel={t.vault.connect}
-          accountLabel={t.vault.account}
-          addLabel={t.vault.addAccount}
-          onConnect={() => openConnectSheet('btc')}
-          onAccountClick={idx => openAccount('btc', idx)}
-          onAddAccount={() => setAddSheet('btc')}
-        />
-
-        <ChainSection
           label={t.vault.tronLabel} sub={t.vault.tronSub}
           iconNode={<ChainIcon chain="tron" size={40} />}
           accounts={accounts.tron}
@@ -126,18 +114,6 @@ export default function WalletManagerScreen() {
           onConnect={() => openConnectSheet('tron')}
           onAccountClick={idx => openAccount('tron', idx)}
           onAddAccount={() => setAddSheet('tron')}
-        />
-
-        <ChainSection
-          label={t.vault.suiLabel} sub={t.vault.suiSub}
-          iconNode={<ChainIcon chain="sui" size={40} />}
-          accounts={accounts.sui}
-          connectLabel={t.vault.connect}
-          accountLabel={t.vault.account}
-          addLabel={t.vault.addAccount}
-          onConnect={() => openConnectSheet('sui')}
-          onAccountClick={idx => openAccount('sui', idx)}
-          onAddAccount={() => setAddSheet('sui')}
         />
 
         <View style={{ height: 100 }} />

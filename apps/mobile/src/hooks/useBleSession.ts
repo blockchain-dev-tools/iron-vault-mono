@@ -6,6 +6,7 @@ import {
   setCurrentApp,
   setSignRequestHandler,
   setMnemonicProvider,
+  setPassphrase,
   clearSignSessions,
 } from '@iron-vault/apdu';
 import { walletStorage } from '../lib/storage';
@@ -58,6 +59,7 @@ export function useBleSession(
     if (!activeChain) return;
 
     setMnemonicProvider(() => walletStorage.getItem('wallet.mnemonic'));
+    walletStorage.getItem('wallet.passphrase').then(p => setPassphrase(p ?? ''));
     setCurrentApp(CHAIN_APP_NAME[activeChain] ?? 'Ethereum');
     setLogFn(addLog);
 
