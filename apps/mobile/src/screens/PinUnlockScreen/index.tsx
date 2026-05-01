@@ -1,27 +1,30 @@
 import React, { useMemo, useRef, useEffect, useState, useCallback } from 'react';
-import { Animated, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { unlockWallet, clearWallet, getPinAttempts, incrementPinAttempts, resetPinAttempts } from '@iron-vault/wallet';
+import { unlockWallet, verifyPin, clearWallet, getPinAttempts, incrementPinAttempts, resetPinAttempts } from '@iron-vault/wallet';
 import { walletStorage } from '../../lib/storage';
 import { useApp, useTheme, useLocale, EMPTY_ACCOUNTS } from '../../store/AppContext';
 import type { ColorTokens } from '@iron-vault/theme';
 import PinPad from '../../components/ui/PinPad';
-import PinDots from '../../components/ui/PinDots';
 import PinLoadingSpinner from '../../components/ui/PinLoadingSpinner';
 import BgLines from '../../components/ui/BgLines';
 import IronVaultHero from '../../components/ui/IronVaultHero';
 import { Fonts } from '../../lib/fonts';
+import { R } from '@iron-vault/theme';
 
 const MAX_ATTEMPTS = 5;
 
 export default function PinUnlockScreen() {
-  const { reset: navReset, setAccounts } = useApp();
+  const { reset: navReset, setAccounts, setPassphrase, storePassphraseEnabled } = useApp();
   const C = useTheme();
   const t = useLocale();
   const s = useMemo(() => makeStyles(C), [C]);
   const [attempts, setAttempts] = useState(0);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [phase, setPhase] = useState<'pin' | 'passphrase'>('pin');
+  const [passphraseInput, setPassphraseInput] = useState('');
+  const verifiedPin = useRef('');
   const insets = useSafeAreaInsets();
   const locked = attempts >= MAX_ATTEMPTS;
 
@@ -41,34 +44,65 @@ export default function PinUnlockScreen() {
     ]).start();
   }, [loading, padOpacity, dotOpacity]);
 
-  const handleComplete = useCallback(async (entered: string, reset: () => void) => {
-    if (locked) return;
+  const finishUnlock = useCallback(async (pin: string, passphrase: string) => {
     setLoading(true);
-    // Yield 2 frames so React can re-render + start animations before PBKDF2 blocks the JS thread
     await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     try {
-      const result = await unlockWallet(walletStorage, entered);
+      const result = await unlockWallet(walletStorage, pin, passphrase || undefined);
       if (result) {
         await resetPinAttempts(walletStorage);
         setAccounts(result);
+        setPassphrase(passphrase);
         navReset('Vault');
       } else {
         const n = await incrementPinAttempts(walletStorage);
         setLoading(false);
         setAttempts(n);
         setError(true);
-        reset();
+        setPhase('pin');
+        setPassphraseInput('');
         setTimeout(() => setError(false), 900);
       }
-    } catch (e: any) {
+    } catch {
       const n = await incrementPinAttempts(walletStorage);
       setLoading(false);
       setAttempts(n);
       setError(true);
-      reset();
+      setPhase('pin');
+      setPassphraseInput('');
       setTimeout(() => setError(false), 900);
     }
-  }, [locked, setAccounts, navReset]);
+  }, [setAccounts, setPassphrase, navReset]);
+
+  const handleComplete = useCallback(async (entered: string, reset: () => void) => {
+    if (locked) return;
+    verifiedPin.current = entered;
+
+    if (!storePassphraseEnabled) {
+      // Verify PIN first without deriving accounts, then ask for passphrase
+      setLoading(true);
+      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      const valid = await verifyPin(walletStorage, entered);
+      setLoading(false);
+      if (valid) {
+        await resetPinAttempts(walletStorage);
+        setPhase('passphrase');
+      } else {
+        const n = await incrementPinAttempts(walletStorage);
+        setAttempts(n);
+        setError(true);
+        reset();
+        setTimeout(() => setError(false), 900);
+      }
+    } else {
+      await finishUnlock(entered, '');
+      reset();
+    }
+  }, [locked, storePassphraseEnabled, finishUnlock]);
+
+  const handlePassphraseConfirm = useCallback(() => {
+    finishUnlock(verifiedPin.current, passphraseInput);
+  }, [passphraseInput, finishUnlock]);
 
   const handleResetWallet = () => {
     Alert.alert(
@@ -100,10 +134,36 @@ export default function PinUnlockScreen() {
         <IronVaultHero />
 
         <Text style={s.sub}>
-          {locked ? t.pinUnlock.locked : loading ? t.pinUnlock.verifying : t.pinUnlock.enterPin}
+          {locked
+            ? t.pinUnlock.locked
+            : loading
+            ? t.pinUnlock.verifying
+            : phase === 'passphrase'
+            ? t.pinUnlock.passphraseTitle
+            : t.pinUnlock.enterPin}
         </Text>
 
-        {!locked && (
+        {phase === 'passphrase' && !locked && !loading && (
+          <View style={s.passphraseArea}>
+            <Text style={s.passphraseSub}>{t.pinUnlock.passphraseSubtitle}</Text>
+            <TextInput
+              style={s.passphraseInput}
+              value={passphraseInput}
+              onChangeText={setPassphraseInput}
+              placeholder={t.pinUnlock.passphrasePlaceholder}
+              placeholderTextColor={C.textDisabled}
+              secureTextEntry
+              autoFocus
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <TouchableOpacity style={s.confirmBtn} onPress={handlePassphraseConfirm} activeOpacity={0.7}>
+              <Text style={s.confirmBtnText}>{t.pinUnlock.passphraseConfirm}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {phase === 'pin' && !locked && (
           <View style={s.pinArea}>
             {/* Loading dots — fades in, absolutely overlays PinPad */}
             <Animated.View
@@ -119,7 +179,7 @@ export default function PinUnlockScreen() {
           </View>
         )}
 
-        {attempts > 0 && !locked && !loading && (
+        {attempts > 0 && !locked && !loading && phase === 'pin' && (
           <Text style={s.warning}>{t.pinUnlock.attemptsLeft(MAX_ATTEMPTS - attempts)}</Text>
         )}
         {locked && (
@@ -154,4 +214,23 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   resetBtnLargeText: { color: C.error, fontSize: 15, fontFamily: Fonts.spaceGrotesk.bold },
   resetLink: { alignItems: 'center', paddingVertical: 12 },
   resetLinkText: { color: C.textDisabled, fontSize: 12, textDecorationLine: 'underline' },
+  passphraseArea: { width: '100%', marginTop: 8, gap: 12 },
+  passphraseSub: { color: C.text2, fontSize: 13, textAlign: 'center' },
+  passphraseInput: {
+    backgroundColor: C.surfaceContainer,
+    borderRadius: R.lg,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    color: C.text,
+    fontSize: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: C.border,
+  },
+  confirmBtn: {
+    backgroundColor: C.primary,
+    borderRadius: R.lg,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  confirmBtnText: { color: '#fff', fontSize: 16, fontFamily: Fonts.spaceGrotesk.bold },
 });

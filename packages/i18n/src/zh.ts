@@ -78,6 +78,10 @@ export const ZH: Translations = {
     resetTitle: '重置账户',
     resetMessage: '此操作将永久删除所有钱包数据。请确认你已备份助记词，否则资产将无法找回。',
     resetConfirm: '确认重置',
+    passphraseTitle: '输入密语',
+    passphraseSubtitle: '未设置密语时留空即可',
+    passphraseConfirm: '确认',
+    passphrasePlaceholder: 'BIP-39 密语（可选）',
   },
   vault: {
     title: '资产库',
@@ -169,6 +173,7 @@ export const ZH: Translations = {
     security: '安全',
     changePin: '修改 PIN',
     backupSeed: '备份助记词',
+    storePassphrase: '在设备上存储密语',
     autoLock: '自动锁定',
     autoLockValue: '5 分钟',
     bluetooth: '蓝牙',

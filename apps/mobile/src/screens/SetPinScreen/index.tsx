@@ -37,7 +37,7 @@ export default function SetPinScreen() {
         await new Promise<void>(resolve => setTimeout(resolve, 32));
         try {
           if (isChangingPin) {
-            await updatePin(walletStorage, pin);
+            await updatePin(walletStorage, pin, passphrase);
             goBack();
           } else {
             const mnemonic = generatedWords.join(mnemonicLang === 'ja' ? '\u3000' : ' ');

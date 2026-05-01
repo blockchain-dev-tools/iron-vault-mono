@@ -10,7 +10,7 @@ import React, {
 import { AppState, useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { WalletAccounts } from '@iron-vault/wallet';
-import { addAccount as serviceAddAccount, removeAccount as serviceRemoveAccount } from '@iron-vault/wallet';
+import { addAccount as serviceAddAccount, removeAccount as serviceRemoveAccount, clearStoredPassphrase } from '@iron-vault/wallet';
 import type { Chain } from '@iron-vault/wallet';
 import type { Bip39Language } from '@iron-vault/wallet';
 import { DARK, LIGHT } from '@iron-vault/theme';
@@ -21,8 +21,9 @@ import { walletStorage } from '../lib/storage';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type { LocaleMode };
-const THEME_KEY = 'app.theme';
-const LOCALE_KEY = 'app.locale';
+const THEME_KEY            = 'app.theme';
+const LOCALE_KEY           = 'app.locale';
+const STORE_PASSPHRASE_KEY = 'app.storePassphrase';
 
 export type ScreenName =
   | 'Welcome' | 'Entropy' | 'GenerateMnemonic' | 'VerifyMnemonic' | 'SetPin' | 'ImportMnemonic'
@@ -82,6 +83,8 @@ interface AppCtx {
   setThemeMode: (mode: ThemeMode) => void;
   localeMode: LocaleMode;
   setLocaleMode: (mode: LocaleMode) => void;
+  storePassphraseEnabled: boolean;
+  setStorePassphraseEnabled: (enabled: boolean) => void;
 }
 
 const Ctx = createContext<AppCtx | null>(null);
@@ -125,6 +128,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [pendingTx, setPendingTx] = useState<PendingTx | null>(null);
   const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
   const [localeMode, setLocaleModeState] = useState<LocaleMode>('system');
+  const [storePassphraseEnabled, setStorePassphraseState] = useState(true);
 
   // Refs for accessing latest values inside stable effects
   const stackRef = useRef(stack);
@@ -148,6 +152,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               Object.values(accountsRef.current).some(arr => arr.length > 0);
             if (hasWalletData && (PROTECTED_SCREENS as string[]).includes(currentScreen)) {
               setAccounts(EMPTY_ACCOUNTS);
+              setPassphrase('');
               setDirection('reset');
               setStack([{ name: 'Unlock' }]);
             }
@@ -159,12 +164,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []); // stable: setters are from useState (never change) + refs
 
   useEffect(() => {
-    AsyncStorage.multiGet([THEME_KEY, LOCALE_KEY]).then(pairs => {
+    AsyncStorage.multiGet([THEME_KEY, LOCALE_KEY, STORE_PASSPHRASE_KEY]).then(pairs => {
       const saved = Object.fromEntries(pairs);
       const t = saved[THEME_KEY];
       if (t === 'light' || t === 'dark' || t === 'system') setThemeModeState(t);
       const l = saved[LOCALE_KEY];
       if (l === 'en' || l === 'zh' || l === 'ja' || l === 'ko' || l === 'system') setLocaleModeState(l);
+      if (saved[STORE_PASSPHRASE_KEY] === 'false') setStorePassphraseState(false);
     });
   }, []);
 
@@ -176,6 +182,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const setLocaleMode = useCallback((mode: LocaleMode) => {
     setLocaleModeState(mode);
     AsyncStorage.setItem(LOCALE_KEY, mode);
+  }, []);
+
+  const setStorePassphraseEnabled = useCallback((enabled: boolean) => {
+    setStorePassphraseState(enabled);
+    AsyncStorage.setItem(STORE_PASSPHRASE_KEY, String(enabled));
+    if (!enabled) clearStoredPassphrase(walletStorage);
   }, []);
 
   const current = stack[stack.length - 1];
@@ -202,13 +214,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setCurrentAcctIdx(idx);
   }, []);
 
+  const passphraseRef = useRef(passphrase);
+  useEffect(() => { passphraseRef.current = passphrase; }, [passphrase]);
+
   const addAccount = useCallback(async (chain: Chain, path: string, custom: boolean) => {
-    const updated = await serviceAddAccount(walletStorage, chain, path, custom);
+    const updated = await serviceAddAccount(walletStorage, chain, path, custom, passphraseRef.current);
     if (updated) setAccounts(updated);
   }, []);
 
   const removeAccount = useCallback(async (chain: Chain, path: string) => {
-    const updated = await serviceRemoveAccount(walletStorage, chain, path);
+    const updated = await serviceRemoveAccount(walletStorage, chain, path, passphraseRef.current);
     if (updated) setAccounts(updated);
   }, []);
 
@@ -227,9 +242,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       pendingTx, setPendingTx,
       themeMode, setThemeMode,
       localeMode, setLocaleMode,
+      storePassphraseEnabled, setStorePassphraseEnabled,
     }),
     [current, direction, canGoBack, previous, accounts, generatedWords, mnemonicEntropy, mnemonicLang, passphrase,
-     currentChain, currentAcctIdx, bleState, pendingTx, themeMode, localeMode,
+     currentChain, currentAcctIdx, bleState, pendingTx, themeMode, localeMode, storePassphraseEnabled,
      addAccount, removeAccount],
   );
 

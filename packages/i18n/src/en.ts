@@ -76,6 +76,10 @@ export const EN = {
     resetTitle: 'Reset Account',
     resetMessage: 'This will permanently delete all wallet data. Make sure you have your seed phrase backed up.',
     resetConfirm: 'Confirm Reset',
+    passphraseTitle: 'Enter Passphrase',
+    passphraseSubtitle: 'Leave blank if no passphrase was set',
+    passphraseConfirm: 'Confirm',
+    passphrasePlaceholder: 'BIP-39 passphrase (optional)',
   },
   vault: {
     title: 'Vault',
@@ -167,6 +171,7 @@ export const EN = {
     security: 'Security',
     changePin: 'Change PIN',
     backupSeed: 'Backup Seed Phrase',
+    storePassphrase: 'Store passphrase on device',
     autoLock: 'Auto-lock',
     autoLockValue: '5 min',
     bluetooth: 'Bluetooth',

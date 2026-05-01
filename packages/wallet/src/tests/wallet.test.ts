@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { setupWallet, unlockWallet, verifyPin, hasWallet, getAccounts, clearWallet } from '../service';
+import { setupWallet, unlockWallet, verifyPin, hasWallet, getAccounts, clearWallet, hasStoredPassphrase } from '../service';
 import type { WalletStorage } from '../types';
 
 const TEST_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
@@ -57,16 +57,19 @@ describe('setupWallet + verifyPin', () => {
     expect(await s1.getItem('wallet.pinKdf')).not.toBe(await s2.getItem('wallet.pinKdf'));
   });
 
-  it('persists passphrase in storage so unlock re-derives correctly', async () => {
+  it('encrypts passphrase in storage so unlock re-derives correctly', async () => {
     const s = makeStorage();
     await setupWallet(s, TEST_MNEMONIC, '123456', 'secret-passphrase');
-    expect(await s.getItem('wallet.passphrase')).toBe('secret-passphrase');
+    // Stored encrypted, not plaintext
+    expect(await s.getItem('wallet.passphrase')).toBeNull();
+    expect(await hasStoredPassphrase(s)).toBe(true);
   });
 
-  it('persists empty passphrase when none provided', async () => {
+  it('does not persist empty passphrase', async () => {
     const s = makeStorage();
     await setupWallet(s, TEST_MNEMONIC, '123456');
-    expect(await s.getItem('wallet.passphrase')).toBe('');
+    expect(await s.getItem('wallet.passphrase')).toBeNull();
+    expect(await hasStoredPassphrase(s)).toBe(false);
   });
 });
 
@@ -125,7 +128,8 @@ describe('unlockWallet + passphrase', () => {
     const s = makeStorage();
     await setupWallet(s, TEST_MNEMONIC, '123456', 'secret');
     await clearWallet(s);
-    expect(await s.getItem('wallet.passphrase')).toBeNull();
+    expect(await s.getItem('wallet.passphraseEnc')).toBeNull();
+    expect(await hasStoredPassphrase(s)).toBe(false);
   });
 });
 

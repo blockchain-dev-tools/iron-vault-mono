@@ -78,6 +78,10 @@ export const KO: Translations = {
     resetTitle: '계정 초기화',
     resetMessage: '모든 지갑 데이터가 영구적으로 삭제됩니다. 시드 문구를 백업해 두었는지 확인하세요.',
     resetConfirm: '초기화 확인',
+    passphraseTitle: '패스프레이즈 입력',
+    passphraseSubtitle: '설정하지 않은 경우 비워 두세요',
+    passphraseConfirm: '확인',
+    passphrasePlaceholder: 'BIP-39 패스프레이즈(선택)',
   },
   vault: {
     title: '볼트',
@@ -169,6 +173,7 @@ export const KO: Translations = {
     security: '보안',
     changePin: 'PIN 변경',
     backupSeed: '시드 문구 백업',
+    storePassphrase: '기기에 패스프레이즈 저장',
     autoLock: '자동 잠금',
     autoLockValue: '5분',
     bluetooth: '블루투스',

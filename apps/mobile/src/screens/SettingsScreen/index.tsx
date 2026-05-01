@@ -22,6 +22,7 @@ export default function SettingsScreen() {
     setAccounts, setBleState,
     themeMode, setThemeMode,
     localeMode, setLocaleMode,
+    storePassphraseEnabled, setStorePassphraseEnabled,
   } = useApp();
   const C = useTheme();
   const t = useLocale();
@@ -84,6 +85,11 @@ export default function SettingsScreen() {
         <View style={s.card}>
           <SettingRow label={t.settings.changePin} onPress={() => go('SetPin')} />
           <SettingRow label={t.settings.backupSeed} onPress={() => go('BackupSeed')} />
+          <SettingRow
+            label={t.settings.storePassphrase}
+            switchValue={storePassphraseEnabled}
+            onSwitchChange={setStorePassphraseEnabled}
+          />
           <SettingRow label={t.settings.autoLock} value={t.settings.autoLockValue} last />
         </View>
 

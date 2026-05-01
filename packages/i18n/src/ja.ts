@@ -78,6 +78,10 @@ export const JA: Translations = {
     resetTitle: 'アカウントをリセット',
     resetMessage: 'これによりすべてのウォレットデータが完全に削除されます。シードフレーズのバックアップを確認してください。',
     resetConfirm: 'リセットを確認',
+    passphraseTitle: 'パスフレーズを入力',
+    passphraseSubtitle: '設定していない場合は空欄のままにしてください',
+    passphraseConfirm: '確認',
+    passphrasePlaceholder: 'BIP-39 パスフレーズ（任意）',
   },
   vault: {
     title: 'ボルト',
@@ -169,6 +173,7 @@ export const JA: Translations = {
     security: 'セキュリティ',
     changePin: 'PINを変更',
     backupSeed: 'シードフレーズをバックアップ',
+    storePassphrase: 'デバイスにパスフレーズを保存',
     autoLock: '自動ロック',
     autoLockValue: '5分',
     bluetooth: 'Bluetooth',
