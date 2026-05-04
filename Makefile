@@ -99,6 +99,13 @@ launch: ## Force-stop + reopen app
 	@$(ADB) shell am start -n $(BUNDLE_ID)/.MainActivity
 	@echo "✓ App launched"
 
+# ── Website ────────────────────────────────────────────────
+
+.PHONY: website
+website: ## Start website dev server (http://localhost:3003)
+	@echo "▶ Starting website (Next.js) on http://localhost:3003..."
+	@cd apps/website && npx next dev -p 3003
+
 # ── Utilities ──────────────────────────────────────────────
 
 .PHONY: clean

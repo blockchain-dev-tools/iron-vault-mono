@@ -18,6 +18,9 @@ pnpm dev
 
 # Prototype only (http://localhost:3002)
 pnpm --filter prototype dev
+
+# Website only (marketing site, http://localhost:3003)
+pnpm --filter @iron-vault/website dev
 ```
 
 ## Mobile (React Native) — Android
@@ -37,6 +40,12 @@ make app            # build + install
 make launch         # Force-stop + reopen app
 make dev            # metro + launch
 make all            # build + install + metro + launch
+
+**Website:**
+
+```bash
+make website        # Start marketing site dev server (http://localhost:3003)
+```
 ```
 
 **Manual commands:**
