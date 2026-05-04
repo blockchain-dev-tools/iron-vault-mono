@@ -62,7 +62,6 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     backgroundColor: C.surfaceContainer, borderRadius: R.lg,
     paddingHorizontal: 16, paddingVertical: 14,
-    borderWidth: 1.5, borderColor: C.borderVariant,
   },
   value: { color: C.text, fontSize: 15 },
   overlay: {
@@ -73,7 +72,6 @@ const makeStyles = (C: ColorTokens) => StyleSheet.create({
   menu: {
     width: '100%', backgroundColor: C.surface,
     borderRadius: R.xl, overflow: 'hidden',
-    borderWidth: 1, borderColor: C.borderVariant,
   },
   item: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
