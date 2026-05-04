@@ -18,12 +18,11 @@ export default function TopBar() {
   return (
     <header className="h-14 flex items-center justify-between px-6 border-b border-outline-variant bg-surface flex-shrink-0">
       <div className="flex items-center gap-2">
-        <span
-          className="material-symbols-outlined text-primary"
-          style={{ fontVariationSettings: "'FILL' 1" }}
-        >
-          shield
-        </span>
+        <svg width={22} height={24} viewBox="0 0 80 92" className="text-primary" fill="currentColor">
+          <path fillRule="evenodd" d="M40 0 80 18v34c0 20-20 36-40 40C20 88 0 72 0 52V18L40 0ZM29 34h22q4 0 4 5v18q0 5-4 5H29q-4 0-4-5V39q0-5 4-5Zm1 0q0-9 10-9t10 9Zm3 0q0-5 7-5t7 5Z" />
+          <circle cx="40" cy="46" r="4" />
+          <rect x="39" y="50" width="2" height="7" rx="1" />
+        </svg>
         <span className="font-headline font-bold text-on-surface">IRON Vault</span>
         <span className="font-label text-xs text-on-surface-variant ml-1">DevTools</span>
       </div>
