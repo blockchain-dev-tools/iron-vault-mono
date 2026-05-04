@@ -5,7 +5,7 @@ description: "从宿主扫描到 APDU 就绪状态的完整 BLE 连接步骤。"
 
 ## 概述
 
-在交换任何 APDU 命令之前，宿主应用与 OldPhone Wallet 必须完成一套固定的握手流程。这套流程与真实 Ledger Nano X 的行为完全相同，因为 OKX Wallet 和 MetaMask 底层都使用了 `@ledgerhq/hw-transport-web-ble`（或其 React Native 版本），该库对握手序列有硬性要求。
+在交换任何 APDU 命令之前，宿主应用与 IRON Vault 必须完成一套固定的握手流程。这套流程与真实 Ledger Nano X 的行为完全相同，因为 OKX Wallet 和 MetaMask 底层都使用了 `@ledgerhq/hw-transport-web-ble`（或其 React Native 版本），该库对握手序列有硬性要求。
 
 在现代 Android 设备上，从扫描到 APDU 就绪整个握手通常在两秒内完成。
 
@@ -14,7 +14,7 @@ description: "从宿主扫描到 APDU 就绪状态的完整 BLE 连接步骤。"
 ## 连接时序图
 
 ```
-宿主应用                              OldPhone Wallet（Android）
+宿主应用                              IRON Vault（Android）
    |                                          |
    |  1. BLE 主动扫描                          |
    |<---- ADV_IND：服务 UUID ---------------- |  广播数据
@@ -62,7 +62,7 @@ description: "从宿主扫描到 APDU 就绪状态的完整 BLE 连接步骤。"
 
 ### 第 1 步 — BLE 主动扫描
 
-宿主发起主动扫描。OldPhone Wallet 的广播数据中包含 Ledger 服务 UUID（`13d63400-2c97-0004-0000-4c6564676572`），扫描响应中包含设备名称 `"Nano X"`。宿主库按服务 UUID 过滤，因此可以立即识别到设备。
+宿主发起主动扫描。IRON Vault 的广播数据中包含 Ledger 服务 UUID（`13d63400-2c97-0004-0000-4c6564676572`），扫描响应中包含设备名称 `"Nano X"`。宿主库按服务 UUID 过滤，因此可以立即识别到设备。
 
 ### 第 2 步 — GATT 连接
 
@@ -159,4 +159,4 @@ MCU version= "1.13\0"
 - **MetaMask** 在每次连接时无条件发送 `OPEN_APP "Ethereum"`，不管当前激活的是什么 App。
 - **OKX** 先读取 GET_APP_AND_VERSION，仅当 App 名称与目标链不符时才发送 OPEN_APP。
 
-这意味着 OldPhone Wallet 必须准确追踪并响应 GET_APP_AND_VERSION，不能始终返回固定值，否则 OKX 会因为 App 名称已匹配而跳过 OPEN_APP，导致链状态不同步。
+这意味着 IRON Vault 必须准确追踪并响应 GET_APP_AND_VERSION，不能始终返回固定值，否则 OKX 会因为 App 名称已匹配而跳过 OPEN_APP，导致链状态不同步。

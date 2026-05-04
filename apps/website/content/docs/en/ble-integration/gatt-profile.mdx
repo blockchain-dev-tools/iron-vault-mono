@@ -1,11 +1,11 @@
 ---
 title: "GATT Profile"
-description: "The Ledger GATT service profile implemented by OldPhone Wallet — exact UUIDs, characteristic properties, and advertising configuration."
+description: "The Ledger GATT service profile implemented by IRON Vault — exact UUIDs, characteristic properties, and advertising configuration."
 ---
 
 ## Overview
 
-OldPhone Wallet emulates a Ledger Nano X at the BLE transport layer. Host applications such as OKX Wallet and MetaMask identify a real Ledger device by scanning for a specific GATT service UUID and connecting to characteristics with precise UUIDs. **Exact UUID replication is mandatory** — any deviation causes the host app to ignore the device entirely, because the host's BLE transport library (`@ledgerhq/hw-transport-web-ble`) hard-codes the UUIDs it looks for during service discovery.
+IRON Vault emulates a Ledger Nano X at the BLE transport layer. Host applications such as OKX Wallet and MetaMask identify a real Ledger device by scanning for a specific GATT service UUID and connecting to characteristics with precise UUIDs. **Exact UUID replication is mandatory** — any deviation causes the host app to ignore the device entirely, because the host's BLE transport library (`@ledgerhq/hw-transport-web-ble`) hard-codes the UUIDs it looks for during service discovery.
 
 The Android app uses `BluetoothGattServer` (API 21+) to act as a GATT peripheral and `BluetoothLeAdvertiser` to broadcast the service UUID so hosts can find the device.
 

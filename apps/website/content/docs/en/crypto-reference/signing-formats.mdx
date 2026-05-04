@@ -5,7 +5,7 @@ description: "Signature formats for Ethereum transactions, personal messages, EI
 
 # Signing Formats
 
-OldPhone Wallet implements four signing operations across two chains. All signing logic lives in `packages/crypto/src/signer.ts`.
+IRON Vault implements four signing operations across two chains. All signing logic lives in `packages/crypto/src/signer.ts`.
 
 Every function returns a raw byte array, not a hex string. The APDU layer is responsible for encoding the response into a Ledger reply frame.
 
@@ -47,7 +47,7 @@ Low-S normalization (`lowS: true`) ensures the `s` component is always in the lo
 
 ### v-value calculation
 
-The `v` value differs by transaction type. OldPhone Wallet distinguishes typed transactions from legacy ones by inspecting the first byte of `rlp`:
+The `v` value differs by transaction type. IRON Vault distinguishes typed transactions from legacy ones by inspecting the first byte of `rlp`:
 
 | TX type | Detection | `v` value |
 |---|---|---|

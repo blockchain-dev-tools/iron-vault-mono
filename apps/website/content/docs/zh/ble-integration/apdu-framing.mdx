@@ -1,13 +1,13 @@
 ---
 title: "APDU 分帧协议"
-description: "APDU 命令如何拆分为 BLE 数据帧并在接收端重组 — OldPhone Wallet 帧格式详解。"
+description: "APDU 命令如何拆分为 BLE 数据帧并在接收端重组 — IRON Vault 帧格式详解。"
 ---
 
 ## 概述
 
 BLE 每包有效载荷受 ATT MTU 硬性限制。一条 APDU 命令可能超过单个 BLE 包的容量，因此 Ledger 传输层在发送前会对 APDU 进行分帧封装：每帧携带一个标签字节、一个分片序号，以及（仅首帧）完整 APDU 的总长度。接收方累积分片，直到收齐 `totalLength` 字节后，将重组好的 APDU 交给应用层处理。
 
-OldPhone Wallet 在接收路径（宿主 → 设备，经由 Write/WriteCmd 特征）和发送路径（设备 → 宿主，经由 Notify 特征）上均实现了此分帧协议。
+IRON Vault 在接收路径（宿主 → 设备，经由 Write/WriteCmd 特征）和发送路径（设备 → 宿主，经由 Notify 特征）上均实现了此分帧协议。
 
 ---
 

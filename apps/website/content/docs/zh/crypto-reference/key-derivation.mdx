@@ -1,11 +1,11 @@
 ---
 title: "密钥派生"
-description: "OldPhone Wallet 如何通过 BIP-39 助记词，借助 BIP-32 和 SLIP-10 Ed25519 派生以太坊和 Solana 私钥。"
+description: "IRON Vault 如何通过 BIP-39 助记词，借助 BIP-32 和 SLIP-10 Ed25519 派生以太坊和 Solana 私钥。"
 ---
 
 # 密钥派生
 
-OldPhone Wallet 从单一 BIP-39 助记词派生所有私钥。以太坊账户使用 BIP-32 HD 密钥树；Solana 账户使用 SLIP-10 Ed25519——这是一种与 BIP-32 完全不兼容的独立算法。
+IRON Vault 从单一 BIP-39 助记词派生所有私钥。以太坊账户使用 BIP-32 HD 密钥树；Solana 账户使用 SLIP-10 Ed25519——这是一种与 BIP-32 完全不兼容的独立算法。
 
 所有派生逻辑位于 `packages/crypto/src/`。
 
@@ -17,7 +17,7 @@ OldPhone Wallet 从单一 BIP-39 助记词派生所有私钥。以太坊账户�
 **依赖库：** `@scure/bip39`，使用英文词表
 
 ```ts
-import { generateMnemonic, validateMnemonic, mnemonicToSeed } from '@ble-vault/crypto';
+import { generateMnemonic, validateMnemonic, mnemonicToSeed } from '@iron-vault/crypto';
 
 // 12 个单词（128 位熵）
 const phrase12 = generateMnemonic(128);
@@ -93,7 +93,7 @@ const privKey = deriveEthPrivateKey(seed, pathComponents); // 32 字节的 Uint8
 **源文件：** `packages/crypto/src/hdkey.ts` — `deriveSolanaPrivateKey`
 **依赖库：** `@noble/hashes/hmac`、`@noble/hashes/sha2`
 
-Solana 使用 Ed25519 密钥。由于 BIP-32 未针对 Ed25519 曲线定义，OldPhone Wallet 实现了 **SLIP-10** 规范。其派生算法与 BIP-32 根本不同。
+Solana 使用 Ed25519 密钥。由于 BIP-32 未针对 Ed25519 曲线定义，IRON Vault 实现了 **SLIP-10** 规范。其派生算法与 BIP-32 根本不同。
 
 > **关键约束：** SLIP-10 Ed25519 路径的**每个分量都必须是强化分量**。若传入任何非强化分量，函数将抛出 `Error('SLIP-10 Ed25519 requires all-hardened paths')`。
 

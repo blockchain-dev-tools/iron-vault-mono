@@ -1,11 +1,11 @@
 ---
 title: "APDU Protocol Overview"
-description: "ISO 7816-4 command structure, CLA routing table, status words, and the deferred signing model used by OldPhone Wallet."
+description: "ISO 7816-4 command structure, CLA routing table, status words, and the deferred signing model used by IRON Vault."
 ---
 
 ## Command Format
 
-OldPhone Wallet speaks the Ledger APDU dialect, which follows ISO 7816-4:
+IRON Vault speaks the Ledger APDU dialect, which follows ISO 7816-4:
 
 ```
 Request:   CLA  INS  P1  P2  Lc  [Data...]
@@ -25,7 +25,7 @@ Commands and responses are carried over BLE as Ledger-framed chunks (TAG + chunk
 
 ## CLA Routing Table
 
-The APDU dispatcher in `@ble-vault/apdu` routes commands by `CLA` byte before any app-specific handler runs:
+The APDU dispatcher in `@iron-vault/apdu` routes commands by `CLA` byte before any app-specific handler runs:
 
 | CLA | Routes to |
 |---|---|

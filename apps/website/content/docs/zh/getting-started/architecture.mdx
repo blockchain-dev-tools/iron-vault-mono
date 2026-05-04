@@ -1,6 +1,6 @@
 ---
 title: "架构"
-description: "OldPhone Wallet 系统架构与数据流概述。"
+description: "IRON Vault 系统架构与数据流概述。"
 ---
 
 ## 系统概览
@@ -8,11 +8,11 @@ description: "OldPhone Wallet 系统架构与数据流概述。"
 ```
 宿主应用（OKX / MetaMask）
         ↕ BLE（Ledger GATT profile）
-安卓手机（OldPhone Wallet）
+安卓手机（IRON Vault）
         ├── BLE 外设（Kotlin GattServer）
-        ├── APDU 处理器（@ble-vault/apdu）
-        ├── HD 密码学（@ble-vault/crypto）
-        └── 钱包存储（@ble-vault/wallet）
+        ├── APDU 处理器（@iron-vault/apdu）
+        ├── HD 密码学（@iron-vault/crypto）
+        └── 钱包存储（@iron-vault/wallet）
 ```
 
 ## BLE 传输层

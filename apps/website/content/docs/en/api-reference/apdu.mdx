@@ -1,14 +1,14 @@
 ---
-title: "@ble-vault/apdu"
-description: "API reference for the @ble-vault/apdu package — APDU parser, handler setup, and sign request interface."
+title: "@iron-vault/apdu"
+description: "API reference for the @iron-vault/apdu package — APDU parser, handler setup, and sign request interface."
 ---
 
 ## Overview
 
-`@ble-vault/apdu` is the APDU processing core of OldPhone Wallet. It exposes two categories of exports: **parser utilities** for encoding and decoding raw APDU bytes, and **handler setup functions** that wire the APDU dispatcher to your wallet's mnemonic store and UI sign-confirmation flow.
+`@iron-vault/apdu` is the APDU processing core of IRON Vault. It exposes two categories of exports: **parser utilities** for encoding and decoding raw APDU bytes, and **handler setup functions** that wire the APDU dispatcher to your wallet's mnemonic store and UI sign-confirmation flow.
 
 ```bash
-pnpm add @ble-vault/apdu
+pnpm add @iron-vault/apdu
 ```
 
 ---
@@ -50,7 +50,7 @@ function parseApdu(hexApdu: string): Apdu
 **Example**
 
 ```typescript
-import { parseApdu } from '@ble-vault/apdu';
+import { parseApdu } from '@iron-vault/apdu';
 
 const apdu = parseApdu('e0020000');
 console.log(apdu.cla.toString(16)); // "e0"
@@ -133,7 +133,7 @@ function bip32PathToString(path: number[]): string
 **Example**
 
 ```typescript
-import { bip32PathToString } from '@ble-vault/apdu';
+import { bip32PathToString } from '@iron-vault/apdu';
 
 bip32PathToString([0x80000000 | 44, 0x80000000 | 60, 0x80000000, 0, 0]);
 // → "m/44'/60'/0'/0/0"
@@ -281,7 +281,7 @@ import {
   setSignRequestHandler,
   handleApdu,
   clearSignSessions,
-} from '@ble-vault/apdu';
+} from '@iron-vault/apdu';
 
 // ── Mount: wire everything up ────────────────────────────────────────────────
 

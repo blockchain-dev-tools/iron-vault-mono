@@ -1,14 +1,14 @@
 ---
-title: "@ble-vault/apdu"
-description: "@ble-vault/apdu 包的 API 参考 — APDU 解析器、处理器配置与签名请求接口。"
+title: "@iron-vault/apdu"
+description: "@iron-vault/apdu 包的 API 参考 — APDU 解析器、处理器配置与签名请求接口。"
 ---
 
 ## 概述
 
-`@ble-vault/apdu` 是 OldPhone Wallet 的 APDU 处理核心。它对外暴露两类导出：用于编解码原始 APDU 字节的**解析工具函数**，以及将 APDU 分发器与助记词存储和 UI 签名确认流程绑定在一起的**处理器配置函数**。
+`@iron-vault/apdu` 是 IRON Vault 的 APDU 处理核心。它对外暴露两类导出：用于编解码原始 APDU 字节的**解析工具函数**，以及将 APDU 分发器与助记词存储和 UI 签名确认流程绑定在一起的**处理器配置函数**。
 
 ```bash
-pnpm add @ble-vault/apdu
+pnpm add @iron-vault/apdu
 ```
 
 ---
@@ -50,7 +50,7 @@ function parseApdu(hexApdu: string): Apdu
 **示例**
 
 ```typescript
-import { parseApdu } from '@ble-vault/apdu';
+import { parseApdu } from '@iron-vault/apdu';
 
 const apdu = parseApdu('e0020000');
 console.log(apdu.cla.toString(16)); // "e0"
@@ -133,7 +133,7 @@ function bip32PathToString(path: number[]): string
 **示例**
 
 ```typescript
-import { bip32PathToString } from '@ble-vault/apdu';
+import { bip32PathToString } from '@iron-vault/apdu';
 
 bip32PathToString([0x80000000 | 44, 0x80000000 | 60, 0x80000000, 0, 0]);
 // → "m/44'/60'/0'/0/0"
@@ -281,7 +281,7 @@ import {
   setSignRequestHandler,
   handleApdu,
   clearSignSessions,
-} from '@ble-vault/apdu';
+} from '@iron-vault/apdu';
 
 // ── 挂载：完成全部配置 ───────────────────────────────────────────────────────
 

@@ -24,7 +24,7 @@ export default function TopBar() {
         >
           shield
         </span>
-        <span className="font-headline font-bold text-on-surface">OldPhone Wallet</span>
+        <span className="font-headline font-bold text-on-surface">IRON Vault</span>
         <span className="font-label text-xs text-on-surface-variant ml-1">DevTools</span>
       </div>
       <div className="flex items-center gap-2">

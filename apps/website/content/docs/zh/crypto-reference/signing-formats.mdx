@@ -5,7 +5,7 @@ description: "以太坊交易、个人消息、EIP-712 结构化数据以及 Sol
 
 # 签名格式
 
-OldPhone Wallet 在两条链上实现了四种签名操作。所有签名逻辑位于 `packages/crypto/src/signer.ts`。
+IRON Vault 在两条链上实现了四种签名操作。所有签名逻辑位于 `packages/crypto/src/signer.ts`。
 
 每个函数返回原始字节数组，而非十六进制字符串。APDU 层负责将签名结果编码为 Ledger 响应帧。
 
@@ -47,7 +47,7 @@ sig  = secp256k1.sign(hash, privKey, { lowS: true })
 
 ### v 值计算
 
-`v` 值因交易类型而异。OldPhone Wallet 通过检查 `rlp` 的第一个字节来区分类型化交易与传统交易：
+`v` 值因交易类型而异。IRON Vault 通过检查 `rlp` 的第一个字节来区分类型化交易与传统交易：
 
 | 交易类型 | 判断条件 | `v` 值 |
 |---|---|---|

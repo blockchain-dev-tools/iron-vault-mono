@@ -1,14 +1,14 @@
 ---
-title: "@ble-vault/crypto"
-description: "API reference for the @ble-vault/crypto package — mnemonic generation, HD key derivation, signing, and address utilities."
+title: "@iron-vault/crypto"
+description: "API reference for the @iron-vault/crypto package — mnemonic generation, HD key derivation, signing, and address utilities."
 ---
 
 ## Overview
 
-`@ble-vault/crypto` is the stateless cryptographic layer of OldPhone Wallet. It covers the full lifecycle from mnemonic generation through HD key derivation, transaction signing, and address encoding — for Ethereum, Solana, Bitcoin, Tron, and Sui. All functions are pure and have no platform dependencies.
+`@iron-vault/crypto` is the stateless cryptographic layer of IRON Vault. It covers the full lifecycle from mnemonic generation through HD key derivation, transaction signing, and address encoding — for Ethereum, Solana, Bitcoin, Tron, and Sui. All functions are pure and have no platform dependencies.
 
 ```bash
-pnpm add @ble-vault/crypto
+pnpm add @iron-vault/crypto
 ```
 
 **Underlying libraries:** `@scure/bip32`, `@scure/bip39`, `@noble/curves` (secp256k1, ed25519), `@noble/hashes` (SHA-256, RIPEMD-160, Keccak-256, HMAC-SHA-512), `@scure/base` (Base58, Bech32).
@@ -36,7 +36,7 @@ function generateMnemonic(strength?: 128 | 256): string
 **Example**
 
 ```typescript
-import { generateMnemonic } from '@ble-vault/crypto';
+import { generateMnemonic } from '@iron-vault/crypto';
 
 const mnemonic12 = generateMnemonic();       // 12 words
 const mnemonic24 = generateMnemonic(256);    // 24 words
@@ -126,7 +126,7 @@ function deriveSolanaPrivateKey(seed: Uint8Array, pathComponents: number[]): Uin
 **Example**
 
 ```typescript
-import { mnemonicToSeed, deriveSolanaPrivateKey } from '@ble-vault/crypto';
+import { mnemonicToSeed, deriveSolanaPrivateKey } from '@iron-vault/crypto';
 
 const seed = await mnemonicToSeed(mnemonic);
 // m/44'/501'/0'/0'
@@ -288,7 +288,7 @@ function deriveAccountsFromPaths(
 **Example**
 
 ```typescript
-import { deriveAccountsFromPaths } from '@ble-vault/crypto';
+import { deriveAccountsFromPaths } from '@iron-vault/crypto';
 
 const accounts = await deriveAccountsFromPaths(
   mnemonic,
@@ -387,7 +387,7 @@ function serializeXpub(seed: Uint8Array, pathComponents: number[]): string
 **Example**
 
 ```typescript
-import { mnemonicToSeed, serializeXpub } from '@ble-vault/crypto';
+import { mnemonicToSeed, serializeXpub } from '@iron-vault/crypto';
 
 const seed = await mnemonicToSeed(mnemonic);
 // Account xpub at m/84'/0'/0'

@@ -1,11 +1,11 @@
 ---
 title: "Key Derivation"
-description: "How OldPhone Wallet derives Ethereum and Solana private keys from a BIP-39 mnemonic using BIP-32 and SLIP-10 Ed25519."
+description: "How IRON Vault derives Ethereum and Solana private keys from a BIP-39 mnemonic using BIP-32 and SLIP-10 Ed25519."
 ---
 
 # Key Derivation
 
-OldPhone Wallet derives private keys from a single BIP-39 mnemonic phrase. Ethereum accounts use BIP-32 HD key derivation; Solana accounts use SLIP-10 with Ed25519 — a distinct algorithm that is incompatible with BIP-32.
+IRON Vault derives private keys from a single BIP-39 mnemonic phrase. Ethereum accounts use BIP-32 HD key derivation; Solana accounts use SLIP-10 with Ed25519 — a distinct algorithm that is incompatible with BIP-32.
 
 All derivation logic lives in `packages/crypto/src/`.
 
@@ -17,7 +17,7 @@ All derivation logic lives in `packages/crypto/src/`.
 **Library:** `@scure/bip39` with the English wordlist
 
 ```ts
-import { generateMnemonic, validateMnemonic, mnemonicToSeed } from '@ble-vault/crypto';
+import { generateMnemonic, validateMnemonic, mnemonicToSeed } from '@iron-vault/crypto';
 
 // 12 words (128 bits of entropy)
 const phrase12 = generateMnemonic(128);
@@ -93,7 +93,7 @@ const privKey = deriveEthPrivateKey(seed, pathComponents); // 32-byte Uint8Array
 **Source:** `packages/crypto/src/hdkey.ts` — `deriveSolanaPrivateKey`
 **Libraries:** `@noble/hashes/hmac`, `@noble/hashes/sha2`
 
-Solana uses Ed25519 keys. BIP-32 is not defined for Ed25519, so OldPhone Wallet implements **SLIP-10** instead. The derivation algorithm is fundamentally different from BIP-32.
+Solana uses Ed25519 keys. BIP-32 is not defined for Ed25519, so IRON Vault implements **SLIP-10** instead. The derivation algorithm is fundamentally different from BIP-32.
 
 > **Critical:** Every component of a SLIP-10 Ed25519 path **must** be hardened. The function throws `Error('SLIP-10 Ed25519 requires all-hardened paths')` if any unhardened component is passed.
 

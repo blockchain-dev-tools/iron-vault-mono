@@ -1,14 +1,14 @@
 ---
-title: "@ble-vault/crypto"
-description: "@ble-vault/crypto 包的 API 参考 — 助记词生成、HD 密钥派生、签名与地址工具。"
+title: "@iron-vault/crypto"
+description: "@iron-vault/crypto 包的 API 参考 — 助记词生成、HD 密钥派生、签名与地址工具。"
 ---
 
 ## 概述
 
-`@ble-vault/crypto` 是 OldPhone Wallet 的无状态密码学层。它涵盖从助记词生成、HD 密钥派生、交易签名到地址编码的完整流程，支持 Ethereum、Solana、Bitcoin、Tron 和 Sui。所有函数均为纯函数，无任何平台依赖。
+`@iron-vault/crypto` 是 IRON Vault 的无状态密码学层。它涵盖从助记词生成、HD 密钥派生、交易签名到地址编码的完整流程，支持 Ethereum、Solana、Bitcoin、Tron 和 Sui。所有函数均为纯函数，无任何平台依赖。
 
 ```bash
-pnpm add @ble-vault/crypto
+pnpm add @iron-vault/crypto
 ```
 
 **底层库：** `@scure/bip32`、`@scure/bip39`、`@noble/curves`（secp256k1、ed25519）、`@noble/hashes`（SHA-256、RIPEMD-160、Keccak-256、HMAC-SHA-512）、`@scure/base`（Base58、Bech32）。
@@ -36,7 +36,7 @@ function generateMnemonic(strength?: 128 | 256): string
 **示例**
 
 ```typescript
-import { generateMnemonic } from '@ble-vault/crypto';
+import { generateMnemonic } from '@iron-vault/crypto';
 
 const mnemonic12 = generateMnemonic();       // 12 个单词
 const mnemonic24 = generateMnemonic(256);    // 24 个单词
@@ -126,7 +126,7 @@ function deriveSolanaPrivateKey(seed: Uint8Array, pathComponents: number[]): Uin
 **示例**
 
 ```typescript
-import { mnemonicToSeed, deriveSolanaPrivateKey } from '@ble-vault/crypto';
+import { mnemonicToSeed, deriveSolanaPrivateKey } from '@iron-vault/crypto';
 
 const seed = await mnemonicToSeed(mnemonic);
 // m/44'/501'/0'/0'
@@ -288,7 +288,7 @@ function deriveAccountsFromPaths(
 **示例**
 
 ```typescript
-import { deriveAccountsFromPaths } from '@ble-vault/crypto';
+import { deriveAccountsFromPaths } from '@iron-vault/crypto';
 
 const accounts = await deriveAccountsFromPaths(
   mnemonic,
@@ -387,7 +387,7 @@ function serializeXpub(seed: Uint8Array, pathComponents: number[]): string
 **示例**
 
 ```typescript
-import { mnemonicToSeed, serializeXpub } from '@ble-vault/crypto';
+import { mnemonicToSeed, serializeXpub } from '@iron-vault/crypto';
 
 const seed = await mnemonicToSeed(mnemonic);
 // m/84'/0'/0' 处的账户 xpub

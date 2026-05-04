@@ -1,11 +1,11 @@
 ---
 title: "APDU 协议概述"
-description: "ISO 7816-4 命令结构、CLA 路由表、状态字，以及 OldPhone Wallet 的延迟签名模型。"
+description: "ISO 7816-4 命令结构、CLA 路由表、状态字，以及 IRON Vault 的延迟签名模型。"
 ---
 
 ## 命令格式
 
-OldPhone Wallet 实现的是 Ledger 方言的 APDU 协议，遵循 ISO 7816-4 标准：
+IRON Vault 实现的是 Ledger 方言的 APDU 协议，遵循 ISO 7816-4 标准：
 
 ```
 请求：  CLA  INS  P1  P2  Lc  [Data...]
@@ -25,7 +25,7 @@ OldPhone Wallet 实现的是 Ledger 方言的 APDU 协议，遵循 ISO 7816-4 �
 
 ## CLA 路由表
 
-`@ble-vault/apdu` 中的 APDU 派发器在进入任何 App 具体处理器之前，先按 `CLA` 字节进行路由：
+`@iron-vault/apdu` 中的 APDU 派发器在进入任何 App 具体处理器之前，先按 `CLA` 字节进行路由：
 
 | CLA | 路由目标 |
 |---|---|

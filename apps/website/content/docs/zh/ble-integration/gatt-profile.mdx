@@ -1,11 +1,11 @@
 ---
 title: "GATT 服务配置"
-description: "OldPhone Wallet 实现的 Ledger GATT 服务配置 — 完整 UUID 列表、特征属性及广播参数。"
+description: "IRON Vault 实现的 Ledger GATT 服务配置 — 完整 UUID 列表、特征属性及广播参数。"
 ---
 
 ## 概述
 
-OldPhone Wallet 在 BLE 传输层完整模拟了 Ledger Nano X 的行为。OKX Wallet、MetaMask 等宿主应用在 BLE 扫描时，会通过特定的 GATT 服务 UUID 识别 Ledger 设备，并在服务发现阶段验证各特征的 UUID。**UUID 必须与真实设备完全一致** — `@ledgerhq/hw-transport-web-ble` 在源码中硬编码了这些 UUID，任何偏差都会导致宿主应用在服务发现阶段直接忽略该设备。
+IRON Vault 在 BLE 传输层完整模拟了 Ledger Nano X 的行为。OKX Wallet、MetaMask 等宿主应用在 BLE 扫描时，会通过特定的 GATT 服务 UUID 识别 Ledger 设备，并在服务发现阶段验证各特征的 UUID。**UUID 必须与真实设备完全一致** — `@ledgerhq/hw-transport-web-ble` 在源码中硬编码了这些 UUID，任何偏差都会导致宿主应用在服务发现阶段直接忽略该设备。
 
 Android 端使用 `BluetoothGattServer`（API 21+）充当 GATT 外设，并通过 `BluetoothLeAdvertiser` 广播服务 UUID，使宿主应用能够扫描到设备。
 

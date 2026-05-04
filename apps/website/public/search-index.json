@@ -50,13 +50,13 @@
   {
     "title": "APDU Protocol Overview",
     "sectionTitle": "Command Format",
-    "excerpt": "Command Format OldPhone Wallet speaks the Ledger APDU dialect, which follows ISO 7816-4: `` Request: CLA INS P1 P2 Lc [Data...] Response: [Data...] SW1 SW2 ` | Field | Size | Description | |---|---|--",
+    "excerpt": "Command Format IRON Vault speaks the Ledger APDU dialect, which follows ISO 7816-4: `` Request: CLA INS P1 P2 Lc [Data...] Response: [Data...] SW1 SW2 ` | Field | Size | Description | |---|---|---| | ",
     "href": "/docs/apdu-protocol/overview"
   },
   {
     "title": "APDU Protocol Overview",
     "sectionTitle": "CLA Routing Table",
-    "excerpt": "CLA Routing Table The APDU dispatcher in @ble-vault/apdu routes commands by CLA byte before any app-specific handler runs: | CLA | Routes to | |---|---| | 0xB0 | OS layer — GET_APP_AND_VERSION | | 0xE",
+    "excerpt": "CLA Routing Table The APDU dispatcher in @iron-vault/apdu routes commands by CLA byte before any app-specific handler runs: | CLA | Routes to | |---|---| | 0xB0 | OS layer — GET_APP_AND_VERSION | | 0x",
     "href": "/docs/apdu-protocol/overview"
   },
   {
@@ -144,73 +144,73 @@
     "href": "/docs/apdu-protocol/solana"
   },
   {
-    "title": "@ble-vault/apdu",
+    "title": "@iron-vault/apdu",
     "sectionTitle": "Overview",
-    "excerpt": "Overview @ble-vault/apdu is the APDU processing core of OldPhone Wallet. It exposes two categories of exports: parser utilities for encoding and decoding raw APDU bytes, and handler setup functions th",
+    "excerpt": "Overview @iron-vault/apdu is the APDU processing core of IRON Vault. It exposes two categories of exports: parser utilities for encoding and decoding raw APDU bytes, and handler setup functions that w",
     "href": "/docs/api-reference/apdu"
   },
   {
-    "title": "@ble-vault/apdu",
+    "title": "@iron-vault/apdu",
     "sectionTitle": "Parser Utilities",
     "excerpt": "Parser Utilities Apdu The structured representation of a decoded APDU command. ``typescript interface Apdu ` --- parseApdu Parse a hex-encoded APDU string into an Apdu object. Skips the CLA INS P1 P2 ",
     "href": "/docs/api-reference/apdu"
   },
   {
-    "title": "@ble-vault/apdu",
+    "title": "@iron-vault/apdu",
     "sectionTitle": "Handler Setup",
     "excerpt": "Handler Setup The handler module maintains module-level singletons. Call the setters once on mount and tear down on unmount. setCurrentApp Switch the active app context. The APDU dispatcher uses this ",
     "href": "/docs/api-reference/apdu"
   },
   {
-    "title": "@ble-vault/apdu",
+    "title": "@iron-vault/apdu",
     "sectionTitle": "`SignRequestData`",
     "excerpt": "SignRequestData The object passed to the registered sign handler when a signing APDU is received. ``typescript interface SignRequestData `` ---",
     "href": "/docs/api-reference/apdu"
   },
   {
-    "title": "@ble-vault/apdu",
+    "title": "@iron-vault/apdu",
     "sectionTitle": "Additional Exports",
     "excerpt": "Additional Exports getLastToken Returns the last ERC-20 token metadata seen in an eth_signTransaction request, if the transaction data was decoded as an ERC-20 transfer. ``typescript function getLastT",
     "href": "/docs/api-reference/apdu"
   },
   {
-    "title": "@ble-vault/apdu",
+    "title": "@iron-vault/apdu",
     "sectionTitle": "Full Wiring Example",
     "excerpt": "Full Wiring Example This pattern shows how useBleSession connects all setters to the BLE transport and the sign-confirmation UI. ``typescript setMnemonicProvider, setLogFn, setSignRequestHandler, hand",
     "href": "/docs/api-reference/apdu"
   },
   {
-    "title": "@ble-vault/crypto",
+    "title": "@iron-vault/crypto",
     "sectionTitle": "Overview",
-    "excerpt": "Overview @ble-vault/crypto is the stateless cryptographic layer of OldPhone Wallet. It covers the full lifecycle from mnemonic generation through HD key derivation, transaction signing, and address en",
+    "excerpt": "Overview @iron-vault/crypto is the stateless cryptographic layer of IRON Vault. It covers the full lifecycle from mnemonic generation through HD key derivation, transaction signing, and address encodi",
     "href": "/docs/api-reference/crypto"
   },
   {
-    "title": "@ble-vault/crypto",
+    "title": "@iron-vault/crypto",
     "sectionTitle": "Mnemonic",
     "excerpt": "Mnemonic generateMnemonic Generate a BIP-39 mnemonic phrase using the English wordlist. ``typescript function generateMnemonic(strength?: 128 | 256): string ` Parameters | Name | Type | Default | Desc",
     "href": "/docs/api-reference/crypto"
   },
   {
-    "title": "@ble-vault/crypto",
+    "title": "@iron-vault/crypto",
     "sectionTitle": "HD Key Derivation",
     "excerpt": "HD Key Derivation Path components are raw uint32 values. Hardened components have the high bit set: 0x80000000 | index. For example, the standard Ethereum path m/44'/60'/0'/0/0 is represented as: ``ty",
     "href": "/docs/api-reference/crypto"
   },
   {
-    "title": "@ble-vault/crypto",
+    "title": "@iron-vault/crypto",
     "sectionTitle": "Signing & Address",
     "excerpt": "Signing & Address ethPubKeyToAddress Derive the Ethereum public key and EIP-55 checksum address from a secp256k1 private key. ``typescript function ethPubKeyToAddress(privKey: Uint8Array): ` Returns |",
     "href": "/docs/api-reference/crypto"
   },
   {
-    "title": "@ble-vault/crypto",
+    "title": "@iron-vault/crypto",
     "sectionTitle": "Account Derivation",
     "excerpt": "Account Derivation Account A single derived account entry. ``typescript interface Account ` --- WalletAccounts The result of a multi-account derivation. `typescript interface WalletAccounts ` --- deri",
     "href": "/docs/api-reference/crypto"
   },
   {
-    "title": "@ble-vault/crypto",
+    "title": "@iron-vault/crypto",
     "sectionTitle": "Bitcoin & Multi-chain Utilities",
     "excerpt": "Bitcoin & Multi-chain Utilities These low-level primitives support Bitcoin, Tron, and multi-chain signing use cases. sha256Single Single SHA-256 hash. Used for Tron transaction hashing. ``typescript f",
     "href": "/docs/api-reference/crypto"
@@ -272,19 +272,19 @@
   {
     "title": "Connection Flow",
     "sectionTitle": "Overview",
-    "excerpt": "Overview Before any APDU command can be exchanged, the host app and OldPhone Wallet must complete a fixed handshake sequence. This sequence is identical to what a real Ledger Nano X performs, because ",
+    "excerpt": "Overview Before any APDU command can be exchanged, the host app and IRON Vault must complete a fixed handshake sequence. This sequence is identical to what a real Ledger Nano X performs, because OKX W",
     "href": "/docs/ble-integration/connection-flow"
   },
   {
     "title": "Connection Flow",
     "sectionTitle": "Connection Sequence",
-    "excerpt": "Connection Sequence `` Host App OldPhone Wallet (Android) | | | 1. BLE scan (active scan) | |<---- ADV_IND: service UUID ------------- | Advertising data |<---- SCAN_RSP: \"Nano X\" ---------------- | S",
+    "excerpt": "Connection Sequence `` Host App IRON Vault (Android) | | | 1. BLE scan (active scan) | |<---- ADV_IND: service UUID ------------- | Advertising data |<---- SCAN_RSP: \"Nano X\" ---------------- | Scan r",
     "href": "/docs/ble-integration/connection-flow"
   },
   {
     "title": "Connection Flow",
     "sectionTitle": "Step-by-Step Breakdown",
-    "excerpt": "Step-by-Step Breakdown Step 1 — BLE Scan The host performs an active BLE scan. OldPhone Wallet's advertising data contains the Ledger service UUID (13d63400-2c97-0004-0000-4c6564676572); the scan resp",
+    "excerpt": "Step-by-Step Breakdown Step 1 — BLE Scan The host performs an active BLE scan. IRON Vault's advertising data contains the Ledger service UUID (13d63400-2c97-0004-0000-4c6564676572); the scan response ",
     "href": "/docs/ble-integration/connection-flow"
   },
   {
@@ -302,7 +302,7 @@
   {
     "title": "GATT Profile",
     "sectionTitle": "Overview",
-    "excerpt": "Overview OldPhone Wallet emulates a Ledger Nano X at the BLE transport layer. Host applications such as OKX Wallet and MetaMask identify a real Ledger device by scanning for a specific GATT service UU",
+    "excerpt": "Overview IRON Vault emulates a Ledger Nano X at the BLE transport layer. Host applications such as OKX Wallet and MetaMask identify a real Ledger device by scanning for a specific GATT service UUID an",
     "href": "/docs/ble-integration/gatt-profile"
   },
   {
@@ -338,7 +338,7 @@
   {
     "title": "Key Derivation",
     "sectionTitle": "Key Derivation",
-    "excerpt": "Key Derivation OldPhone Wallet derives private keys from a single BIP-39 mnemonic phrase. Ethereum accounts use BIP-32 HD key derivation; Solana accounts use SLIP-10 with Ed25519 — a distinct algorith",
+    "excerpt": "Key Derivation IRON Vault derives private keys from a single BIP-39 mnemonic phrase. Ethereum accounts use BIP-32 HD key derivation; Solana accounts use SLIP-10 with Ed25519 — a distinct algorithm tha",
     "href": "/docs/crypto-reference/key-derivation"
   },
   {
@@ -380,7 +380,7 @@
   {
     "title": "Signing Formats",
     "sectionTitle": "Signing Formats",
-    "excerpt": "Signing Formats OldPhone Wallet implements four signing operations across two chains. All signing logic lives in packages/crypto/src/signer.ts. Every function returns a raw byte array, not a hex strin",
+    "excerpt": "Signing Formats IRON Vault implements four signing operations across two chains. All signing logic lives in packages/crypto/src/signer.ts. Every function returns a raw byte array, not a hex string. Th",
     "href": "/docs/crypto-reference/signing-formats"
   },
   {
@@ -434,7 +434,7 @@
   {
     "title": "Architecture",
     "sectionTitle": "System Overview",
-    "excerpt": "System Overview `` Host App (OKX / MetaMask) ↕ BLE (Ledger GATT profile) Android Phone (OldPhone Wallet) ├── BLE Peripheral (Kotlin GattServer) ├── APDU Handler (@ble-vault/apdu) ├── HD Crypto (@ble-v",
+    "excerpt": "System Overview `` Host App (OKX / MetaMask) ↕ BLE (Ledger GATT profile) Android Phone (IRON Vault) ├── BLE Peripheral (Kotlin GattServer) ├── APDU Handler (@iron-vault/apdu) ├── HD Crypto (@iron-vaul",
     "href": "/docs/getting-started/architecture"
   },
   {
@@ -463,8 +463,8 @@
   },
   {
     "title": "Introduction",
-    "sectionTitle": "What is OldPhone Wallet?",
-    "excerpt": "What is OldPhone Wallet? OldPhone Wallet repurposes an old Android phone as a BLE hardware wallet. From the perspective of a host app like OKX Wallet or MetaMask, it behaves identically to a Ledger Na",
+    "sectionTitle": "What is IRON Vault?",
+    "excerpt": "What is IRON Vault? IRON Vault repurposes an old Android phone as a BLE hardware wallet. From the perspective of a host app like OKX Wallet or MetaMask, it behaves identically to a Ledger Nano X — com",
     "href": "/docs/getting-started/introduction"
   },
   {
@@ -476,13 +476,13 @@
   {
     "title": "Introduction",
     "sectionTitle": "This Site",
-    "excerpt": "This Site This DevTools site provides: 1. Documentation — Full protocol reference for developers integrating with OldPhone Wallet 2. APDU Debugger — Send commands to the simulator or a real device and",
+    "excerpt": "This Site This DevTools site provides: 1. Documentation — Full protocol reference for developers integrating with IRON Vault 2. APDU Debugger — Send commands to the simulator or a real device and insp",
     "href": "/docs/getting-started/introduction"
   },
   {
     "title": "Quick Start",
     "sectionTitle": "Prerequisites",
-    "excerpt": "Prerequisites - Chrome browser with chrome://flags/#enable-experimental-web-platform-features enabled - OldPhone Wallet app running on an Android device, or use the Simulator on this site",
+    "excerpt": "Prerequisites - Chrome browser with chrome://flags/#enable-experimental-web-platform-features enabled - IRON Vault app running on an Android device, or use the Simulator on this site",
     "href": "/docs/getting-started/quick-start"
   },
   {
@@ -506,7 +506,7 @@
   {
     "title": "Quick Start",
     "sectionTitle": "Step 4: Connecting to a Real Device",
-    "excerpt": "Step 4: Connecting to a Real Device Switch the target to BLE Device, click Scan, and select your OldPhone Wallet device. All subsequent commands go to the real phone over Bluetooth. > Note: BLE Device",
+    "excerpt": "Step 4: Connecting to a Real Device Switch the target to BLE Device, click Scan, and select your IRON Vault device. All subsequent commands go to the real phone over Bluetooth. > Note: BLE Device mode",
     "href": "/docs/getting-started/quick-start"
   }
 ]

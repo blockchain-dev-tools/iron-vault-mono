@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next'
 import { getAllSlugs } from '@/lib/mdx'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = 'https://devtools.oldphonewallet.dev'
+  const base = 'https://ironvault.dev'
   const docSlugs = getAllSlugs()
 
   return [

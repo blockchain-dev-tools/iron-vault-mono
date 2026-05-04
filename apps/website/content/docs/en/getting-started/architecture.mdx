@@ -1,6 +1,6 @@
 ---
 title: "Architecture"
-description: "Overview of the OldPhone Wallet system architecture and data flow."
+description: "Overview of the IRON Vault system architecture and data flow."
 ---
 
 ## System Overview
@@ -8,11 +8,11 @@ description: "Overview of the OldPhone Wallet system architecture and data flow.
 ```
 Host App (OKX / MetaMask)
         ↕ BLE (Ledger GATT profile)
-Android Phone (OldPhone Wallet)
+Android Phone (IRON Vault)
         ├── BLE Peripheral (Kotlin GattServer)
-        ├── APDU Handler (@ble-vault/apdu)
-        ├── HD Crypto (@ble-vault/crypto)
-        └── Wallet Storage (@ble-vault/wallet)
+        ├── APDU Handler (@iron-vault/apdu)
+        ├── HD Crypto (@iron-vault/crypto)
+        └── Wallet Storage (@iron-vault/wallet)
 ```
 
 ## BLE Transport Layer

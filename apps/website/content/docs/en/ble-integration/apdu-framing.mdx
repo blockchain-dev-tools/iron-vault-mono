@@ -1,13 +1,13 @@
 ---
 title: "APDU Framing"
-description: "How APDU commands are chunked into BLE frames and reassembled — the OldPhone Wallet frame format."
+description: "How APDU commands are chunked into BLE frames and reassembled — the IRON Vault frame format."
 ---
 
 ## Overview
 
 BLE has a hard per-packet payload ceiling set by the ATT MTU. A raw APDU command can be longer than a single BLE packet, so Ledger's transport layer wraps every APDU in a simple framing protocol before putting it on the wire. Frames carry a tag byte, a chunk index, and (on the first chunk only) the total APDU length. The receiver accumulates chunks until it has collected `totalLength` bytes, then hands the reassembled APDU up to the application layer.
 
-OldPhone Wallet implements this framing on both the receive path (host → device, via the Write/WriteCmd characteristics) and the transmit path (device → host, via the Notify characteristic).
+IRON Vault implements this framing on both the receive path (host → device, via the Write/WriteCmd characteristics) and the transmit path (device → host, via the Notify characteristic).
 
 ---
 

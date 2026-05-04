@@ -5,7 +5,7 @@ description: "Step-by-step BLE connection sequence from host scan to APDU-ready 
 
 ## Overview
 
-Before any APDU command can be exchanged, the host app and OldPhone Wallet must complete a fixed handshake sequence. This sequence is identical to what a real Ledger Nano X performs, because OKX Wallet and MetaMask both use `@ledgerhq/hw-transport-web-ble` under the hood — a library that expects this exact flow.
+Before any APDU command can be exchanged, the host app and IRON Vault must complete a fixed handshake sequence. This sequence is identical to what a real Ledger Nano X performs, because OKX Wallet and MetaMask both use `@ledgerhq/hw-transport-web-ble` under the hood — a library that expects this exact flow.
 
 The entire handshake from scan to APDU-ready typically completes in under two seconds on a modern Android device.
 
@@ -14,7 +14,7 @@ The entire handshake from scan to APDU-ready typically completes in under two se
 ## Connection Sequence
 
 ```
-Host App                             OldPhone Wallet (Android)
+Host App                             IRON Vault (Android)
    |                                          |
    |  1. BLE scan (active scan)               |
    |<---- ADV_IND: service UUID ------------- |  Advertising data
@@ -62,7 +62,7 @@ Host App                             OldPhone Wallet (Android)
 
 ### Step 1 — BLE Scan
 
-The host performs an active BLE scan. OldPhone Wallet's advertising data contains the Ledger service UUID (`13d63400-2c97-0004-0000-4c6564676572`); the scan response contains the device name `"Nano X"`. The host library filters by service UUID, so the device is identified immediately.
+The host performs an active BLE scan. IRON Vault's advertising data contains the Ledger service UUID (`13d63400-2c97-0004-0000-4c6564676572`); the scan response contains the device name `"Nano X"`. The host library filters by service UUID, so the device is identified immediately.
 
 ### Step 2 — GATT Connect
 
@@ -154,4 +154,4 @@ Failing to restart advertising after disconnect is the most common integration b
 
 Both apps use `@ledgerhq/hw-transport-web-ble` (or its React Native counterpart `@ledgerhq/react-native-hw-transport-ble`). The library performs steps 1–8 automatically when `TransportBLE.open(device)` is called. From the app developer's perspective the sequence is opaque — the library surfaces a `Transport` object only after the full handshake succeeds.
 
-MetaMask performs the OPEN_APP step for `"Ethereum"` unconditionally on connect. OKX first reads GET_APP_AND_VERSION and only sends OPEN_APP if the active app name does not match the desired chain — this means OldPhone Wallet must track and respond to GET_APP_AND_VERSION accurately, not just return a fixed value.
+MetaMask performs the OPEN_APP step for `"Ethereum"` unconditionally on connect. OKX first reads GET_APP_AND_VERSION and only sends OPEN_APP if the active app name does not match the desired chain — this means IRON Vault must track and respond to GET_APP_AND_VERSION accurately, not just return a fixed value.
