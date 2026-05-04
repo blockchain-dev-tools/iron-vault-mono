@@ -22,7 +22,7 @@ export default function UnlockScreen() {
     await new Promise<void>(r => setTimeout(r, 32));
     const result = await unlockWallet(storage, pin);
     if (result) {
-      setAccounts(result);
+      setAccounts(result.accounts);
       navReset('Vault');
     } else {
       setLoading(false);
@@ -36,7 +36,7 @@ export default function UnlockScreen() {
   const handleResetWallet = async () => {
     if (!confirm('Reset wallet? All data will be deleted.')) return;
     await clearWallet(storage);
-    setAccounts({ eth: [], sol: [] });
+    setAccounts({ eth: [], sol: [], btc: [], tron: [], sui: [] });
     navReset('Welcome');
   };
 

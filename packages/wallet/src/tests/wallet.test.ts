@@ -112,8 +112,8 @@ describe('unlockWallet + passphrase', () => {
     const setup = await setupWallet(s, TEST_MNEMONIC, '123456', 'my-passphrase');
     const unlock = await unlockWallet(s, '123456');
     expect(unlock).not.toBeNull();
-    expect(unlock!.eth[0].full).toBe(setup.eth[0].full);
-    expect(unlock!.sol[0].full).toBe(setup.sol[0].full);
+    expect(unlock!.accounts.eth[0].full).toBe(setup.eth[0].full);
+    expect(unlock!.accounts.sol[0].full).toBe(setup.sol[0].full);
   });
 
   it('passphrase-derived address differs from no-passphrase address', async () => {
@@ -139,8 +139,8 @@ describe('unlockWallet', () => {
     await setupWallet(s, TEST_MNEMONIC, '123456');
     const accounts = await unlockWallet(s, '123456');
     expect(accounts).not.toBeNull();
-    expect(accounts!.eth).toHaveLength(1);
-    expect(accounts!.sol).toHaveLength(1);
+    expect(accounts!.accounts.eth).toHaveLength(1);
+    expect(accounts!.accounts.sol).toHaveLength(1);
   });
 
   it('returns null on wrong PIN', async () => {
@@ -154,7 +154,7 @@ describe('unlockWallet', () => {
     const s = makeStorage();
     await setupWallet(s, TEST_MNEMONIC, '123456');
     const accounts = await unlockWallet(s, '123456');
-    expect(accounts!.eth[0].full.startsWith('0x')).toBe(true);
+    expect(accounts!.accounts.eth[0].full.startsWith('0x')).toBe(true);
   });
 
   it('known ETH address for abandon mnemonic account 0', async () => {
@@ -162,7 +162,7 @@ describe('unlockWallet', () => {
     await setupWallet(s, TEST_MNEMONIC, '000000');
     const accounts = await unlockWallet(s, '000000');
     // Known BIP-44 ETH m/44'/60'/0'/0/0 address
-    expect(accounts!.eth[0].full).toBe('0x9858EfFD232B4033E47d90003D41EC34EcaEda94');
+    expect(accounts!.accounts.eth[0].full).toBe('0x9858EfFD232B4033E47d90003D41EC34EcaEda94');
   });
 });
 

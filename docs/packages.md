@@ -29,8 +29,9 @@ const exists = await hasWallet(storage);  // → boolean
 // First-time setup: store mnemonic + hashed PIN, return derived accounts
 const accounts = await setupWallet(storage, mnemonic, pin);  // → WalletAccounts
 
-// Unlock: verify PIN hash and derive accounts (null = wrong PIN)
-const accounts = await unlockWallet(storage, pin);  // → WalletAccounts | null
+// Unlock: verify PIN, derive accounts, return resolved passphrase (null = wrong PIN)
+const { accounts, passphrase } = await unlockWallet(storage, pin) ?? {};
+// → { accounts: WalletAccounts; passphrase: string } | null
 
 // Just check PIN without returning accounts
 const ok = await verifyPin(storage, pin);  // → boolean
@@ -44,7 +45,7 @@ await clearWallet(storage);
 
 ### PIN Security
 
-The PIN is **never stored in plaintext**. `setupWallet` stores `bytesToHex(sha256(pin))` as `wallet.pinHash`. `unlockWallet` and `verifyPin` hash the input before comparison.
+The PIN is **never stored in plaintext**. `setupWallet` stores a PBKDF2 (10,000 iterations, random salt) hash of the PIN as `wallet.pinKdf`. Legacy SHA-256 hashes (`wallet.pinHash`) are migrated transparently on first unlock.
 
 ### WalletAccounts Type
 

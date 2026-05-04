@@ -89,6 +89,32 @@ async function encryptPassphraseWithPin(passphrase: string, pin: string): Promis
   return `${bytesToHex(salt)}:${bytesToHex(nonce)}:${bytesToHex(cipher)}`;
 }
 
+/** Hermes-compatible TextDecoder — decodes a UTF-8 Uint8Array to string. */
+function bytesToStr(bytes: Uint8Array): string {
+  // Hermes (React Native) doesn't have TextDecoder. Use manual UTF-8 decode.
+  let out = '';
+  let i = 0;
+  while (i < bytes.length) {
+    const b = bytes[i++]!;
+    if (b < 0x80) {
+      out += String.fromCharCode(b);
+    } else if (b < 0xE0) {
+      out += String.fromCharCode(((b & 0x1F) << 6) | (bytes[i++]! & 0x3F));
+    } else if (b < 0xF0) {
+      out += String.fromCharCode(((b & 0x0F) << 12) | ((bytes[i++]! & 0x3F) << 6) | (bytes[i++]! & 0x3F));
+    } else {
+      let cp = ((b & 0x07) << 18) | ((bytes[i++]! & 0x3F) << 12) | ((bytes[i++]! & 0x3F) << 6) | (bytes[i++]! & 0x3F);
+      if (cp > 0xFFFF) {
+        cp -= 0x10000;
+        out += String.fromCharCode(0xD800 + (cp >> 10), 0xDC00 + (cp & 0x3FF));
+      } else {
+        out += String.fromCharCode(cp);
+      }
+    }
+  }
+  return out;
+}
+
 async function decryptPassphraseWithPin(stored: string, pin: string): Promise<string> {
   const parts = stored.split(':');
   if (parts.length !== 3) throw new Error('Invalid passphraseEnc format');
@@ -97,7 +123,7 @@ async function decryptPassphraseWithPin(stored: string, pin: string): Promise<st
   const ciphertext = hexToBytes(parts[2]!);
   const key        = await kdfEncKey(pin, salt);
   const plain      = chacha20poly1305(key, nonce).decrypt(ciphertext);
-  return new TextDecoder().decode(plain);
+  return bytesToStr(plain);
 }
 
 // Resolve passphrase for an already-verified PIN.
@@ -108,7 +134,6 @@ async function resolvePassphrase(s: WalletStorage, pin: string): Promise<string>
   if (enc) {
     try { return await decryptPassphraseWithPin(enc, pin); } catch { return ''; }
   }
-  // Fall back to legacy plaintext (written by old code)
   return (await s.getItem(PASSPHRASE_KEY)) ?? '';
 }
 
@@ -246,13 +271,14 @@ export async function unlockWallet(
   s: WalletStorage,
   pin: string,
   passphraseOverride?: string,
-): Promise<WalletAccounts | null> {
+): Promise<{ accounts: WalletAccounts; passphrase: string } | null> {
   if (!(await verifyPin(s, pin))) return null;
   const mnemonic = await s.getItem(MNEMONIC_KEY);
   if (!mnemonic) return null;
   const paths = await readPaths(s);
   const passphrase = passphraseOverride ?? (await resolvePassphrase(s, pin));
-  return deriveFrom(mnemonic, paths, passphrase);
+  const accounts = await deriveFrom(mnemonic, paths, passphrase);
+  return { accounts, passphrase };
 }
 
 export async function verifyPin(s: WalletStorage, pin: string): Promise<boolean> {

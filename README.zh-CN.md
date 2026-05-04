@@ -183,11 +183,11 @@ import { hasWallet, setupWallet, unlockWallet, clearWallet } from '@iron-vault/w
 
 await hasWallet(storage);                        // → boolean
 await setupWallet(storage, mnemonic, pin);       // → WalletAccounts
-await unlockWallet(storage, pin);                // → WalletAccounts | null（null 表示 PIN 错误）
+await unlockWallet(storage, pin);                // → { accounts, passphrase } | null（null 表示 PIN 错误）
 await clearWallet(storage);                      // 清除钱包数据
 ```
 
-PIN **永不以明文存储** —— 仅持久化 `sha256(pin)`。
+PIN **永不以明文存储** —— 持久化 PBKDF2（10,000 轮迭代，随机 salt）哈希。旧版 SHA-256 哈希在首次解锁时透明迁移。
 
 ### `@iron-vault/crypto`
 

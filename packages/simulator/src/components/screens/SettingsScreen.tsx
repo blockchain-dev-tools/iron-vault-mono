@@ -48,7 +48,7 @@ export default function SettingsScreen() {
   const handleResetWallet = async () => {
     if (!confirm('Reset wallet? All data will be permanently deleted.')) return;
     await clearWallet(storage);
-    setAccounts({ eth: [], sol: [] });
+    setAccounts({ eth: [], sol: [], btc: [], tron: [], sui: [] });
     setGeneratedWords([]);
     navReset('Welcome');
   };

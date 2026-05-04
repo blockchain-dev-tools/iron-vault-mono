@@ -30,7 +30,7 @@ export interface PendingTx {
   reject: () => void;
 }
 
-const EMPTY_ACCOUNTS: WalletAccounts = { eth: [], sol: [] };
+const EMPTY_ACCOUNTS: WalletAccounts = { eth: [], sol: [], btc: [], tron: [], sui: [] };
 
 // ─── Context interface ────────────────────────────────────────────────────────
 

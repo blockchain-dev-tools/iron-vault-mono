@@ -51,8 +51,8 @@ export default function UnlockScreen() {
       const result = await unlockWallet(walletStorage, pin, passphrase || undefined);
       if (result) {
         await resetPinAttempts(walletStorage);
-        setAccounts(result);
-        setPassphrase(passphrase);
+        setAccounts(result.accounts);
+        setPassphrase(result.passphrase);
         navReset('Vault');
       } else {
         const n = await incrementPinAttempts(walletStorage);

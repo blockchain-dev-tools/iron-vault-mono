@@ -289,7 +289,7 @@ import {
 
 await hasWallet(storage);                        // → boolean
 await setupWallet(storage, mnemonic, pin);       // → WalletAccounts
-await unlockWallet(storage, pin);                // → WalletAccounts | null  (null = wrong PIN)
+await unlockWallet(storage, pin);                // → { accounts, passphrase } | null  (null = wrong PIN)
 await clearWallet(storage);                      // wipe wallet
 await verifyPin(storage, pin);                   // → boolean
 await getAccounts(storage);                      // → Account[]

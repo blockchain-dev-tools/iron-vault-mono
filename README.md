@@ -202,7 +202,7 @@ import { hasWallet, setupWallet, unlockWallet, clearWallet } from '@iron-vault/w
 
 await hasWallet(storage);                        // → boolean
 await setupWallet(storage, mnemonic, pin);       // → WalletAccounts
-await unlockWallet(storage, pin);                // → WalletAccounts | null (null = wrong PIN)
+await unlockWallet(storage, pin);                // → { accounts, passphrase } | null  (null = wrong PIN)
 await clearWallet(storage);                      // wipe wallet
 ```
 

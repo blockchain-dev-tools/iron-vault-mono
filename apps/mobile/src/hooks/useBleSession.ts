@@ -39,7 +39,7 @@ export function useBleSession(
   activeChain: 'eth' | 'sol' | 'btc' | 'tron' | 'sui' | null,
   acct: { short: string },
 ): BleSessionResult {
-  const { setBleState, setPendingTx, go } = useApp();
+  const { setBleState, setPendingTx, go, passphrase } = useApp();
   const [logs, setLogs] = useState<LogEntry[]>([]);
 
   const acctRef = useRef(acct);
@@ -59,7 +59,7 @@ export function useBleSession(
     if (!activeChain) return;
 
     setMnemonicProvider(() => walletStorage.getItem('wallet.mnemonic'));
-    walletStorage.getItem('wallet.passphrase').then(p => setPassphrase(p ?? ''));
+    setPassphrase(passphrase);
     setCurrentApp(CHAIN_APP_NAME[activeChain] ?? 'Ethereum');
     setLogFn(addLog);
 
@@ -112,6 +112,11 @@ export function useBleSession(
       setSignRequestHandler(null);
     };
   }, [activeChain, addLog, setBleState]);
+
+  // ── Sync passphrase to APDU handler ──────────────────────────────────────
+  useEffect(() => {
+    setPassphrase(passphrase);
+  }, [passphrase]);
 
   // ── BLE advertising controls ─────────────────────────────────────────────
   const requestPermissions = useCallback(async (): Promise<boolean> => {
