@@ -8,7 +8,7 @@ import ShieldLogo from '../ui/ShieldLogo';
 
 const MAX_ATTEMPTS = 5;
 
-export default function PinUnlockScreen() {
+export default function UnlockScreen() {
   const { reset: navReset } = useNav();
   const { setAccounts, storage } = useApp();
   const [failCount, setFailCount] = useState(0);

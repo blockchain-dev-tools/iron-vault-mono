@@ -18,7 +18,7 @@ Individual screen specs live in [`docs/design/screens/`](./design/screens/).
 | `AccountDetail` | Address QR, derivation path, BLE toggle, log viewer | [account-detail/](./design/screens/account-detail/) |
 | `Transaction` | Sign approval: network / action / from / to / amount / gas | [transaction-confirm/](./design/screens/transaction-confirm/) |
 | `Settings` | Appearance, language, security, BLE device name, app version | [settings/](./design/screens/settings/) |
-| `PinUnlock` | Cold-start PIN gate; max 5 attempts then lockout | [pin-unlock/](./design/screens/pin-unlock/) |
+| `Unlock` | Cold-start PIN gate; max 5 attempts then lockout | [pin-unlock/](./design/screens/pin-unlock/) |
 | `BackupSeed` | PIN-gated seed reveal; language re-encoding | — |
 
 ## Navigation Flow
@@ -29,7 +29,7 @@ Welcome
  ├── Enigma  → EnigmaMnemonic  ──────────────────→ SetPin → Vault
  └── ImportMnemonic ───────────────────────────────SetPin → Vault
 
-[cold start with wallet] → PinUnlock → Vault
+[cold start with wallet] → Unlock → Vault
 
 Vault ↔ Settings → BackupSeed
 Vault → AccountDetail → Transaction → AccountDetail

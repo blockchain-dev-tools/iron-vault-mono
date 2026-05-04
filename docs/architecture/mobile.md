@@ -96,7 +96,7 @@ apps/mobile/
 │   │   ├── ImportMnemonicScreen.tsx    # P05
 │   │   ├── WalletManagerScreen.tsx     # P06
 │   │   ├── SettingsScreen.tsx          # P08
-│   │   ├── PinUnlockScreen.tsx         # P09
+│   │   ├── UnlockScreen.tsx            # P09
 │   │   ├── AccountDetailScreen.tsx     # P10
 │   │   └── TransactionScreen.tsx       # P11
 │   ├── store/
@@ -406,7 +406,7 @@ const initialScreen = (): ScreenName => {
 - About section: Version / Updates
 - 底部红色 "Reset Wallet" 按钮（Alert 二次确认 → clearMnemonic → P01）
 
-### P09 — PinUnlockScreen
+### P09 — UnlockScreen
 
 - 全屏 PIN 输入
 - Lock 图标 + "Enter PIN to unlock"

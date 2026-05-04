@@ -40,10 +40,10 @@
 
 ### 1.3 PIN 解锁
 
-- [ ] 杀进程重启 → 跳 PinUnlock（已有钱包时不回 Welcome）
+- [ ] 杀进程重启 → 跳 Unlock（已有钱包时不回 Welcome）
 - [ ] 输入正确 PIN → `reset` 进入 Vault
 - [ ] 输入错误 PIN → 提示失败，字段清空
-- [ ] 硬件返回键在 PinUnlock 页无法退出
+- [ ] 硬件返回键在 Unlock 页无法退出
 
 ### 1.4 Enigma 钱包（谜题派生）
 

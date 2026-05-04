@@ -14,7 +14,7 @@ import { R } from '@iron-vault/theme';
 
 const MAX_ATTEMPTS = 5;
 
-export default function PinUnlockScreen() {
+export default function UnlockScreen() {
   const { reset: navReset, setAccounts, setPassphrase, storePassphraseEnabled } = useApp();
   const C = useTheme();
   const t = useLocale();

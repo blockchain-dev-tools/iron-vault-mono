@@ -123,7 +123,7 @@ Welcome → generateMnemonic() [packages/wallet]
 ### Unlock Flow (returning user)
 ```
 App start → hasWallet(storage) → true
-  → PinUnlock: unlockWallet(storage, enteredPin)
+  → Unlock: unlockWallet(storage, enteredPin)
        ├── compares sha256(enteredPin) == stored pinHash
        ├── derives accounts from stored mnemonic
        └── returns WalletAccounts | null

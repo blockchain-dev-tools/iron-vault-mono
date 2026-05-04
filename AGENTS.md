@@ -79,7 +79,7 @@ import { R } from '@iron-vault/theme';
 'Welcome' | 'Entropy' | 'GenerateMnemonic' | 'VerifyMnemonic' | 'SetPin' | 'ImportMnemonic'
 | 'Vault' | 'Settings' | 'Unlock' | 'AccountDetail' | 'Transaction' | 'BackupSeed'
 ```
-Note: the lock screen is `'Unlock'`, **not** `'PinUnlock'`.
+The lock screen is `'Unlock'`.
 
 **Screen flow:**
 ```
@@ -233,7 +233,7 @@ adb shell input tap X Y
   Fix: `const { reset: navReset } = useApp()`.
 - `SetPinScreen` serves both "create wallet" and "change PIN" — distinguish with `generatedWords.length === 0`.
 - Always register `BackHandler` for Android hardware back button.
-- The lock screen is named `'Unlock'` (not `'PinUnlock'`). Startup code that calls `navReset('PinUnlock')` is wrong.
+- The lock screen is named `'Unlock'`.
 
 ### Theme Gotchas
 - `ThemeMode` = `'system' | 'light' | 'dark'` (persisted in AsyncStorage key `app.theme`).
@@ -266,7 +266,7 @@ Check `hasWallet()` before first render — render `null` until resolved, then `
 const [ready, setReady] = useState(false);
 useEffect(() => {
   hasWallet(storage).then(has => {
-    navReset(has ? 'Unlock' : 'Welcome');   // 'Unlock', not 'PinUnlock'
+    navReset(has ? 'Unlock' : 'Welcome');
     setReady(true);
   });
 }, []);

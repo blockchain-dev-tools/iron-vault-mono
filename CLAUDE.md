@@ -178,7 +178,7 @@ Vault → AccountDetail → Transaction
 | `AccountDetail` | Address display, QR code, derivation path, BLE toggle, log viewer |
 | `Transaction` | Sign approval: shows network/action/from/to/amount/gas; raw hex toggle |
 | `Settings` | Appearance, language (EN/中文/日本語/한국어), security, BLE device name, app version |
-| `PinUnlock` | Cold-start unlock; max 5 attempts; lockout → Reset Wallet |
+| `Unlock` | Cold-start unlock; max 5 attempts; lockout → Reset Wallet |
 | `BackupSeed` | PIN-gated seed reveal; decrypts via `revealMnemonic`; `LangPicker` re-encoding |
 
 ## Theme System

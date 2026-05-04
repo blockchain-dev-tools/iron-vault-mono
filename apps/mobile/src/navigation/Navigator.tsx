@@ -22,7 +22,7 @@ import SetPinScreen           from '../screens/SetPinScreen';
 import ImportMnemonicScreen   from '../screens/ImportMnemonicScreen';
 import WalletManagerScreen    from '../screens/WalletManagerScreen';
 import SettingsScreen         from '../screens/SettingsScreen';
-import PinUnlockScreen        from '../screens/PinUnlockScreen';
+import UnlockScreen           from '../screens/UnlockScreen';
 import AccountDetailScreen    from '../screens/AccountDetailScreen';
 import TransactionScreen      from '../screens/TransactionScreen';
 import EntropyScreen         from '../screens/EntropyScreen';
@@ -39,7 +39,7 @@ const SCREENS = {
   ImportMnemonic:   ImportMnemonicScreen,
   Vault:            WalletManagerScreen,
   Settings:         SettingsScreen,
-  Unlock:           PinUnlockScreen,
+  Unlock:           UnlockScreen,
   AccountDetail:    AccountDetailScreen,
   Transaction:      TransactionScreen,
   BackupSeed:       BackupSeedScreen,
