@@ -36,6 +36,7 @@ export const NAV: NavSection[] = [
       { title: 'Ethereum Commands', href: '/docs/apdu-protocol/ethereum' },
       { title: 'Solana Commands', href: '/docs/apdu-protocol/solana' },
       { title: 'APDU Debugger', href: '/docs/apdu-protocol/debugger' },
+      { title: '@iron-vault/apdu', href: '/docs/apdu-protocol/apdu-lib' },
     ],
   },
   {
@@ -46,14 +47,7 @@ export const NAV: NavSection[] = [
       { title: 'Mnemonic & Seed', href: '/docs/crypto-reference/mnemonic-seed' },
       { title: 'Derivation Paths', href: '/docs/crypto-reference/derivation-paths' },
       { title: 'BIP39 Tool', href: '/docs/crypto-reference/bip39-tool' },
-    ],
-  },
-  {
-    title: 'API Reference',
-    titleKey: 'apiReference',
-    items: [
-      { title: '@iron-vault/apdu', href: '/docs/api-reference/apdu' },
-      { title: '@iron-vault/crypto', href: '/docs/api-reference/crypto' },
+      { title: '@iron-vault/crypto', href: '/docs/crypto-reference/crypto-lib' },
     ],
   },
 ]
