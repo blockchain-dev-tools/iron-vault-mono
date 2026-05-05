@@ -1,0 +1,129 @@
+---
+title: "Derivation Paths"
+description: "How BIP44 organizes the HD key tree — the meaning behind m/44'/60'/0'/0/0 and how wallets discover your accounts."
+---
+
+# Derivation Paths
+
+From a single seed, an HD wallet can generate billions of keys. Without a standard way to organize them, wallets from different vendors would produce different addresses from the same seed — making recovery impossible.
+
+Derivation paths solve this by defining **which branch of the key tree** a wallet should use for which blockchain.
+
+---
+
+## The Path Format
+
+A derivation path looks like a filesystem path with apostrophes:
+
+```
+m / 44' / 60' / 0' / 0 / 0
+```
+
+| Segment | Meaning | Example |
+|---|---|---|
+| `m` | Master node (root) | Always present |
+| `purpose'` | BIP standard | `44'` = BIP44, `84'` = BIP84 |
+| `coin_type'` | Blockchain identifier | `60'` = Ethereum, `501'` = Solana |
+| `account'` | User account index | `0'` = first account |
+| `change` | External (0) or internal (1) | `0` = receiving addresses |
+| `index` | Address number | `0` = first address |
+
+The apostrophe (`'`) marks a **hardened** derivation step, which uses the private key for derivation rather than the public key. This creates a security boundary.
+
+---
+
+## BIP44: The Multi-Account Standard
+
+[BIP44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) defines the most widely used path structure:
+
+```
+m / purpose' / coin_type' / account' / change / address_index
+```
+
+### Common Coin Types
+
+Each blockchain has a registered coin type number:
+
+| Chain | Coin Type | Path Prefix |
+|---|---|---|
+| Bitcoin | `0` | `m/44'/0'/...` |
+| Ethereum | `60` | `m/44'/60'/...` |
+| Solana | `501` | `m/44'/501'/...` |
+| Tron | `195` | `m/44'/195'/...` |
+| Sui | `784` | `m/44'/784'/...` |
+
+These numbers are registered in the [SLIP44](https://github.com/satoshilabs/slips/blob/master/slip-0044.md) standard.
+
+---
+
+## Why Different BIP Numbers?
+
+You'll see paths starting with `44'`, `49'`, `84'`, and `86'`. These aren't different wallets — they're different **address formats** for Bitcoin:
+
+| Purpose | Standard | Address Format | Example Path |
+|---|---|---|---|
+| `44'` | BIP44 | Legacy (starts with `1`) | `m/44'/0'/0'/0/0` |
+| `49'` | BIP49 | SegWit (starts with `3`) | `m/49'/0'/0'/0/0` |
+| `84'` | BIP84 | Native SegWit (starts with `bc1`) | `m/84'/0'/0'/0/0` |
+| `86'` | BIP86 | Taproot (starts with `bc1p`) | `m/86'/0'/0'/0/0` |
+
+For blockchains like Ethereum and Solana that only have one address format, the purpose is always `44'`.
+
+---
+
+## Change: External vs Internal
+
+The `change` level distinguishes between addresses you give out (external) and change addresses (internal):
+
+- **`0`** — External chain: addresses you share with others to receive funds
+- **`1`** — Internal chain: change addresses where leftover funds go after a transaction
+
+For Ethereum and Solana (which use accounts rather than UTXOs), this distinction doesn't apply, but the path structure still includes it for compatibility.
+
+---
+
+## Account Discovery
+
+When you restore a wallet from a seed phrase, how does it know which addresses you've used? It can't scan billions. Instead, wallets use a technique called **gap limit**:
+
+1. Start at `index = 0`
+2. Derive the address and check the blockchain for transactions
+3. If you find a transaction, move to `index + 1` and repeat
+4. If you find **20 consecutive unused addresses** (the gap limit), stop
+
+This typically finds all used addresses within the first few indexes. Iron Vault pre-derives the first account for each supported chain without requiring blockchain scanning.
+
+---
+
+## Iron Vault Default Paths
+
+Iron Vault uses these default derivation paths:
+
+| Chain | Default Path |
+|---|---|
+| Ethereum | `m/44'/60'/0'/0/0` |
+| Solana | `m/44'/501'/0'/0'` |
+| Bitcoin (SegWit) | `m/84'/0'/0'/0/0` |
+| Tron | `m/44'/195'/0'/0/0` |
+| Sui | `m/44'/784'/0'/0'/0'` |
+
+You can add additional paths and custom derivations using the [BIP39 Tool](/docs/crypto-reference/bip39-tool).
+
+---
+
+## Path Compatibility
+
+The same seed phrase used in different wallets should produce the same addresses — but only if all wallets use the same derivation path. In practice:
+
+- **MetaMask** uses `m/44'/60'/0'/0/0` for Ethereum
+- **Ledger Live** uses the same path but discovers multiple accounts
+- **OKX Wallet** and **Phantom** follow the same BIP44 paths for their respective chains
+
+This is why Iron Vault is compatible with existing wallets: it derives keys following the exact same standards. The seed phrase you use in Iron Vault will produce the same Ethereum addresses in MetaMask.
+
+---
+
+## Next Steps
+
+- Experiment with different paths and see addresses change in real time → [BIP39 Tool](/docs/crypto-reference/bip39-tool)
+- Start from the beginning → [HD Wallets](/docs/crypto-reference/hd-wallet)

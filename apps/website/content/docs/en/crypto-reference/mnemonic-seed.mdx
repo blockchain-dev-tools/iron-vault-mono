@@ -1,0 +1,114 @@
+---
+title: "Mnemonic & Seed"
+description: "How a string of random words becomes the master key to your wallet — BIP39 explained from entropy to seed."
+---
+
+# Mnemonic & Seed
+
+If an HD wallet is a key tree, the **seed** is its root. And if the seed is 64 bytes of random data (impossible to write down reliably), the **mnemonic phrase** is its human-friendly encoding.
+
+This is BIP39: the standard that turns raw entropy into a sequence of words you can write with pen and paper.
+
+---
+
+## Entropy: The Starting Point
+
+Every wallet begins with randomness. BIP39 supports two levels of security:
+
+| Word Count | Entropy Bits | Security Level |
+|---|---|---|
+| 12 words | 128 bits | Standard (sufficient for most use) |
+| 24 words | 256 bits | Maximum (future-proof against quantum advancements) |
+
+128 bits of entropy means there are 2¹²⁸ possible wallets — more than the number of atoms in the universe. A 24-word phrase doesn't add "more security" in any practical sense; both are infeasible to brute force.
+
+---
+
+## From Entropy to Words
+
+BIP39 converts entropy to words in three steps:
+
+```
+Entropy (128 bits)
+    → SHA-256 → take first 4 bits as checksum
+    → Append checksum to entropy (132 bits total)
+    → Split into 11-bit groups (12 groups)
+    → Each group = index into a 2048-word list
+    → Result: 12 words
+```
+
+The **checksum** (4 bits for 12 words, 8 bits for 24 words) means a random word from the list is almost certainly **invalid** — it won't pass the checksum check. This catches transcription errors when you restore a wallet.
+
+The word list itself contains 2048 carefully chosen words that are:
+
+- **Distinct** — no two words sound alike
+- **Short** — 4–7 characters on average
+- **Unambiguous** — no homophones
+
+BIP39 defines word lists in 10 languages, but English is the universal standard. Most wallets (including Iron Vault) default to English.
+
+---
+
+## Passphrase: The "25th Word"
+
+BIP39 includes an optional **passphrase** — a password that modifies the seed:
+
+```
+Seed = PBKDF2(Mnemonic + Passphrase)
+```
+
+A different passphrase produces a completely different set of addresses from the same 12/24 words. This means:
+
+- **Plausible deniability** — give attackers a low-value passphrase while concealing the real one
+- **Additional security** — even if someone finds your written mnemonic, they cannot access your wallet without the passphrase
+- **Hidden wallets** — use the same mnemonic with different passphrases for separate identities
+
+**Warning**: the passphrase is NOT stored in the wallet. Lose it, and your funds are unrecoverable — even with the correct mnemonic.
+
+---
+
+## From Mnemonic to Seed
+
+Words are not the seed. The seed is derived from the mnemonic (and optional passphrase) through **PBKDF2-SHA512** — a deliberately slow key derivation function:
+
+```
+Seed = PBKDF2(
+    Password = Mnemonic (as NFKD-normalized UTF-8),
+    Salt     = "mnemonic" + Passphrase (also NFKD-normalized),
+    Iterations = 2048,
+    Key Length = 512 bits (64 bytes)
+)
+```
+
+The 2048 iterations make brute-force attempts computationally expensive. The result is always 64 bytes, regardless of whether you started with 12 words or 24.
+
+This seed then becomes the **master node** of the BIP32 key tree — the root from which every private key, public key, and address in your wallet is derived.
+
+---
+
+## Relationship Summary
+
+```
+Entropy (128–256 bits)
+    │
+    ▼ BIP39
+Mnemonic Phrase (12–24 words)
+    │
+    ▼ PBKDF2 (2048 rounds)
+Seed (64 bytes)
+    │
+    ▼ BIP32
+Master Private Key + Chain Code
+    │
+    ▼ CKD (Child Key Derivation)
+Account Keys → Addresses
+```
+
+Everything in your wallet traces back to that initial entropy. Back up the mnemonic (and passphrase, if used), and you back up everything.
+
+---
+
+## Next Steps
+
+- See how master keys become organized addresses → [Derivation Paths](/docs/crypto-reference/derivation-paths)
+- Experiment with mnemonic generation live → [BIP39 Tool](/docs/crypto-reference/bip39-tool)

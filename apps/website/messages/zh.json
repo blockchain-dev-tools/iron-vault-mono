@@ -5,7 +5,7 @@
       "gettingStarted": "快速入门",
       "bleIntegration": "BLE 集成",
       "apduProtocol": "APDU 协议",
-      "cryptoReference": "密码学参考",
+      "walletBasics": "钱包基础",
       "apiReference": "API 参考"
     }
   },

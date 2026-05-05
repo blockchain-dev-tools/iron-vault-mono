@@ -336,100 +336,136 @@
     "href": "/docs/ble-integration/gatt-profile"
   },
   {
-    "title": "Key Derivation",
-    "sectionTitle": "Key Derivation",
-    "excerpt": "Key Derivation IRON Vault derives private keys from a single BIP-39 mnemonic phrase. Ethereum accounts use BIP-32 HD key derivation; Solana accounts use SLIP-10 with Ed25519 — a distinct algorithm tha",
-    "href": "/docs/crypto-reference/key-derivation"
+    "title": "Derivation Paths",
+    "sectionTitle": "Derivation Paths",
+    "excerpt": "Derivation Paths From a single seed, an HD wallet can generate billions of keys. Without a standard way to organize them, wallets from different vendors would produce different addresses from the same",
+    "href": "/docs/crypto-reference/derivation-paths"
   },
   {
-    "title": "Key Derivation",
-    "sectionTitle": "Mnemonic Generation and Validation",
-    "excerpt": "Mnemonic Generation and Validation Source: packages/crypto/src/mnemonic.ts Library: @scure/bip39 with the English wordlist ``ts // 12 words (128 bits of entropy) const phrase12 = generateMnemonic(128)",
-    "href": "/docs/crypto-reference/key-derivation"
+    "title": "Derivation Paths",
+    "sectionTitle": "The Path Format",
+    "excerpt": "The Path Format A derivation path looks like a filesystem path with apostrophes: `` m / 44' / 60' / 0' / 0 / 0 ` | Segment | Meaning | Example | |---|---|---| | m | Master node (root) | Always present",
+    "href": "/docs/crypto-reference/derivation-paths"
   },
   {
-    "title": "Key Derivation",
-    "sectionTitle": "Ethereum Key Derivation (BIP-32)",
-    "excerpt": "Ethereum Key Derivation (BIP-32) Source: packages/crypto/src/hdkey.ts — deriveEthPrivateKey Library: @scure/bip32 Ethereum uses the standard BIP-32 HD key tree with a BIP-44 coin type of 60. ``ts func",
-    "href": "/docs/crypto-reference/key-derivation"
+    "title": "Derivation Paths",
+    "sectionTitle": "BIP44: The Multi-Account Standard",
+    "excerpt": "BIP44: The Multi-Account Standard BIP44 defines the most widely used path structure: `` m / purpose' / coin_type' / account' / change / address_index ` Common Coin Types Each blockchain has a register",
+    "href": "/docs/crypto-reference/derivation-paths"
   },
   {
-    "title": "Key Derivation",
-    "sectionTitle": "Solana Key Derivation (SLIP-10 Ed25519)",
-    "excerpt": "Solana Key Derivation (SLIP-10 Ed25519) Source: packages/crypto/src/hdkey.ts — deriveSolanaPrivateKey Libraries: @noble/hashes/hmac, @noble/hashes/sha2 Solana uses Ed25519 keys. BIP-32 is not defined ",
-    "href": "/docs/crypto-reference/key-derivation"
+    "title": "Derivation Paths",
+    "sectionTitle": "Why Different BIP Numbers?",
+    "excerpt": "Why Different BIP Numbers? You'll see paths starting with 44', 49', 84', and 86'. These aren't different wallets — they're different address formats for Bitcoin: | Purpose | Standard | Address Format ",
+    "href": "/docs/crypto-reference/derivation-paths"
   },
   {
-    "title": "Key Derivation",
-    "sectionTitle": "Address Derivation",
-    "excerpt": "Address Derivation Source: packages/crypto/src/signer.ts and packages/crypto/src/address.ts Ethereum address ``ts function ethPubKeyToAddress(privKey: Uint8Array): ` 1. Derive uncompressed secp256k1 p",
-    "href": "/docs/crypto-reference/key-derivation"
+    "title": "Derivation Paths",
+    "sectionTitle": "Change: External vs Internal",
+    "excerpt": "Change: External vs Internal The change level distinguishes between addresses you give out (external) and change addresses (internal): - 0 — External chain: addresses you share with others to receive ",
+    "href": "/docs/crypto-reference/derivation-paths"
   },
   {
-    "title": "Key Derivation",
-    "sectionTitle": "High-Level Helper: `deriveAccountsFromPaths`",
-    "excerpt": "High-Level Helper: deriveAccountsFromPaths Source: packages/crypto/src/address.ts This is the primary API for deriving multiple accounts at once. ``ts async function deriveAccountsFromPaths( mnemonic:",
-    "href": "/docs/crypto-reference/key-derivation"
+    "title": "Derivation Paths",
+    "sectionTitle": "Account Discovery",
+    "excerpt": "Account Discovery When you restore a wallet from a seed phrase, how does it know which addresses you've used? It can't scan billions. Instead, wallets use a technique called gap limit: 1. Start at ind",
+    "href": "/docs/crypto-reference/derivation-paths"
   },
   {
-    "title": "Key Derivation",
-    "sectionTitle": "Key Derivation Summary",
-    "excerpt": "Key Derivation Summary | Chain | Algorithm | Path | Returns | |---|---|---|---| | Ethereum | BIP-32 (@scure/bip32) | m/44'/60'/0'/0/ | 32-byte secp256k1 private key | | Solana | SLIP-10 Ed25519 (@nobl",
-    "href": "/docs/crypto-reference/key-derivation"
+    "title": "Derivation Paths",
+    "sectionTitle": "Iron Vault Default Paths",
+    "excerpt": "Iron Vault Default Paths Iron Vault uses these default derivation paths: | Chain | Default Path | |---|---| | Ethereum | m/44'/60'/0'/0/0 | | Solana | m/44'/501'/0'/0' | | Bitcoin (SegWit) | m/84'/0'/",
+    "href": "/docs/crypto-reference/derivation-paths"
   },
   {
-    "title": "Signing Formats",
-    "sectionTitle": "Signing Formats",
-    "excerpt": "Signing Formats IRON Vault implements four signing operations across two chains. All signing logic lives in packages/crypto/src/signer.ts. Every function returns a raw byte array, not a hex string. Th",
-    "href": "/docs/crypto-reference/signing-formats"
+    "title": "Derivation Paths",
+    "sectionTitle": "Path Compatibility",
+    "excerpt": "Path Compatibility The same seed phrase used in different wallets should produce the same addresses — but only if all wallets use the same derivation path. In practice: - MetaMask uses m/44'/60'/0'/0/",
+    "href": "/docs/crypto-reference/derivation-paths"
   },
   {
-    "title": "Signing Formats",
-    "sectionTitle": "Output Format",
-    "excerpt": "Output Format All Ethereum signing functions return a 65-byte buffer with the layout: `` [ v (1 byte) | r (32 bytes) | s (32 bytes) ] ` The v` value encodes the recovery bit and, for legacy transactio",
-    "href": "/docs/crypto-reference/signing-formats"
+    "title": "Derivation Paths",
+    "sectionTitle": "Next Steps",
+    "excerpt": "Next Steps - Experiment with different paths and see addresses change in real time → BIP39 Tool - Start from the beginning → HD Wallets",
+    "href": "/docs/crypto-reference/derivation-paths"
   },
   {
-    "title": "Signing Formats",
-    "sectionTitle": "ETH: Transaction Signing",
-    "excerpt": "ETH: Transaction Signing Function: signEthTransaction(privKey, rlp) ``ts function signEthTransaction(privKey: Uint8Array, rlp: Uint8Array): Uint8Array // Returns: v(1B) + r(32B) + s(32B) = 65 bytes ` ",
-    "href": "/docs/crypto-reference/signing-formats"
+    "title": "HD Wallets",
+    "sectionTitle": "HD Wallets",
+    "excerpt": "HD Wallets Imagine you have a Bitcoin wallet. You receive money at one address, then want a fresh address for the next transaction. Without a system, you'd need to: 1. Generate a new private key 2. Ba",
+    "href": "/docs/crypto-reference/hd-wallet"
   },
   {
-    "title": "Signing Formats",
-    "sectionTitle": "ETH: Personal Message Signing",
-    "excerpt": "ETH: Personal Message Signing Function: signEthPersonalMessage(privKey, message) ``ts function signEthPersonalMessage(privKey: Uint8Array, message: Uint8Array): Uint8Array // Returns: v(1B) + r(32B) +",
-    "href": "/docs/crypto-reference/signing-formats"
+    "title": "HD Wallets",
+    "sectionTitle": "Deterministic: One Seed, Infinite Keys",
+    "excerpt": "Deterministic: One Seed, Infinite Keys A deterministic wallet means the same starting secret always produces the same sequence of keys. Unlike generating random keys (which you must back up individual",
+    "href": "/docs/crypto-reference/hd-wallet"
   },
   {
-    "title": "Signing Formats",
-    "sectionTitle": "ETH: EIP-712 Typed Data Signing",
-    "excerpt": "ETH: EIP-712 Typed Data Signing Function: signEthEip712(privKey, domainHash, structHash) ``ts function signEthEip712( privKey: Uint8Array, domainHash: Uint8Array, // 32 bytes structHash: Uint8Array, /",
-    "href": "/docs/crypto-reference/signing-formats"
+    "title": "HD Wallets",
+    "sectionTitle": "Hierarchical: Tree Structure",
+    "excerpt": "Hierarchical: Tree Structure The \"hierarchical\" part means keys are organized in a tree. A parent key can derive many children, each child can derive its own children, and so on. This structure is def",
+    "href": "/docs/crypto-reference/hd-wallet"
   },
   {
-    "title": "Signing Formats",
-    "sectionTitle": "SOL: Message Signing",
-    "excerpt": "SOL: Message Signing Function: signSolanaMessage(privKey, message) ``ts function signSolanaMessage(privKey: Uint8Array, message: Uint8Array): Uint8Array // Returns: 64-byte raw Ed25519 signature ` Alg",
-    "href": "/docs/crypto-reference/signing-formats"
+    "title": "HD Wallets",
+    "sectionTitle": "Key Derivation: How It Works",
+    "excerpt": "Key Derivation: How It Works BIP32 defines a Child Key Derivation (CKD) function. Given a parent key and an index number, it produces a child key pair: `` Child = CKD(Parent, Index) ` The derivation u",
+    "href": "/docs/crypto-reference/hd-wallet"
   },
   {
-    "title": "Signing Formats",
-    "sectionTitle": "Comparison Table",
-    "excerpt": "Comparison Table | Method | Input | Hash construction | v value | Output size | |---|---|---|---|---| | signEthTransaction | RLP bytes | keccak256(rlp) | 0/1 (typed) or 37/38 (legacy) | 65 bytes | | s",
-    "href": "/docs/crypto-reference/signing-formats"
+    "title": "HD Wallets",
+    "sectionTitle": "Why HD Wallets Won",
+    "excerpt": "Why HD Wallets Won Before HD wallets, each address was an independent random key. Backup meant writing down every single private key — impractical for any real use. HD wallets reduced backup to one se",
+    "href": "/docs/crypto-reference/hd-wallet"
   },
   {
-    "title": "Signing Formats",
-    "sectionTitle": "Low-S Normalization",
-    "excerpt": "Low-S Normalization All three Ethereum signing functions pass ` to secp256k1.sign. This instructs the @noble/curves library to negate s if it falls in the upper half of the secp256k1 order (s > n/2), ",
-    "href": "/docs/crypto-reference/signing-formats"
+    "title": "HD Wallets",
+    "sectionTitle": "Next Steps",
+    "excerpt": "Next Steps - Learn how that seed phrase is generated → Mnemonic & Seed - Understand the path structure at the core of every HD wallet → Derivation Paths - Experiment with a live HD wallet → BIP39 Tool",
+    "href": "/docs/crypto-reference/hd-wallet"
   },
   {
-    "title": "Signing Formats",
-    "sectionTitle": "Error Handling",
-    "excerpt": "Error Handling None of the signing functions validate the private key length or format. Passing a key that is not 32 bytes will produce undefined behavior from the underlying @noble/curves primitives.",
-    "href": "/docs/crypto-reference/signing-formats"
+    "title": "Mnemonic & Seed",
+    "sectionTitle": "Mnemonic & Seed",
+    "excerpt": "Mnemonic & Seed If an HD wallet is a key tree, the seed is its root. And if the seed is 64 bytes of random data (impossible to write down reliably), the mnemonic phrase is its human-friendly encoding.",
+    "href": "/docs/crypto-reference/mnemonic-seed"
+  },
+  {
+    "title": "Mnemonic & Seed",
+    "sectionTitle": "Entropy: The Starting Point",
+    "excerpt": "Entropy: The Starting Point Every wallet begins with randomness. BIP39 supports two levels of security: | Word Count | Entropy Bits | Security Level | |---|---|---| | 12 words | 128 bits | Standard (s",
+    "href": "/docs/crypto-reference/mnemonic-seed"
+  },
+  {
+    "title": "Mnemonic & Seed",
+    "sectionTitle": "From Entropy to Words",
+    "excerpt": "From Entropy to Words BIP39 converts entropy to words in three steps: `` Entropy (128 bits) → SHA-256 → take first 4 bits as checksum → Append checksum to entropy (132 bits total) → Split into 11-bit ",
+    "href": "/docs/crypto-reference/mnemonic-seed"
+  },
+  {
+    "title": "Mnemonic & Seed",
+    "sectionTitle": "Passphrase: The \"25th Word\"",
+    "excerpt": "Passphrase: The \"25th Word\" BIP39 includes an optional passphrase — a password that modifies the seed: `` Seed = PBKDF2(Mnemonic + Passphrase) `` A different passphrase produces a completely different",
+    "href": "/docs/crypto-reference/mnemonic-seed"
+  },
+  {
+    "title": "Mnemonic & Seed",
+    "sectionTitle": "From Mnemonic to Seed",
+    "excerpt": "From Mnemonic to Seed Words are not the seed. The seed is derived from the mnemonic (and optional passphrase) through PBKDF2-SHA512 — a deliberately slow key derivation function: `` Seed = PBKDF2( Pas",
+    "href": "/docs/crypto-reference/mnemonic-seed"
+  },
+  {
+    "title": "Mnemonic & Seed",
+    "sectionTitle": "Relationship Summary",
+    "excerpt": "Relationship Summary `` Entropy (128–256 bits) │ ▼ BIP39 Mnemonic Phrase (12–24 words) │ ▼ PBKDF2 (2048 rounds) Seed (64 bytes) │ ▼ BIP32 Master Private Key + Chain Code │ ▼ CKD (Child Key Derivation)",
+    "href": "/docs/crypto-reference/mnemonic-seed"
+  },
+  {
+    "title": "Mnemonic & Seed",
+    "sectionTitle": "Next Steps",
+    "excerpt": "Next Steps - See how master keys become organized addresses → Derivation Paths - Experiment with mnemonic generation live → BIP39 Tool",
+    "href": "/docs/crypto-reference/mnemonic-seed"
   },
   {
     "title": "Architecture",

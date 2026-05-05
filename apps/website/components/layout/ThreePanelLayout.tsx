@@ -15,7 +15,7 @@ export default function ThreePanelLayout({ center, right }: ThreePanelLayoutProp
         <main className="flex-1 overflow-y-auto">
           {center}
         </main>
-        <aside className="w-[360px] flex-shrink-0 border-l border-outline-variant overflow-hidden">
+        <aside className="w-[460px] flex-shrink-0 border-l border-outline-variant overflow-hidden">
           {right}
         </aside>
       </div>

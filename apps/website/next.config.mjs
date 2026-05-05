@@ -11,7 +11,7 @@ const withMDX = createMDX({
 })
 
 const nextConfig = {
-  output: 'export',
+  output: process.env.STATIC_EXPORT === 'true' ? 'export' : undefined,
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   transpilePackages: ['@iron-vault/simulator'],
 }

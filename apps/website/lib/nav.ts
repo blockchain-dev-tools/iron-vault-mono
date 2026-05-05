@@ -38,11 +38,13 @@ export const NAV: NavSection[] = [
     ],
   },
   {
-    title: 'Crypto Reference',
-    titleKey: 'cryptoReference',
+    title: 'Wallet Basics',
+    titleKey: 'walletBasics',
     items: [
-      { title: 'Key Derivation', href: '/docs/crypto-reference/key-derivation' },
-      { title: 'Signing Formats', href: '/docs/crypto-reference/signing-formats' },
+      { title: 'HD Wallets', href: '/docs/crypto-reference/hd-wallet' },
+      { title: 'Mnemonic & Seed', href: '/docs/crypto-reference/mnemonic-seed' },
+      { title: 'Derivation Paths', href: '/docs/crypto-reference/derivation-paths' },
+      { title: 'BIP39 Tool', href: '/docs/crypto-reference/bip39-tool' },
     ],
   },
   {

@@ -5,7 +5,7 @@
       "gettingStarted": "Getting Started",
       "bleIntegration": "BLE Integration",
       "apduProtocol": "APDU Protocol",
-      "cryptoReference": "Crypto Reference",
+      "walletBasics": "Wallet Basics",
       "apiReference": "API Reference"
     }
   },

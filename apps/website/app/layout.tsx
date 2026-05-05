@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     template: '%s | IRON Vault',
   },
   description: 'BLE hardware wallet emulator for old Android phones — developer docs, APDU debugger, and wallet simulator.',
+  icons: {
+    icon: '/favicon.ico',
+  },
   openGraph: {
     siteName: 'IRON Vault',
     type: 'website',

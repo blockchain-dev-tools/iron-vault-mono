@@ -1,0 +1,83 @@
+---
+title: "HD Wallets"
+description: "Understand hierarchical deterministic wallets — how one seed generates thousands of addresses, why this matters, and how BIP32 makes it possible."
+---
+
+# HD Wallets
+
+Imagine you have a Bitcoin wallet. You receive money at one address, then want a fresh address for the next transaction. Without a system, you'd need to:
+
+1. Generate a new private key
+2. Back up that key somewhere safe
+3. Remember which keys you've used
+
+Now scale that to 10 addresses, then 100, then across Ethereum, Solana, and Bitcoin simultaneously. Managing individual keys becomes impossible.
+
+**Hierarchical Deterministic (HD) wallets** solve this with two key ideas: *deterministic* and *hierarchical*.
+
+---
+
+## Deterministic: One Seed, Infinite Keys
+
+A deterministic wallet means the **same starting secret always produces the same sequence of keys**. Unlike generating random keys (which you must back up individually), an HD wallet derives every key from a single **seed** — typically 64 bytes of randomness.
+
+```
+Seed → Master Key → Child Key 1 → Grandchild Key A
+                  → Child Key 2 → Grandchild Key B
+                  → Child Key 3 → Grandchild Key C
+```
+
+Back up the seed once, and you recover every key ever derived from it. If your phone is lost, the seed alone restores your entire wallet.
+
+---
+
+## Hierarchical: Tree Structure
+
+The "hierarchical" part means keys are organized in a tree. A parent key can derive many children, each child can derive its own children, and so on. This structure is defined by **BIP32** (Bitcoin Improvement Proposal 32), the standard that introduced HD wallets.
+
+Why a tree instead of a flat list?
+
+- **Organization** — separate branches for different purposes (receiving addresses, change addresses, different blockchains)
+- **Selective exposure** — you can share a public parent key ("xpub") without exposing the private keys below it, which allows a watching-only wallet that can see incoming transactions but cannot spend
+- **Backup invariance** — backing up one node backs up everything beneath it
+
+---
+
+## Key Derivation: How It Works
+
+BIP32 defines a **Child Key Derivation (CKD)** function. Given a parent key and an index number, it produces a child key pair:
+
+```
+Child = CKD(Parent, Index)
+```
+
+The derivation uses HMAC-SHA512 to mix the parent's private key and chain code with the child index, producing 64 bytes. The left 32 bytes become the child's private key (after adding to the parent's key); the right 32 bytes become the child's chain code.
+
+### Hardened vs Normal Derivation
+
+BIP32 defines two types of child derivation:
+
+| Type | Notation | Index Range | Property |
+|---|---|---|---|
+| **Normal** | `0`, `1`, `2`... | 0 to 2³¹−1 | Given parent xpub + child index, you can compute child xpub |
+| **Hardened** | `0'`, `1'`, `2'`... | 0' to 2³¹−1' (bit 31 set) | Requires parent private key; xpub alone is insufficient |
+
+Hardened derivation uses the parent's **private key** as input to HMAC-SHA512 instead of the public key, producing a child that is unrelated to the parent's public chain. This is a security boundary: even if someone knows your parent xpub, they cannot derive hardened children.
+
+**Best practice**: use hardened derivation for the first levels of the tree (purpose, coin type, account), then normal derivation for address indexes.
+
+---
+
+## Why HD Wallets Won
+
+Before HD wallets, each address was an independent random key. Backup meant writing down every single private key — impractical for any real use. HD wallets reduced backup to **one seed phrase**, which is why every modern wallet (MetaMask, Ledger, Phantom, OKX Wallet) uses them.
+
+The entire ecosystem — BIP32 for the key tree, BIP39 for seed encoding, BIP44 for the path standard — was designed in 2013–2014 and has been the foundation of self-custody ever since.
+
+---
+
+## Next Steps
+
+- Learn how that seed phrase is generated → [Mnemonic & Seed](/docs/crypto-reference/mnemonic-seed)
+- Understand the path structure at the core of every HD wallet → [Derivation Paths](/docs/crypto-reference/derivation-paths)
+- Experiment with a live HD wallet → [BIP39 Tool](/docs/crypto-reference/bip39-tool)
