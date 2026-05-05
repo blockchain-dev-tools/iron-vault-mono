@@ -7,8 +7,7 @@
       "bleIntegration": "BLE Integration",
       "apduProtocol": "APDU Protocol",
       "walletBasics": "Wallet Basics",
-      "apiReference": "API Reference",
-      "transactionConsole": "Transaction Console"
+      "apiReference": "API Reference"
     }
   },
   "console": {

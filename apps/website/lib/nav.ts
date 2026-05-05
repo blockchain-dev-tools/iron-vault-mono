@@ -11,13 +11,6 @@ export interface NavSection {
 
 export const NAV: NavSection[] = [
   {
-    title: 'Transaction Console',
-    titleKey: 'transactionConsole',
-    items: [
-      { title: 'Sign & Broadcast', href: '/console' },
-    ],
-  },
-  {
     title: 'Getting Started',
     titleKey: 'gettingStarted',
     items: [

@@ -7,8 +7,7 @@
       "bleIntegration": "BLE 集成",
       "apduProtocol": "APDU 协议",
       "walletBasics": "钱包基础",
-      "apiReference": "API 参考",
-      "transactionConsole": "交易控制台"
+      "apiReference": "API 参考"
     }
   },
   "console": {

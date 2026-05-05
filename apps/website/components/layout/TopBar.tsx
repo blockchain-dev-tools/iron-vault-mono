@@ -1,6 +1,6 @@
 'use client'
 import { useTranslations, useLocale } from 'next-intl'
-import { usePathname, useRouter } from '@/lib/navigation'
+import { Link, usePathname, useRouter } from '@/lib/navigation'
 import ThemeToggle from './ThemeToggle'
 import { openSearch } from '@/components/search/SearchModal'
 
@@ -25,6 +25,17 @@ export default function TopBar() {
         </svg>
         <span className="font-headline font-bold text-on-surface">IRON Vault</span>
         <span className="font-label text-xs text-on-surface-variant ml-1">DevTools</span>
+        <div className="w-px h-5 bg-outline-variant mx-3" />
+        <Link
+          href="/console"
+          className={`font-label text-sm transition-colors ${
+            pathname.startsWith('/console')
+              ? 'text-primary font-semibold'
+              : 'text-on-surface-variant hover:text-on-surface'
+          }`}
+        >
+          Console
+        </Link>
       </div>
       <div className="flex items-center gap-2">
         {/* Search button */}
