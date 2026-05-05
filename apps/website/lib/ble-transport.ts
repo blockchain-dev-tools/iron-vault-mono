@@ -1,56 +1,10 @@
+import { frameAPDU, unframeResponse } from '@iron-vault/apdu';
+export { frameAPDU, unframeResponse };
+
 // Ledger BLE GATT profile UUIDs
 export const SERVICE_UUID = '13d63400-2c97-0004-0000-4c6564676572';
 export const NOTIFY_UUID  = '13d63400-2c97-0004-0001-4c6564676572';
 export const WRITE_UUID   = '13d63400-2c97-0004-0002-4c6564676572';
-
-const CHANNEL = [0x01, 0x01];
-const TAG     = 0x05;
-const MTU     = 20;
-
-// ── Framing ───────────────────────────────────────────────────────────────────
-
-export function frameAPDU(apdu: Uint8Array): Uint8Array[] {
-  const packets: Uint8Array[] = [];
-  let offset = 0;
-  let seq = 0;
-
-  while (offset < apdu.length || seq === 0) {
-    const headerLen = seq === 0 ? 7 : 5;
-    const chunkLen  = Math.min(MTU - headerLen, apdu.length - offset);
-    const pkt       = new Uint8Array(headerLen + chunkLen);
-    let i = 0;
-    pkt[i++] = CHANNEL[0]; pkt[i++] = CHANNEL[1];
-    pkt[i++] = TAG;
-    pkt[i++] = (seq >> 8) & 0xff; pkt[i++] = seq & 0xff;
-    if (seq === 0) {
-      pkt[i++] = (apdu.length >> 8) & 0xff;
-      pkt[i++] = apdu.length & 0xff;
-    }
-    pkt.set(apdu.slice(offset, offset + chunkLen), i);
-    packets.push(pkt);
-    offset += chunkLen;
-    seq++;
-    if (offset >= apdu.length) break;
-  }
-  return packets;
-}
-
-export function unframeResponse(chunks: Uint8Array[]): Uint8Array {
-  if (chunks.length === 0) throw new Error('No chunks');
-  const first = chunks[0];
-  const totalLen = (first[5] << 8) | first[6];
-  const result = new Uint8Array(totalLen);
-  let offset = 0;
-
-  for (let seq = 0; seq < chunks.length && offset < totalLen; seq++) {
-    const headerLen = seq === 0 ? 7 : 5;
-    const payload   = chunks[seq].slice(headerLen);
-    const toCopy    = Math.min(payload.length, totalLen - offset);
-    result.set(payload.slice(0, toCopy), offset);
-    offset += toCopy;
-  }
-  return result;
-}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 

@@ -69,8 +69,11 @@ export default function LocalePage({ params: { locale } }: Props) {
           <Link href={`/${locale}/docs/getting-started/introduction`} className="text-on-surface-variant hover:text-on-surface transition-colors">
             {isZh ? '文档' : 'Docs'}
           </Link>
-          <Link href={`/${locale}/debugger`} className="text-on-surface-variant hover:text-on-surface transition-colors">
+          <Link href={`/${locale}/docs/apdu-protocol/debugger`} className="text-on-surface-variant hover:text-on-surface transition-colors">
             {isZh ? '调试器' : 'Debugger'}
+          </Link>
+          <Link href={`/${locale}/console`} className="text-on-surface-variant hover:text-on-surface transition-colors">
+            {isZh ? '控制台' : 'Console'}
           </Link>
           <a href={`/${altLocale}`} className="text-on-surface-variant hover:text-on-surface transition-colors">
             {isZh ? 'EN' : '中文'}
@@ -142,8 +145,11 @@ export default function LocalePage({ params: { locale } }: Props) {
           <Link href={`/${locale}/docs/getting-started/introduction`} className="hover:text-on-surface transition-colors">
             {isZh ? '文档' : 'Docs'}
           </Link>
-          <Link href={`/${locale}/debugger`} className="hover:text-on-surface transition-colors">
+          <Link href={`/${locale}/docs/apdu-protocol/debugger`} className="hover:text-on-surface transition-colors">
             {isZh ? 'APDU 调试器' : 'APDU Debugger'}
+          </Link>
+          <Link href={`/${locale}/console`} className="hover:text-on-surface transition-colors">
+            {isZh ? '交易控制台' : 'Transaction Console'}
           </Link>
           <a href={`/${altLocale}`} className="hover:text-on-surface transition-colors">
             {isZh ? 'English' : '中文'}

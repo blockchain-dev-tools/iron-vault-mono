@@ -1,59 +1,10 @@
 'use client'
 import { useState } from 'react'
+import { APDU_PRESETS } from '@iron-vault/apdu'
 import TargetToggle, { type DebugTarget } from './TargetToggle'
 import ScanModal from './ScanModal'
 import { useApduBus } from '@/lib/apdu-bus'
 import { useBleDevice, type BleLogFn } from '@/hooks/useBleDevice'
-
-const PRESETS = [
-  // ── System ───────────────────────────────────────────────────────────────────
-  { label: 'GET_VERSION',
-    hex: 'e001000000',
-    group: 'System' },
-  { label: 'GET_APP_AND_VERSION',
-    hex: 'b001000000',
-    group: 'System' },
-  { label: 'OPEN_APP (Ethereum)',
-    hex: 'e0d8000008457468657265756d',
-    group: 'System' },
-  { label: 'OPEN_APP (Solana)',
-    hex: 'e0d800000653 6f6c616e61',
-    group: 'System' },
-  { label: 'PROVIDE_ERC20_TOKEN_INFO (USDC, mainnet)',
-    hex: 'e00a00001f04555344430 6a0b86991c6218b36c1d19d4a2e9eb0ce3606eb480000000100',
-    group: 'System' },
-
-  // ── Ethereum ─────────────────────────────────────────────────────────────────
-  { label: "GET_ETH_ADDRESS (m/44'/60'/0'/0/0)",
-    hex: 'e002000015058000002c8000003c800000000000000000000000',
-    group: 'Ethereum' },
-  { label: "GET_ETH_ADDRESS (m/44'/60'/0'/0/1)",
-    hex: 'e002000015058000002c8000003c800000000000000000000001',
-    group: 'Ethereum' },
-  { label: "GET_ETH_ADDRESS (m/44'/60'/0'/0/2)",
-    hex: 'e002000015058000002c8000003c800000000000000000000002',
-    group: 'Ethereum' },
-  { label: "SIGN_ETH_TX (0.001 ETH → vitalik.eth, EIP-1559)",
-    hex: 'e004000046058000002c8000003c80000000000000000000000002ef0180843b9aca008502540be40082520894d8da6bf26964af9d7eed9e03e53415d37aa9604587038d7ea4c6800080c0',
-    group: 'Ethereum' },
-  { label: 'SIGN_PERSONAL_MESSAGE ("Hello, IRON Vault!")',
-    hex: 'e008000030058000002c8000003c8000000000000000000000000000001748656c6c6f2c2049524f4e205661756c7421',
-    group: 'Ethereum' },
-  { label: 'SIGN_EIP_712_MESSAGE (sample typed data)',
-    hex: 'e00c000055058000002c8000003c800000000000000000000000deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefcafebabecafebabecafebabecafebabecafebabecafebabecafebabecafebabe',
-    group: 'Ethereum' },
-
-  // ── Solana ───────────────────────────────────────────────────────────────────
-  { label: "GET_SOLANA_PUBKEY (m/44'/501'/0'/0')",
-    hex: 'e005000011048000002c800001f5800000008000000 0',
-    group: 'Solana' },
-  { label: "GET_SOLANA_PUBKEY (m/44'/501'/0'/1')",
-    hex: 'e005000011048000002c800001f58000000080000001',
-    group: 'Solana' },
-  { label: 'SIGN_SOLANA_MESSAGE ("Hello Solana")',
-    hex: 'e00601001d048000002c800001f5800000008000000048656c6c6f20536f6c616e61',
-    group: 'Solana' },
-]
 
 export interface LogEntry {
   id: number
@@ -71,7 +22,7 @@ let _entryId = 0
 
 export default function CommandBuilder({ onLog }: CommandBuilderProps) {
   const [mode, setMode]     = useState<'preset' | 'manual'>('preset')
-  const [preset, setPreset] = useState(PRESETS[0])
+  const [preset, setPreset] = useState(APDU_PRESETS[0])
   const [manual, setManual] = useState('')
   const [target, setTarget] = useState<DebugTarget>('simulator')
   const [loading, setLoading] = useState(false)
@@ -83,7 +34,7 @@ export default function CommandBuilder({ onLog }: CommandBuilderProps) {
     ? preset.hex.replace(/\s/g, '')
     : manual.replace(/\s/g, '')
 
-  const groups = Array.from(new Set(PRESETS.map(p => p.group)))
+  const groups = Array.from(new Set(APDU_PRESETS.map(p => p.group)))
 
   // Bridge BLE transport log events → CommandBuilder LogEntry format
   const bleLog: BleLogFn = (dir, hex, label) => {
@@ -174,12 +125,12 @@ export default function CommandBuilder({ onLog }: CommandBuilderProps) {
       {mode === 'preset' ? (
         <select
           value={preset.hex}
-          onChange={e => setPreset(PRESETS.find(p => p.hex === e.target.value) ?? PRESETS[0])}
+          onChange={e => setPreset(APDU_PRESETS.find(p => p.hex === e.target.value) ?? APDU_PRESETS[0])}
           className="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-sm font-mono text-on-surface focus:outline-none focus:border-primary"
         >
-          {groups.map(group => (
-            <optgroup key={group} label={group}>
-              {PRESETS.filter(p => p.group === group).map(p => (
+              {groups.map(group => (
+                <optgroup key={group} label={group}>
+                  {APDU_PRESETS.filter(p => p.group === group).map(p => (
                 <option key={p.hex} value={p.hex}>{p.label}</option>
               ))}
             </optgroup>

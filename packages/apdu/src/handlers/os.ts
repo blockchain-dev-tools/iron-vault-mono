@@ -7,6 +7,10 @@ import { S, ulog } from './shared';
 export async function handleOs(
   cla: number, ins: number, _p1: number, _p2: number, data: Uint8Array,
 ): Promise<string | null> {
+  // GET_VERSION — E0 01 (only when app doesn't define its own INS 0x01)
+  // Solana app uses INS 0x01 as GET_APP_CONFIGURATION — handled by handleSol()
+  if (cla === 0xe0 && ins === 0x01 && S.currentApp !== 'Solana') return buildGetVersion();
+
   // GET_APP_AND_VERSION — B0 01
   if (cla === 0xb0 && ins === 0x01) return buildGetAppAndVersion();
 

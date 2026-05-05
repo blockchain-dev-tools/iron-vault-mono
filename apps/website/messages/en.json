@@ -1,13 +1,28 @@
 {
   "nav": {
     "debugger": "APDU Debugger",
+    "console": "Transaction Console",
     "sections": {
       "gettingStarted": "Getting Started",
       "bleIntegration": "BLE Integration",
       "apduProtocol": "APDU Protocol",
       "walletBasics": "Wallet Basics",
-      "apiReference": "API Reference"
+      "apiReference": "API Reference",
+      "transactionConsole": "Transaction Console"
     }
+  },
+  "console": {
+    "pageTitle": "Transaction Console",
+    "chainEthereum": "Ethereum",
+    "chainSolana": "Solana",
+    "signButton": "Sign Transaction",
+    "signing": "Signing...",
+    "deviceSimulator": "In-browser Simulator",
+    "deviceBle": "BLE Device",
+    "disconnect": "Disconnect",
+    "resultSignature": "Signature",
+    "resultBroadcast": "Broadcast to Network",
+    "resultCopied": "Copied"
   },
   "toc": {
     "onThisPage": "On this page"

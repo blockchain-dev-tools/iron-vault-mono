@@ -1,13 +1,28 @@
 {
   "nav": {
     "debugger": "APDU 调试器",
+    "console": "交易控制台",
     "sections": {
       "gettingStarted": "快速入门",
       "bleIntegration": "BLE 集成",
       "apduProtocol": "APDU 协议",
       "walletBasics": "钱包基础",
-      "apiReference": "API 参考"
+      "apiReference": "API 参考",
+      "transactionConsole": "交易控制台"
     }
+  },
+  "console": {
+    "pageTitle": "交易控制台",
+    "chainEthereum": "以太坊",
+    "chainSolana": "Solana",
+    "signButton": "签名交易",
+    "signing": "签名中...",
+    "deviceSimulator": "浏览器模拟器",
+    "deviceBle": "BLE 设备",
+    "disconnect": "断开连接",
+    "resultSignature": "签名结果",
+    "resultBroadcast": "广播到网络",
+    "resultCopied": "已复制"
   },
   "toc": {
     "onThisPage": "本页目录"

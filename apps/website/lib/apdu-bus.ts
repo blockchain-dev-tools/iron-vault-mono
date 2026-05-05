@@ -14,6 +14,9 @@ interface ApduBusState {
   /** Called by debugger to send a command. Returns response hex. */
   dispatch(hex: string): Promise<string>
 
+  /** Send multiple commands sequentially with optional interval (ms). Useful for multi-frame replay. */
+  dispatchSequence(hexes: string[], intervalMs?: number): Promise<string[]>
+
   /** Called by simulator panel when it has processed the command */
   resolve(id: string, responseHex: string): void
 
@@ -33,6 +36,18 @@ export const useApduBus = create<ApduBusState>((set, get) => ({
       const pending: PendingRequest = { id, hex, resolve, reject }
       set({ pendingRequest: { id, hex }, _pending: pending })
     })
+  },
+
+  async dispatchSequence(hexes, intervalMs = 500) {
+    const responses: string[] = []
+    for (const hex of hexes) {
+      const resp = await get().dispatch(hex)
+      responses.push(resp)
+      if (intervalMs > 0) {
+        await new Promise(r => setTimeout(r, intervalMs))
+      }
+    }
+    return responses
   },
 
   resolve(id, responseHex) {

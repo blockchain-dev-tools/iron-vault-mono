@@ -11,6 +11,13 @@ export interface NavSection {
 
 export const NAV: NavSection[] = [
   {
+    title: 'Transaction Console',
+    titleKey: 'transactionConsole',
+    items: [
+      { title: 'Sign & Broadcast', href: '/console' },
+    ],
+  },
+  {
     title: 'Getting Started',
     titleKey: 'gettingStarted',
     items: [
@@ -35,6 +42,7 @@ export const NAV: NavSection[] = [
       { title: 'Overview', href: '/docs/apdu-protocol/overview' },
       { title: 'Ethereum Commands', href: '/docs/apdu-protocol/ethereum' },
       { title: 'Solana Commands', href: '/docs/apdu-protocol/solana' },
+      { title: 'APDU Debugger', href: '/docs/apdu-protocol/debugger' },
     ],
   },
   {

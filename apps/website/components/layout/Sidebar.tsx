@@ -35,15 +35,15 @@ export default function Sidebar() {
     <nav className="w-60 flex-shrink-0 h-full overflow-y-auto border-r border-outline-variant bg-surface">
       <div className="px-3 py-6">
         <Link
-          href="/debugger"
+          href="/console"
           className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-label mb-4 transition-colors ${
-            pathname.startsWith('/debugger')
+            pathname.startsWith('/console')
               ? 'bg-primary/10 text-primary font-semibold border-l-2 border-primary pl-[10px]'
               : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
           }`}
         >
-          <span className="material-symbols-outlined text-[18px]">bug_report</span>
-          {t('debugger')}
+          <span className="material-symbols-outlined text-[18px]">terminal</span>
+          Console
         </Link>
 
         <div className="border-t border-outline-variant/40 mb-4" />
