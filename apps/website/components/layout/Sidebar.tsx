@@ -32,7 +32,7 @@ export default function Sidebar() {
   }
 
   return (
-    <nav className="w-60 flex-shrink-0 h-full overflow-y-auto border-r border-outline-variant bg-surface">
+    <nav className="w-60 flex-shrink-0 h-full overflow-y-auto border-r border-outline-variant/20 bg-surface">
       <div className="px-3 py-6">
         {NAV.map(section => {
           const isOpen = openSections[section.titleKey] ?? true

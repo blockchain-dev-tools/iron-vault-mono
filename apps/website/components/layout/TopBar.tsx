@@ -16,7 +16,7 @@ export default function TopBar() {
   }
 
   return (
-    <header className="h-14 flex items-center justify-between px-6 border-b border-outline-variant bg-surface flex-shrink-0">
+    <header className="h-14 flex items-center justify-between px-6 shadow-lg bg-surface flex-shrink-0 relative z-10">
       <div className="flex items-center gap-2">
         <svg width={22} height={24} viewBox="0 0 80 92" className="text-primary" fill="currentColor">
           <path fillRule="evenodd" d="M40 0 80 18v34c0 20-20 36-40 40C20 88 0 72 0 52V18L40 0ZM29 34h22q4 0 4 5v18q0 5-4 5H29q-4 0-4-5V39q0-5 4-5Zm1 0q0-9 10-9t10 9Zm3 0q0-5 7-5t7 5Z" />
