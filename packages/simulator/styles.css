@@ -5,7 +5,7 @@
   --c-primary-container:     #1c2a00;
   --c-background:            #000000;
   --c-surface:               #1A1A1A;
-  --c-surface-container:     #1A1919;
+  --c-surface-container:     #1A1A1A;
   --c-surface-container-low: #131313;
   --c-surface-container-high:#262626;
   --c-on-surface:            #FFFFFF;
@@ -22,10 +22,10 @@
   --c-on-primary:            #FFFFFF;
   --c-primary-container:     #d4e8a0;
   --c-background:            #ffffff;
-  --c-surface:               #FAFDF2;
-  --c-surface-container:     #E9EED8;
-  --c-surface-container-low: #F0F4E3;
-  --c-surface-container-high:#DDE5C5;
+  --c-surface:               #F8F8F8;
+  --c-surface-container:     #E8E8E8;
+  --c-surface-container-low: #F0F0F0;
+  --c-surface-container-high:#DEDEDE;
   --c-on-surface:            #0A0A0A;
   --c-on-surface-variant:    #555555;
   --c-outline:               #CCCCCC;
