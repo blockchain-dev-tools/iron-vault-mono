@@ -37,7 +37,7 @@ export default function TocScrollSpy() {
   if (!items.length) return null
 
   return (
-    <aside className="w-52 flex-shrink-0 py-8 pr-4 sticky top-0 self-start">
+    <aside className="w-52 py-8 pr-4">
       <p className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 px-1">
         {t('onThisPage')}
       </p>
