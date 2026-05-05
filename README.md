@@ -71,8 +71,7 @@ iron-vault-mono/
 ├── apps/
 │   ├── mobile/          # React Native production app
 │   ├── prototype/       # Next.js design canvas & logic test harness (port 3002)
-│   ├── debugger/        # Next.js BLE APDU debugger (port 3001)
-│   └── devtools/        # Developer tooling UI
+│   └── website/         # Next.js SSG docs site + APDU debugger (port 3003)
 └── packages/
     ├── wallet/          # Business logic: PIN auth, mnemonic lifecycle, storage interface
     ├── crypto/          # Pure crypto: HD derivation, signing, BIP-39 (no platform deps)
@@ -94,6 +93,7 @@ iron-vault-mono/
 
 apps/prototype           ← @iron-vault/wallet, @iron-vault/apdu, @iron-vault/theme
 apps/mobile              ← @iron-vault/wallet, @iron-vault/apdu, @iron-vault/theme
+apps/website             ← @iron-vault/wallet, @iron-vault/apdu, @iron-vault/crypto, @iron-vault/simulator
 ```
 
 ---
@@ -119,7 +119,7 @@ pnpm dev
 
 # Individual apps
 pnpm --filter prototype dev     # → http://localhost:3002
-pnpm --filter debugger dev      # → http://localhost:3001
+pnpm --filter website dev       # → http://localhost:3003 (docs + /debugger)
 ```
 
 ### Type-check
@@ -252,15 +252,16 @@ import { DARK, LIGHT } from '@iron-vault/theme';
 
 ---
 
-## Web Debugger (apps/debugger)
+## Web Debugger (apps/website → /debugger)
 
-A browser-based tool for testing APDU communication over BLE (Chrome/Edge with Web Bluetooth).
+The [apps/website](./apps/website) hosts an interactive APDU debugger at the `/debugger` route — a browser-based tool for testing APDU communication over BLE or against an in-browser wallet simulator.
 
-- Send preset APDU commands and inspect raw hex frames
-- Simulate the full OKX Wallet connection flow
-- Decode responses in real time
+- **Debugger panel** — send preset/manual APDU commands and inspect raw hex frames
+- **Simulator panel** — embedded phone wallet simulator that visually processes APDU commands in real-time
+- **BLE target** — connect to a real Iron Vault device via Web Bluetooth (Chrome/Edge)
+- **Simulator target** — run the full APDU flow entirely in-browser without any hardware
 
-Requires: `chrome://flags/#enable-experimental-web-platform-features`
+Requires: `chrome://flags/#enable-experimental-web-platform-features` (for BLE mode)
 
 ---
 

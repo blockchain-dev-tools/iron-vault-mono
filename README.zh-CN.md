@@ -71,8 +71,7 @@ iron-vault-mono/
 ├── apps/
 │   ├── mobile/          # React Native 生产应用
 │   ├── prototype/       # Next.js 设计画布 & 逻辑测试台（端口 3002）
-│   ├── debugger/        # Next.js BLE APDU 调试器（端口 3001）
-│   └── devtools/        # 开发者工具 UI
+│   └── website/         # Next.js SSG 文档站 + APDU 调试器（端口 3003）
 └── packages/
     ├── wallet/          # 业务逻辑：PIN 鉴权、助记词生命周期、存储接口
     ├── crypto/          # 纯加密：HD 派生、签名、BIP-39（无平台依赖）
@@ -94,6 +93,7 @@ iron-vault-mono/
 
 apps/prototype           ← @iron-vault/wallet, @iron-vault/apdu, @iron-vault/theme
 apps/mobile              ← @iron-vault/wallet, @iron-vault/apdu, @iron-vault/theme
+apps/website             ← @iron-vault/wallet, @iron-vault/apdu, @iron-vault/crypto, @iron-vault/simulator
 ```
 
 ---
@@ -119,7 +119,7 @@ pnpm dev
 
 # 单独启动某个应用
 pnpm --filter prototype dev     # → http://localhost:3002
-pnpm --filter debugger dev      # → http://localhost:3001
+pnpm --filter website dev       # → http://localhost:3003（文档站 + /debugger 调试器）
 ```
 
 ### 类型检查
@@ -233,15 +233,16 @@ import { DARK, LIGHT } from '@iron-vault/theme';
 
 ---
 
-## Web 调试器（apps/debugger）
+## Web 调试器（apps/website → /debugger）
 
-基于浏览器的 APDU 通信调试工具，通过 Web Bluetooth API 连接设备（需要 Chrome/Edge）。
+[apps/website](./apps/website) 文档站内置了一个交互式 APDU 调试器（`/debugger` 路由），可在浏览器中测试 APDU 通信：连接真实 BLE 设备或在浏览器内运行钱包模拟器。
 
-- 发送预设 APDU 命令，查看原始十六进制帧
-- 模拟完整的 OKX Wallet 连接流程
-- 实时解码响应数据
+- **调试器面板** — 发送预设/手动 APDU 命令，查看原始十六进制帧
+- **模拟器面板** — 嵌入式手机钱包模拟器，实时可视化 APDU 命令的处理过程
+- **BLE 模式** — 通过 Web Bluetooth 连接真实 Iron Vault 设备（需要 Chrome/Edge）
+- **模拟器模式** — 完全在浏览器内运行 APDU 流程，无需任何硬件
 
-需要开启：`chrome://flags/#enable-experimental-web-platform-features`
+需要开启（BLE 模式）：`chrome://flags/#enable-experimental-web-platform-features`
 
 ---
 

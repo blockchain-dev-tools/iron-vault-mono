@@ -12,8 +12,7 @@ The app emulates the Ledger GATT profile + APDU protocol; host wallets (OKX, Met
 ```
 apps/mobile       → React Native 0.84.1 + React 19  (Android + iOS, production)
 apps/prototype    → Next.js 14  (design canvas + logic test harness, port 3002)
-apps/debugger     → Next.js BLE APDU debugger (port 3001)
-apps/website      → Next.js SSG (marketing site)
+apps/website      → Next.js SSG docs site + APDU debugger (/debugger route, port 3003)
 
 packages/wallet   → PIN auth, mnemonic lifecycle, WalletStorage interface
 packages/crypto   → Pure crypto: BIP-32/39, secp256k1, Ed25519/SLIP-10
@@ -40,6 +39,7 @@ packages/assets   → Shared SVGs and images
 
 apps/prototype           ← wallet, apdu, theme
 apps/mobile              ← wallet, apdu, theme, i18n, assets
+apps/website             ← wallet, apdu, crypto, simulator
 ```
 
 ---
@@ -158,6 +158,7 @@ store/            # AppContext.tsx (app state, navigation, theme, locale) + stor
 pnpm install                                            # install all deps
 pnpm dev                                                # run all apps
 pnpm --filter prototype dev                             # prototype only (port 3002)
+pnpm --filter website dev                               # website + debugger (port 3003)
 
 # Type-check (run from monorepo root)
 pnpm exec tsc --noEmit -p apps/mobile/tsconfig.json

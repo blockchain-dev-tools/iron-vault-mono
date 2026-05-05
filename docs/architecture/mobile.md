@@ -485,6 +485,6 @@ pnpm android         # 安装到 Android 设备
 
 2. **fonts 加载** — Space Grotesk / Manrope 需要 `react-native link` 或手动 `Info.plist` 配置，MVP 阶段可用系统字体降级，M5 前完成字体集成。
 
-3. **packages/theme 主色更新** — `#1A73E8` → `#8FC322` 会影响 `apps/debugger` 和任何使用 `@iron-vault/theme` 的地方；debugger 目前有自己的 tailwind 配置，不受影响。
+3. **packages/theme 主色更新** — `#1A73E8` → `#8FC322` 会影响 `apps/website`（/debugger 路由）和任何使用 `@iron-vault/theme` 的地方；website 目前有自己的 tailwind 配置，不受影响。
 
 4. **iOS BLE peripheral mode** — `CBPeripheralManager` 在后台切换时会被系统暂停广播，需要 `CBPeripheralManagerOptionRestoreIdentifierKey` 支持状态恢复。
