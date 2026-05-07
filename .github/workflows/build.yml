@@ -22,6 +22,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Fix pnpm hoisting for React Native Gradle
+        run: |
+          # pnpm hoists deps to root node_modules; Gradle expects them in apps/mobile/node_modules
+          mkdir -p apps/mobile/node_modules/@react-native
+          ln -sf "$(pwd)/node_modules/@react-native/gradle-plugin" apps/mobile/node_modules/@react-native/gradle-plugin
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
