@@ -13,7 +13,7 @@ const withMDX = createMDX({
 const nextConfig = {
   output: process.env.STATIC_EXPORT === 'true' ? 'export' : undefined,
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
-  transpilePackages: ['@iron-vault/simulator'],
+  transpilePackages: ['@iron-vault/simulator', '@iron-vault/apdu', '@iron-vault/crypto', '@iron-vault/wallet'],
 }
 
 export default withNextIntl(withMDX(nextConfig))

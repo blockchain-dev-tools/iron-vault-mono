@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd apps/website && pnpm build",
+  "outputDirectory": "apps/website/out",
+  "framework": null
+}
