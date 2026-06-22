@@ -1,5 +1,6 @@
 {
   "nav": {
+    "wallet": "Wallet",
     "debugger": "APDU Debugger",
     "console": "Transaction Console",
     "sections": {

@@ -27,6 +27,16 @@ export default function TopBar() {
         <span className="font-label text-xs text-on-surface-variant ml-1">DevTools</span>
         <div className="w-px h-5 bg-outline-variant mx-3" />
         <Link
+          href="/wallet"
+          className={`font-label text-sm transition-colors ${
+            pathname.startsWith('/wallet')
+              ? 'text-primary font-semibold'
+              : 'text-on-surface-variant hover:text-on-surface'
+          }`}
+        >
+          Wallet
+        </Link>
+        <Link
           href="/console"
           className={`font-label text-sm transition-colors ${
             pathname.startsWith('/console')

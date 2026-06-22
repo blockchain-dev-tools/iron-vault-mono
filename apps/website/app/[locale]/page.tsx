@@ -72,6 +72,9 @@ export default function LocalePage({ params: { locale } }: Props) {
           <Link href={`/${locale}/docs/apdu-protocol/debugger`} className="text-on-surface-variant hover:text-on-surface transition-colors">
             {isZh ? '调试器' : 'Debugger'}
           </Link>
+          <Link href={`/${locale}/wallet`} className="text-on-surface-variant hover:text-on-surface transition-colors">
+            {isZh ? '钱包' : 'Wallet'}
+          </Link>
           <Link href={`/${locale}/console`} className="text-on-surface-variant hover:text-on-surface transition-colors">
             {isZh ? '控制台' : 'Console'}
           </Link>
@@ -147,6 +150,9 @@ export default function LocalePage({ params: { locale } }: Props) {
           </Link>
           <Link href={`/${locale}/docs/apdu-protocol/debugger`} className="hover:text-on-surface transition-colors">
             {isZh ? 'APDU 调试器' : 'APDU Debugger'}
+          </Link>
+          <Link href={`/${locale}/wallet`} className="hover:text-on-surface transition-colors">
+            {isZh ? '钱包' : 'Wallet'}
           </Link>
           <Link href={`/${locale}/console`} className="hover:text-on-surface transition-colors">
             {isZh ? '交易控制台' : 'Transaction Console'}

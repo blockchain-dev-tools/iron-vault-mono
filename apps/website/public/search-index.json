@@ -1,5 +1,41 @@
 [
   {
+    "title": "@iron-vault/apdu",
+    "sectionTitle": "Overview",
+    "excerpt": "Overview @iron-vault/apdu is the APDU processing core of IRON Vault. It exposes two categories of exports: parser utilities for encoding and decoding raw APDU bytes, and handler setup functions that w",
+    "href": "/docs/apdu-protocol/apdu-lib"
+  },
+  {
+    "title": "@iron-vault/apdu",
+    "sectionTitle": "Parser Utilities",
+    "excerpt": "Parser Utilities Apdu The structured representation of a decoded APDU command. ``typescript interface Apdu ` --- parseApdu Parse a hex-encoded APDU string into an Apdu object. Skips the CLA INS P1 P2 ",
+    "href": "/docs/apdu-protocol/apdu-lib"
+  },
+  {
+    "title": "@iron-vault/apdu",
+    "sectionTitle": "Handler Setup",
+    "excerpt": "Handler Setup The handler module maintains module-level singletons. Call the setters once on mount and tear down on unmount. setCurrentApp Switch the active app context. The APDU dispatcher uses this ",
+    "href": "/docs/apdu-protocol/apdu-lib"
+  },
+  {
+    "title": "@iron-vault/apdu",
+    "sectionTitle": "`SignRequestData`",
+    "excerpt": "SignRequestData The object passed to the registered sign handler when a signing APDU is received. ``typescript interface SignRequestData `` ---",
+    "href": "/docs/apdu-protocol/apdu-lib"
+  },
+  {
+    "title": "@iron-vault/apdu",
+    "sectionTitle": "Additional Exports",
+    "excerpt": "Additional Exports getLastToken Returns the last ERC-20 token metadata seen in an eth_signTransaction request, if the transaction data was decoded as an ERC-20 transfer. ``typescript function getLastT",
+    "href": "/docs/apdu-protocol/apdu-lib"
+  },
+  {
+    "title": "@iron-vault/apdu",
+    "sectionTitle": "Full Wiring Example",
+    "excerpt": "Full Wiring Example This pattern shows how useBleSession connects all setters to the BLE transport and the sign-confirmation UI. ``typescript setMnemonicProvider, setLogFn, setSignRequestHandler, hand",
+    "href": "/docs/apdu-protocol/apdu-lib"
+  },
+  {
     "title": "Ethereum Commands",
     "sectionTitle": "Activation",
     "excerpt": "Activation The Ethereum handler is the default for CLA 0xE0. It is active when currentApp is 'Ethereum' or when no OPEN_APP has been sent yet (initial state after connection). Explicitly activate it w",
@@ -144,78 +180,6 @@
     "href": "/docs/apdu-protocol/solana"
   },
   {
-    "title": "@iron-vault/apdu",
-    "sectionTitle": "Overview",
-    "excerpt": "Overview @iron-vault/apdu is the APDU processing core of IRON Vault. It exposes two categories of exports: parser utilities for encoding and decoding raw APDU bytes, and handler setup functions that w",
-    "href": "/docs/api-reference/apdu"
-  },
-  {
-    "title": "@iron-vault/apdu",
-    "sectionTitle": "Parser Utilities",
-    "excerpt": "Parser Utilities Apdu The structured representation of a decoded APDU command. ``typescript interface Apdu ` --- parseApdu Parse a hex-encoded APDU string into an Apdu object. Skips the CLA INS P1 P2 ",
-    "href": "/docs/api-reference/apdu"
-  },
-  {
-    "title": "@iron-vault/apdu",
-    "sectionTitle": "Handler Setup",
-    "excerpt": "Handler Setup The handler module maintains module-level singletons. Call the setters once on mount and tear down on unmount. setCurrentApp Switch the active app context. The APDU dispatcher uses this ",
-    "href": "/docs/api-reference/apdu"
-  },
-  {
-    "title": "@iron-vault/apdu",
-    "sectionTitle": "`SignRequestData`",
-    "excerpt": "SignRequestData The object passed to the registered sign handler when a signing APDU is received. ``typescript interface SignRequestData `` ---",
-    "href": "/docs/api-reference/apdu"
-  },
-  {
-    "title": "@iron-vault/apdu",
-    "sectionTitle": "Additional Exports",
-    "excerpt": "Additional Exports getLastToken Returns the last ERC-20 token metadata seen in an eth_signTransaction request, if the transaction data was decoded as an ERC-20 transfer. ``typescript function getLastT",
-    "href": "/docs/api-reference/apdu"
-  },
-  {
-    "title": "@iron-vault/apdu",
-    "sectionTitle": "Full Wiring Example",
-    "excerpt": "Full Wiring Example This pattern shows how useBleSession connects all setters to the BLE transport and the sign-confirmation UI. ``typescript setMnemonicProvider, setLogFn, setSignRequestHandler, hand",
-    "href": "/docs/api-reference/apdu"
-  },
-  {
-    "title": "@iron-vault/crypto",
-    "sectionTitle": "Overview",
-    "excerpt": "Overview @iron-vault/crypto is the stateless cryptographic layer of IRON Vault. It covers the full lifecycle from mnemonic generation through HD key derivation, transaction signing, and address encodi",
-    "href": "/docs/api-reference/crypto"
-  },
-  {
-    "title": "@iron-vault/crypto",
-    "sectionTitle": "Mnemonic",
-    "excerpt": "Mnemonic generateMnemonic Generate a BIP-39 mnemonic phrase using the English wordlist. ``typescript function generateMnemonic(strength?: 128 | 256): string ` Parameters | Name | Type | Default | Desc",
-    "href": "/docs/api-reference/crypto"
-  },
-  {
-    "title": "@iron-vault/crypto",
-    "sectionTitle": "HD Key Derivation",
-    "excerpt": "HD Key Derivation Path components are raw uint32 values. Hardened components have the high bit set: 0x80000000 | index. For example, the standard Ethereum path m/44'/60'/0'/0/0 is represented as: ``ty",
-    "href": "/docs/api-reference/crypto"
-  },
-  {
-    "title": "@iron-vault/crypto",
-    "sectionTitle": "Signing & Address",
-    "excerpt": "Signing & Address ethPubKeyToAddress Derive the Ethereum public key and EIP-55 checksum address from a secp256k1 private key. ``typescript function ethPubKeyToAddress(privKey: Uint8Array): ` Returns |",
-    "href": "/docs/api-reference/crypto"
-  },
-  {
-    "title": "@iron-vault/crypto",
-    "sectionTitle": "Account Derivation",
-    "excerpt": "Account Derivation Account A single derived account entry. ``typescript interface Account ` --- WalletAccounts The result of a multi-account derivation. `typescript interface WalletAccounts ` --- deri",
-    "href": "/docs/api-reference/crypto"
-  },
-  {
-    "title": "@iron-vault/crypto",
-    "sectionTitle": "Bitcoin & Multi-chain Utilities",
-    "excerpt": "Bitcoin & Multi-chain Utilities These low-level primitives support Bitcoin, Tron, and multi-chain signing use cases. sha256Single Single SHA-256 hash. Used for Tron transaction hashing. ``typescript f",
-    "href": "/docs/api-reference/crypto"
-  },
-  {
     "title": "APDU Framing",
     "sectionTitle": "Overview",
     "excerpt": "Overview BLE has a hard per-packet payload ceiling set by the ATT MTU. A raw APDU command can be longer than a single BLE packet, so Ledger's transport layer wraps every APDU in a simple framing proto",
@@ -334,6 +298,42 @@
     "sectionTitle": "Android API and Permissions",
     "excerpt": "Android API and Permissions Core APIs used: ``java // Open the GATT server BluetoothGattServer server = bluetoothManager.openGattServer(context, callback); server.addService(ledgerService); // Bluetoo",
     "href": "/docs/ble-integration/gatt-profile"
+  },
+  {
+    "title": "@iron-vault/crypto",
+    "sectionTitle": "Overview",
+    "excerpt": "Overview @iron-vault/crypto is the stateless cryptographic layer of IRON Vault. It covers the full lifecycle from mnemonic generation through HD key derivation, transaction signing, and address encodi",
+    "href": "/docs/crypto-reference/crypto-lib"
+  },
+  {
+    "title": "@iron-vault/crypto",
+    "sectionTitle": "Mnemonic",
+    "excerpt": "Mnemonic generateMnemonic Generate a BIP-39 mnemonic phrase using the English wordlist. ``typescript function generateMnemonic(strength?: 128 | 256): string ` Parameters | Name | Type | Default | Desc",
+    "href": "/docs/crypto-reference/crypto-lib"
+  },
+  {
+    "title": "@iron-vault/crypto",
+    "sectionTitle": "HD Key Derivation",
+    "excerpt": "HD Key Derivation Path components are raw uint32 values. Hardened components have the high bit set: 0x80000000 | index. For example, the standard Ethereum path m/44'/60'/0'/0/0 is represented as: ``ty",
+    "href": "/docs/crypto-reference/crypto-lib"
+  },
+  {
+    "title": "@iron-vault/crypto",
+    "sectionTitle": "Signing & Address",
+    "excerpt": "Signing & Address ethPubKeyToAddress Derive the Ethereum public key and EIP-55 checksum address from a secp256k1 private key. ``typescript function ethPubKeyToAddress(privKey: Uint8Array): ` Returns |",
+    "href": "/docs/crypto-reference/crypto-lib"
+  },
+  {
+    "title": "@iron-vault/crypto",
+    "sectionTitle": "Account Derivation",
+    "excerpt": "Account Derivation Account A single derived account entry. ``typescript interface Account ` --- WalletAccounts The result of a multi-account derivation. `typescript interface WalletAccounts ` --- deri",
+    "href": "/docs/crypto-reference/crypto-lib"
+  },
+  {
+    "title": "@iron-vault/crypto",
+    "sectionTitle": "Bitcoin & Multi-chain Utilities",
+    "excerpt": "Bitcoin & Multi-chain Utilities These low-level primitives support Bitcoin, Tron, and multi-chain signing use cases. sha256Single Single SHA-256 hash. Used for Tron transaction hashing. ``typescript f",
+    "href": "/docs/crypto-reference/crypto-lib"
   },
   {
     "title": "Derivation Paths",
