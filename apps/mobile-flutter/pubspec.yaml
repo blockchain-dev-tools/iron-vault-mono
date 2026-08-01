@@ -1,0 +1,68 @@
+name: iron_vault_flutter
+description: "iron-vault-flutter — Flutter port of iron-vault-mono. Turn an old Android/iOS phone into a Ledger Nano X-compatible BLE hardware wallet."
+publish_to: 'none'
+
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.12.0
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # FFI utilities (String <-> Pointer<Utf8> conversion)
+  ffi: ^2.0.0
+
+  # i18n / l10n
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+
+  # Settings persistence
+  shared_preferences: ^2.0.0
+
+  # === BLE peripheral (Ledger Nano X GATT server) ===
+  ble_gatt_server: ^0.1.0
+  permission_handler: ^11.3.0
+
+  # === Planned dependencies (add when implementing corresponding features) ===
+  # Secure key storage
+  # flutter_secure_storage: ^9.0.0
+  # State management
+  # flutter_riverpod: ^2.0.0
+  # Routing
+  go_router: ^14.0.0
+  # QR code display
+  qr_flutter: ^4.1.0
+  flutter_svg: ^2.3.0
+  # QR code scanning
+  # mobile_scanner: ^6.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/chains.json
+    - assets/icons/chains/

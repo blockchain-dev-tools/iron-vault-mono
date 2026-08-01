@@ -1,0 +1,17 @@
+[package]
+name = "iron-vault-biz"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+iron-vault-crypto = { path = "../iron-vault-crypto" }
+bip32 = { workspace = true }
+bip39 = { workspace = true }
+hmac = { workspace = true }
+sha2 = { workspace = true }
+sha3 = { workspace = true }
+rlp = { workspace = true }
+hex = { workspace = true }
+rand = { workspace = true }
+bs58 = { workspace = true }
+thiserror = { workspace = true }

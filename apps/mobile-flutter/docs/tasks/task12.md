@@ -1,0 +1,1 @@
+现在不支持bip39的passphrase，需要想
